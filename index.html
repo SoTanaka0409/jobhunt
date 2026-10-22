@@ -607,8 +607,17 @@
             </button>
           </div>
 
-          <!-- Row 2: Filter Selects (Hidden on mobile unless opened, inline on desktop) -->
-          <div id="offerFiltersDropdown" class="hidden md:grid md:grid-cols-2 gap-2 pt-1 border-t border-slate-800/80 md:border-0 md:pt-0">
+          <!-- Row 2: Filter Selects & Sort Order (Hidden on mobile unless opened, inline on desktop) -->
+          <div id="offerFiltersDropdown" class="hidden md:grid md:grid-cols-3 gap-2 pt-1 border-t border-slate-800/80 md:border-0 md:pt-0">
+            <!-- Sort Order: 期限が近い順・新しく来た順・新着優先 -->
+            <select id="offerSortOrder" onchange="renderOffers()" class="text-xs bg-slate-800 border border-amber-500/40 text-amber-300 font-semibold rounded-lg px-2.5 py-1.5 focus:outline-none focus:border-indigo-500 shadow-sm">
+              <option value="unread_first">🔥 並び順: 新着・未確認が上</option>
+              <option value="deadline_asc">⏰ 並び順: 返信期限が近い順</option>
+              <option value="received_desc">📅 並び順: 新しく来た順</option>
+              <option value="score_desc">⭐ 並び順: 評価スコアが高い順</option>
+              <option value="priority_desc">🎯 並び順: 志望度が高い順</option>
+            </select>
+
             <!-- Filter: Media -->
             <select id="offerFilterMedia" onchange="renderOffers()" class="text-xs bg-slate-800 border border-slate-700 text-slate-200 rounded-lg px-2.5 py-1.5 focus:outline-none focus:border-indigo-500">
               <option value="ALL">全媒体</option>
@@ -3511,6 +3520,8 @@
         rating: 5,
         status: '検討中',
         deadline: '2026-10-31',
+        receivedDate: '2026-10-20',
+        isViewed: false,
         matchedRule: 'その他: 早期選考案内 / 3daysカレッジ',
         url: 'https://job.saiyo.jp/sega/',
         notes: '10/20「【SEGA FAVE】メダル開発職(プランナー・プログラマ） 3daysカレッジ 応募受付開始」受信。メダルゲームのソフトウェア開発職直結型。C++や自作ゲームエンジンの知見がダイレクトに評価される最有力枠。'
@@ -3524,6 +3535,8 @@
         rating: 5,
         status: '検討中',
         deadline: '2026-10-28',
+        receivedDate: '2026-10-16',
+        isViewed: false,
         matchedRule: 'その他: 早期選考案内 / ES提出',
         url: 'https://mypage.snar.jp/koeitecmo/',
         notes: '10/16「インターンシップ エントリーシート提出のご案内」受信。自社IP家庭用ゲーム開発100%。早期選考ルートへの最重要ステップ。'
@@ -3537,6 +3550,8 @@
         rating: 4,
         status: '検討中',
         deadline: '2026-11-05',
+        receivedDate: '2026-10-20',
+        isViewed: true,
         matchedRule: 'その他: 早期選考案内 / 仕事体験',
         url: 'https://job.saiyo.jp/bandainamco/',
         notes: '10/20「プランナー仕事体験 エントリーについてのご案内」受信。バンダイナムコグループの体験型エンタメ企画プログラム。'
@@ -3550,6 +3565,8 @@
         rating: 3,
         status: '検討中',
         deadline: '2026-10-31',
+        receivedDate: '2026-10-19',
+        isViewed: true,
         matchedRule: 'マイナビ: エントリー・メッセージ受信',
         url: 'https://job.mynavi.jp/2028/',
         notes: '10/19「エントリーした企業からメッセージが届きました」受信。マイナビ経由の独立系ITソリューション企業。'
@@ -3614,7 +3631,21 @@
               p.stage = '面談 (カジュアル / リクルーター)';
             }
           });
-          offers.forEach(o => { if (!o.selectionType) o.selectionType = '早期選考'; });
+          offers.forEach((o, idx) => {
+            if (!o.selectionType) o.selectionType = '早期選考';
+            if (typeof o.isViewed === 'undefined') {
+              // 既存データマイグレーション：直近のセガ・コーエーテクモは未確認、他は確認済み
+              o.isViewed = idx > 1;
+            }
+            if (!o.receivedDate) {
+              const m = (o.notes || '').match(/(\d{1,2})\/(\d{1,2})/);
+              if (m) {
+                o.receivedDate = `2026-${m[1].padStart(2, '0')}-${m[2].padStart(2, '0')}`;
+              } else {
+                o.receivedDate = '2026-10-20';
+              }
+            }
+          });
           archivedPipeline.forEach(a => { if (!a.selectionType) a.selectionType = '早期選考'; });
 
           // 【重複防止ルール】選考パイプラインにすでに存在する企業はオファー一覧から完全自動削除
@@ -3943,14 +3974,65 @@
         return true;
       });
 
+      // ==========================================
+      // ソート処理（未確認優先・期限近い順・新着順など）
+      // ==========================================
+      const sortSelectEl = document.getElementById('offerSortOrder');
+      let currentSort = sortSelectEl ? sortSelectEl.value : (localStorage.getItem('jobhunt_offer_sort_mode') || 'unread_first');
+      if (sortSelectEl && sortSelectEl.value !== currentSort) {
+        sortSelectEl.value = currentSort;
+      }
+      localStorage.setItem('jobhunt_offer_sort_mode', currentSort);
+
+      filtered.sort((a, b) => {
+        // 1. 期限が近い順（締切間近が上）
+        if (currentSort === 'deadline_asc') {
+          if (!a.deadline && !b.deadline) return 0;
+          if (!a.deadline) return 1;
+          if (!b.deadline) return -1;
+          return a.deadline.localeCompare(b.deadline);
+        }
+
+        // 2. 新しく来た順（受信日が新しい順）
+        if (currentSort === 'received_desc') {
+          const dateA = a.receivedDate || a.deadline || '';
+          const dateB = b.receivedDate || b.deadline || '';
+          return dateB.localeCompare(dateA);
+        }
+
+        // 3. 評価スコアが高い順
+        if (currentSort === 'score_desc') {
+          const scoreA = (a.analystReport || ANALYST_REPORTS[a.companyName])?.score || a.rating || 0;
+          const scoreB = (b.analystReport || ANALYST_REPORTS[b.companyName])?.score || b.rating || 0;
+          return scoreB - scoreA;
+        }
+
+        // 4. 志望度が高い順
+        if (currentSort === 'priority_desc') {
+          const prioMap = { '最優先': 4, '高': 3, '中': 2, '低': 1 };
+          return (prioMap[b.priority] || 0) - (prioMap[a.priority] || 0);
+        }
+
+        // 5. デフォルト: 新着・未確認が上（一度見た・確認済みのものは下へ）
+        const viewedA = !!a.isViewed;
+        const viewedB = !!b.isViewed;
+        if (viewedA !== viewedB) {
+          return viewedA ? 1 : -1; // 未確認(false)が上、確認済み(true)が下
+        }
+        // 同じ状態の中では、受信日が新しい順
+        const dateA = a.receivedDate || a.deadline || '';
+        const dateB = b.receivedDate || b.deadline || '';
+        return dateB.localeCompare(dateA);
+      });
+
       document.getElementById('offersStatsCount').innerText = `${filtered.length}件`;
 
       if (filtered.length === 0) {
         container.innerHTML = `
           <div class="py-16 text-center bg-slate-800/20 border border-dashed border-slate-800 rounded-2xl">
             <i data-lucide="inbox" class="w-12 h-12 text-slate-600 mx-auto mb-3"></i>
-            <p class="text-slate-300 font-semibold text-sm">現在登録されているオファーはありません</p>
-            <p class="text-slate-500 text-xs mt-1.5">OfferBox、paiza新卒、Re就活等からオファーが届いた際は、右上の「+ 新規追加」から登録してください</p>
+            <p class="text-slate-300 font-semibold text-sm">現在該当するオファーはありません</p>
+            <p class="text-slate-500 text-xs mt-1.5">条件を変更するか、右上の「+ 新規追加」から新しいオファーを登録してください</p>
           </div>
         `;
         lucide.createIcons();
@@ -3960,12 +4042,28 @@
       if (currentOffersLayout === 'grid') {
         let cardsHtml = `<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">`;
         filtered.forEach(item => {
+          const isViewed = !!item.isViewed;
+          const cardBorder = isViewed ? 'border-slate-700/60 bg-slate-800/60 opacity-90 hover:opacity-100' : 'border-sky-500/40 bg-slate-800/90 shadow-sky-950/20 ring-1 ring-sky-500/20';
+
           cardsHtml += `
-            <div class="bg-slate-800/70 hover:bg-slate-800 border border-slate-700/70 hover:border-indigo-500/50 rounded-2xl p-5 flex flex-col justify-between transition-all duration-200 shadow-lg shadow-black/20 group">
+            <div class="${cardBorder} hover:bg-slate-800 border rounded-2xl p-5 flex flex-col justify-between transition-all duration-200 shadow-lg group">
               <div>
-                <!-- Top Badges Row -->
+                <!-- Top Badges Row: New/Viewed toggle badge on left -->
                 <div class="flex items-center justify-between gap-2 mb-3">
                   <div class="flex items-center gap-1.5 flex-wrap">
+                    <!-- 既読/未読（確認済/新着）トグルバッジ -->
+                    ${!isViewed ? `
+                      <button type="button" onclick="toggleOfferItemViewed('${item.id}', event)" title="クリックして確認済みにする（下へ移動）" class="inline-flex items-center gap-1 text-[10px] px-2 py-0.5 rounded-full bg-gradient-to-r from-sky-500/25 to-indigo-500/25 text-sky-200 border border-sky-400/50 font-bold shadow-sm shadow-sky-500/20 hover:scale-105 transition active:scale-95">
+                        <span class="w-1.5 h-1.5 rounded-full bg-sky-400 animate-pulse"></span>
+                        <span>NEW 未確認</span>
+                      </button>
+                    ` : `
+                      <button type="button" onclick="toggleOfferItemViewed('${item.id}', event)" title="クリックして未確認に戻す（上へ移動）" class="inline-flex items-center gap-1 text-[10px] px-2 py-0.5 rounded-full bg-slate-800 text-slate-400 border border-slate-700 hover:text-slate-200 hover:border-slate-500 transition active:scale-95">
+                        <i data-lucide="check" class="w-3 h-3 text-slate-500"></i>
+                        <span>確認済</span>
+                      </button>
+                    `}
+
                     ${getSelectionTypeBadgeHtml(item.selectionType)}
                     ${getMediaBadgeHtml(item.media)}
                     ${getOfferStatusBadgeHtml(item.status)}
@@ -3977,8 +4075,8 @@
                 </div>
 
                 <!-- Company & Offer Type -->
-                <h3 class="text-base font-bold text-white group-hover:text-indigo-300 transition-colors tracking-tight mb-1 cursor-pointer" onclick="openOfferAsDetailModal('${item.id}')">
-                  ${escapeHtml(item.companyName)}
+                <h3 class="text-base font-bold text-white group-hover:text-indigo-300 transition-colors tracking-tight mb-1 cursor-pointer flex items-center gap-1.5" onclick="openOfferAsDetailModal('${item.id}')">
+                  <span>${escapeHtml(item.companyName)}</span>
                 </h3>
 
                 <div class="flex items-center gap-2 mb-3 flex-wrap">
@@ -4003,10 +4101,18 @@
                   ` : ''}
                 </div>
 
-                <!-- Deadline Badge -->
-                <div class="mb-3.5 flex items-center gap-2">
-                  <span class="text-[11px] text-slate-400 font-medium">返信期限:</span>
-                  ${getDeadlineBadgeHtml(item.deadline)}
+                <!-- Deadline Badge & Received Date -->
+                <div class="mb-3.5 flex items-center justify-between gap-2 flex-wrap">
+                  <div class="flex items-center gap-1.5">
+                    <span class="text-[11px] text-slate-400 font-medium">返信期限:</span>
+                    ${getDeadlineBadgeHtml(item.deadline)}
+                  </div>
+                  ${item.receivedDate ? `
+                    <span class="text-[11px] text-slate-400 font-mono flex items-center gap-1">
+                      <i data-lucide="calendar" class="w-3 h-3 text-slate-500"></i>
+                      <span>受信: ${escapeHtml(item.receivedDate.replace(/^2026-/, ''))}</span>
+                    </span>
+                  ` : ''}
                 </div>
 
                 <!-- Evaluated Points / Notes -->
@@ -4070,11 +4176,13 @@
               <table class="w-full text-left text-xs text-slate-300">
                 <thead class="bg-slate-900/80 text-slate-400 uppercase text-[11px] font-semibold border-b border-slate-700">
                   <tr>
+                    <th class="px-3 py-3.5 text-center">状態</th>
                     <th class="px-4 py-3.5">企業名</th>
                     <th class="px-3 py-3.5">スコア判定</th>
                     <th class="px-3 py-3.5">媒体</th>
                     <th class="px-3 py-3.5">オファー種別</th>
                     <th class="px-3 py-3.5">返信期限</th>
+                    <th class="px-3 py-3.5">受信日</th>
                     <th class="px-4 py-3.5">評価されたポイント</th>
                     <th class="px-3 py-3.5 text-center">興味度</th>
                     <th class="px-3 py-3.5">ステータス</th>
@@ -4084,8 +4192,20 @@
                 <tbody class="divide-y divide-slate-700/50">
         `;
         filtered.forEach(item => {
+          const isViewed = !!item.isViewed;
           tableHtml += `
-            <tr class="hover:bg-slate-700/30 transition-colors">
+            <tr class="hover:bg-slate-700/30 transition-colors ${!isViewed ? 'bg-sky-500/5' : ''}">
+              <td class="px-3 py-3 text-center whitespace-nowrap">
+                ${!isViewed ? `
+                  <button type="button" onclick="toggleOfferItemViewed('${item.id}', event)" title="クリックして確認済みにする" class="px-1.5 py-0.5 rounded-full bg-sky-500/20 text-sky-300 border border-sky-500/40 text-[10px] font-bold">
+                    NEW
+                  </button>
+                ` : `
+                  <button type="button" onclick="toggleOfferItemViewed('${item.id}', event)" title="クリックして未確認に戻す" class="px-1.5 py-0.5 rounded-full bg-slate-800 text-slate-500 border border-slate-700 text-[10px]">
+                    済
+                  </button>
+                `}
+              </td>
               <td class="px-4 py-3 font-bold text-white whitespace-nowrap cursor-pointer hover:text-indigo-300" onclick="openOfferAsDetailModal('${item.id}')">
                 ${escapeHtml(item.companyName)}
               </td>
@@ -4102,6 +4222,9 @@
               </td>
               <td class="px-3 py-3 whitespace-nowrap">
                 ${getDeadlineBadgeHtml(item.deadline)}
+              </td>
+              <td class="px-3 py-3 whitespace-nowrap font-mono text-slate-400 text-[11px]">
+                ${escapeHtml(item.receivedDate ? item.receivedDate.replace(/^2026-/, '') : '—')}
               </td>
               <td class="px-4 py-3 max-w-xs truncate text-slate-400" title="${escapeHtml(item.notes || '')}">
                 ${escapeHtml(item.notes || '—')}
@@ -5154,9 +5277,28 @@
       lucide.createIcons();
     }
 
+    // オファー確認済み/未確認 手動トグル機能
+    function toggleOfferItemViewed(id, e) {
+      if (e) e.stopPropagation();
+      const offer = offers.find(o => o.id === id);
+      if (!offer) return;
+      offer.isViewed = !offer.isViewed;
+      saveState();
+      renderOffers();
+      showToast(`「${offer.companyName}」を${offer.isViewed ? '確認済みにしました（下位へ移動）' : '未確認に戻しました（上位へ移動）'}`, 'info');
+    }
+
     function openOfferAsDetailModal(id) {
       const offer = offers.find(o => o.id === id);
       if (!offer) return;
+
+      // 一度詳細・診断を見たオファーは自動的に「確認済み」にして下へ回す
+      if (!offer.isViewed) {
+        offer.isViewed = true;
+        saveState();
+        renderOffers();
+      }
+
       activeDetailItem = offer;
       activeDetailType = 'offer';
 
@@ -5559,6 +5701,9 @@
         status: document.getElementById('offerStatus').value,
         url: document.getElementById('offerUrl').value.trim(),
         notes: document.getElementById('offerNotes').value.trim(),
+        receivedDate: new Date().toISOString().split('T')[0],
+        isViewed: false,
+        selectionType: '早期選考',
         analystReport: ANALYST_REPORTS[comp] ? JSON.parse(JSON.stringify(ANALYST_REPORTS[comp])) : null
       };
 
@@ -5567,7 +5712,7 @@
       closeModal('createModal');
       document.getElementById('offerCreateForm').reset();
       renderOffers();
-      showToast(`オファー「${newOffer.companyName}」を登録しました`, 'success');
+      showToast(`新着オファー「${newOffer.companyName}」を最上位に登録しました`, 'success');
     }
 
     function handleCreatePipeline(e) {
