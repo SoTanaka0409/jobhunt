@@ -1,6 +1,27 @@
 <!DOCTYPE html>
 <html lang="ja" class="dark">
 <head>
+  <!-- Instant Appearance Loader (FOUC Prevention) -->
+  <script>
+    (function() {
+      try {
+        var raw = localStorage.getItem('jobhunt_appearance_settings_v1');
+        var s = raw ? JSON.parse(raw) : { theme: 'dark', accent: 'indigo', fontSize: 'normal', density: 'comfortable', colWidth: 'fixed' };
+        var root = document.documentElement;
+        root.classList.remove('theme-dark', 'theme-light', 'theme-contrast', 'theme-sepia');
+        root.classList.add('theme-' + (s.theme || 'dark'));
+        if (s.theme === 'light' || s.theme === 'sepia') {
+          root.classList.remove('dark');
+        } else {
+          root.classList.add('dark');
+        }
+        root.setAttribute('data-accent', s.accent || 'indigo');
+        root.setAttribute('data-font-size', s.fontSize || 'normal');
+        root.setAttribute('data-density', s.density || 'comfortable');
+        root.setAttribute('data-col-width', s.colWidth || 'fixed');
+      } catch(e) {}
+    })();
+  </script>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>就活ダッシュボード | 田中壮さん専用 オファー＆選考パイプライン管理</title>
@@ -75,6 +96,301 @@
       border: 2px dashed #6366f1 !important;
       background-color: rgba(99, 102, 241, 0.05);
     }
+
+    /* ========================================================
+       THEME & VISIBILITY ENHANCEMENTS (明暗・色付け・端末調整)
+       ======================================================== */
+    /* Root font size scaling for all devices */
+    html[data-font-size="small"] { font-size: 14px; }
+    html[data-font-size="normal"] { font-size: 16px; }
+    html[data-font-size="medium"] { font-size: 17.5px; }
+    html[data-font-size="large"] { font-size: 19px; }
+    html[data-font-size="xlarge"] { font-size: 21px; }
+
+    /* Compact Density */
+    html[data-density="compact"] .kanban-col {
+      padding: 0.6rem !important;
+      min-height: 520px !important;
+    }
+    html[data-density="compact"] .kanban-col [id^="card-"] {
+      padding: 0.55rem !important;
+      margin-bottom: 0.45rem !important;
+    }
+    html[data-density="compact"] main {
+      padding: 0.75rem !important;
+    }
+
+    /* Kanban Column Width Adjustments */
+    html[data-col-width="narrow"] .kanban-col {
+      min-width: 270px !important;
+      max-width: 295px !important;
+    }
+    html[data-col-width="wide"] .kanban-col {
+      min-width: 370px !important;
+      max-width: 410px !important;
+    }
+    html[data-col-width="fit"] #kanbanBoardWrapper {
+      min-width: 100% !important;
+      width: 100% !important;
+      display: grid !important;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)) !important;
+      gap: 0.75rem !important;
+    }
+    html[data-col-width="fit"] .kanban-col {
+      min-width: 0 !important;
+      max-width: 100% !important;
+    }
+
+    /* --------------------------------------------------------
+       LIGHT THEME (オフィス・昼間・印刷・他者閲覧向け)
+       -------------------------------------------------------- */
+    html.theme-light body {
+      background-color: #f1f5f9 !important;
+      color: #0f172a !important;
+    }
+    html.theme-light .bg-slate-950,
+    html.theme-light .bg-slate-900,
+    html.theme-light [class*="bg-slate-900"] {
+      background-color: #ffffff !important;
+    }
+    html.theme-light header {
+      background-color: rgba(255, 255, 255, 0.96) !important;
+      border-bottom-color: #e2e8f0 !important;
+      box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.05) !important;
+    }
+    html.theme-light .bg-slate-800,
+    html.theme-light .bg-slate-850,
+    html.theme-light [class*="bg-slate-800"],
+    html.theme-light [class*="bg-slate-850"] {
+      background-color: #f8fafc !important;
+    }
+    html.theme-light .bg-slate-700,
+    html.theme-light .bg-slate-750,
+    html.theme-light [class*="bg-slate-700"] {
+      background-color: #f1f5f9 !important;
+    }
+    html.theme-light .border-slate-800,
+    html.theme-light .border-slate-700,
+    html.theme-light [class*="border-slate-800"],
+    html.theme-light [class*="border-slate-700"] {
+      border-color: #e2e8f0 !important;
+    }
+    html.theme-light .text-white,
+    html.theme-light .text-slate-100,
+    html.theme-light .text-slate-200 {
+      color: #0f172a !important;
+    }
+    html.theme-light .text-slate-300 {
+      color: #334155 !important;
+    }
+    html.theme-light .text-slate-400 {
+      color: #64748b !important;
+    }
+    html.theme-light .text-slate-500 {
+      color: #94a3b8 !important;
+    }
+    html.theme-light input,
+    html.theme-light select,
+    html.theme-light textarea {
+      background-color: #ffffff !important;
+      color: #0f172a !important;
+      border-color: #cbd5e1 !important;
+    }
+    html.theme-light input::placeholder,
+    html.theme-light textarea::placeholder {
+      color: #94a3b8 !important;
+    }
+    html.theme-light .kanban-col {
+      background-color: #f8fafc !important;
+      border-color: #e2e8f0 !important;
+    }
+    html.theme-light .kanban-col [id^="card-"] {
+      background-color: #ffffff !important;
+      border-color: #e2e8f0 !important;
+      box-shadow: 0 2px 8px -1px rgba(0, 0, 0, 0.06), 0 1px 3px -1px rgba(0, 0, 0, 0.04) !important;
+    }
+    html.theme-light .kanban-col [id^="card-"]:hover {
+      background-color: #ffffff !important;
+      border-color: #6366f1 !important;
+      box-shadow: 0 12px 20px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05) !important;
+    }
+    html.theme-light .shadow-2xl,
+    html.theme-light .shadow-xl {
+      box-shadow: 0 15px 35px -5px rgba(15, 23, 42, 0.12), 0 8px 15px -4px rgba(15, 23, 42, 0.06) !important;
+    }
+
+    /* --------------------------------------------------------
+       HIGH CONTRAST / OLED BLACK (省電力・直射日光・黒)
+       -------------------------------------------------------- */
+    html.theme-contrast body {
+      background-color: #000000 !important;
+      color: #ffffff !important;
+    }
+    html.theme-contrast .bg-slate-950,
+    html.theme-contrast .bg-slate-900,
+    html.theme-contrast [class*="bg-slate-900"] {
+      background-color: #000000 !important;
+    }
+    html.theme-contrast header {
+      background-color: rgba(0, 0, 0, 0.98) !important;
+      border-bottom-color: #3f3f46 !important;
+    }
+    html.theme-contrast .bg-slate-800,
+    html.theme-contrast .bg-slate-850,
+    html.theme-contrast [class*="bg-slate-800"],
+    html.theme-contrast [class*="bg-slate-850"] {
+      background-color: #0a0a0c !important;
+    }
+    html.theme-contrast .bg-slate-700,
+    html.theme-contrast .bg-slate-750,
+    html.theme-contrast [class*="bg-slate-700"] {
+      background-color: #18181b !important;
+    }
+    html.theme-contrast .border-slate-800,
+    html.theme-contrast .border-slate-700,
+    html.theme-contrast [class*="border-slate-800"],
+    html.theme-contrast [class*="border-slate-700"] {
+      border-color: #3f3f46 !important;
+    }
+    html.theme-contrast .text-slate-400,
+    html.theme-contrast .text-slate-300 {
+      color: #e4e4e7 !important;
+    }
+    html.theme-contrast .text-slate-500 {
+      color: #a1a1aa !important;
+    }
+    html.theme-contrast .kanban-col {
+      background-color: #0a0a0c !important;
+      border-color: #27272a !important;
+    }
+    html.theme-contrast .kanban-col [id^="card-"] {
+      background-color: #000000 !important;
+      border-color: #3f3f46 !important;
+    }
+
+    /* --------------------------------------------------------
+       SEPIA / EYE CARE (目に優しい暖色・長時間の分析)
+       -------------------------------------------------------- */
+    html.theme-sepia body {
+      background-color: #fbf7ee !important;
+      color: #2c251e !important;
+    }
+    html.theme-sepia .bg-slate-950,
+    html.theme-sepia .bg-slate-900,
+    html.theme-sepia [class*="bg-slate-900"] {
+      background-color: #fbf7ee !important;
+    }
+    html.theme-sepia header {
+      background-color: rgba(251, 247, 238, 0.96) !important;
+      border-bottom-color: #e6dfd1 !important;
+      box-shadow: 0 1px 3px 0 rgba(44, 37, 30, 0.05) !important;
+    }
+    html.theme-sepia .bg-slate-800,
+    html.theme-sepia .bg-slate-850,
+    html.theme-sepia [class*="bg-slate-800"],
+    html.theme-sepia [class*="bg-slate-850"] {
+      background-color: #f4ecdc !important;
+    }
+    html.theme-sepia .bg-slate-700,
+    html.theme-sepia .bg-slate-750,
+    html.theme-sepia [class*="bg-slate-700"] {
+      background-color: #eae1cd !important;
+    }
+    html.theme-sepia .border-slate-800,
+    html.theme-sepia .border-slate-700,
+    html.theme-sepia [class*="border-slate-800"],
+    html.theme-sepia [class*="border-slate-700"] {
+      border-color: #dfd6c2 !important;
+    }
+    html.theme-sepia .text-white,
+    html.theme-sepia .text-slate-100,
+    html.theme-sepia .text-slate-200 {
+      color: #2c251e !important;
+    }
+    html.theme-sepia .text-slate-300 {
+      color: #4a3f35 !important;
+    }
+    html.theme-sepia .text-slate-400 {
+      color: #736354 !important;
+    }
+    html.theme-sepia .text-slate-500 {
+      color: #968370 !important;
+    }
+    html.theme-sepia input,
+    html.theme-sepia select,
+    html.theme-sepia textarea {
+      background-color: #ffffff !important;
+      color: #2c251e !important;
+      border-color: #dfd6c2 !important;
+    }
+    html.theme-sepia .kanban-col {
+      background-color: #f3ece0 !important;
+      border-color: #ded6c4 !important;
+    }
+    html.theme-sepia .kanban-col [id^="card-"] {
+      background-color: #fbf7ee !important;
+      border-color: #ded6c4 !important;
+      box-shadow: 0 2px 6px -1px rgba(67, 52, 34, 0.06) !important;
+    }
+
+    /* --------------------------------------------------------
+       ACCENT COLORS (色付け・テーマカラーパレット)
+       -------------------------------------------------------- */
+    /* ACCENT: EMERALD (安心・ホワイト・健康) */
+    html[data-accent="emerald"] .from-indigo-500.to-sky-500,
+    html[data-accent="emerald"] .from-indigo-600.to-sky-400 {
+      --tw-gradient-from: #059669 !important;
+      --tw-gradient-to: #0d9488 !important;
+      --tw-gradient-stops: var(--tw-gradient-from), var(--tw-gradient-to) !important;
+    }
+    html[data-accent="emerald"] .bg-indigo-600 { background-color: #059669 !important; }
+    html[data-accent="emerald"] .bg-indigo-500\/20 { background-color: rgba(16, 185, 129, 0.2) !important; }
+    html[data-accent="emerald"] .text-indigo-300,
+    html[data-accent="emerald"] .text-indigo-400 { color: #34d399 !important; }
+    html[data-accent="emerald"] .border-indigo-500,
+    html[data-accent="emerald"] .border-indigo-500\/40 { border-color: #10b981 !important; }
+
+    /* ACCENT: PURPLE (ゲーム開発・クリエイター) */
+    html[data-accent="purple"] .from-indigo-500.to-sky-500,
+    html[data-accent="purple"] .from-indigo-600.to-sky-400 {
+      --tw-gradient-from: #8b5cf6 !important;
+      --tw-gradient-to: #ec4899 !important;
+      --tw-gradient-stops: var(--tw-gradient-from), var(--tw-gradient-to) !important;
+    }
+    html[data-accent="purple"] .bg-indigo-600 { background-color: #7c3aed !important; }
+    html[data-accent="purple"] .bg-indigo-500\/20 { background-color: rgba(139, 92, 246, 0.2) !important; }
+    html[data-accent="purple"] .text-indigo-300,
+    html[data-accent="purple"] .text-indigo-400 { color: #c084fc !important; }
+    html[data-accent="purple"] .border-indigo-500,
+    html[data-accent="purple"] .border-indigo-500\/40 { border-color: #8b5cf6 !important; }
+
+    /* ACCENT: AMBER (スカウト・プレミアム) */
+    html[data-accent="amber"] .from-indigo-500.to-sky-500,
+    html[data-accent="amber"] .from-indigo-600.to-sky-400 {
+      --tw-gradient-from: #f59e0b !important;
+      --tw-gradient-to: #f97316 !important;
+      --tw-gradient-stops: var(--tw-gradient-from), var(--tw-gradient-to) !important;
+    }
+    html[data-accent="amber"] .bg-indigo-600 { background-color: #d97706 !important; }
+    html[data-accent="amber"] .bg-indigo-500\/20 { background-color: rgba(245, 158, 11, 0.2) !important; }
+    html[data-accent="amber"] .text-indigo-300,
+    html[data-accent="amber"] .text-indigo-400 { color: #fbbf24 !important; }
+    html[data-accent="amber"] .border-indigo-500,
+    html[data-accent="amber"] .border-indigo-500\/40 { border-color: #f59e0b !important; }
+
+    /* ACCENT: SKY (爽快・高透明感) */
+    html[data-accent="sky"] .from-indigo-500.to-sky-500,
+    html[data-accent="sky"] .from-indigo-600.to-sky-400 {
+      --tw-gradient-from: #0284c7 !important;
+      --tw-gradient-to: #38bdf8 !important;
+      --tw-gradient-stops: var(--tw-gradient-from), var(--tw-gradient-to) !important;
+    }
+    html[data-accent="sky"] .bg-indigo-600 { background-color: #0284c7 !important; }
+    html[data-accent="sky"] .bg-indigo-500\/20 { background-color: rgba(2, 132, 199, 0.2) !important; }
+    html[data-accent="sky"] .text-indigo-300,
+    html[data-accent="sky"] .text-indigo-400 { color: #38bdf8 !important; }
+    html[data-accent="sky"] .border-indigo-500,
+    html[data-accent="sky"] .border-indigo-500\/40 { border-color: #0284c7 !important; }
   </style>
 </head>
 <body class="bg-slate-900 text-slate-100 min-h-screen flex flex-col transition-colors duration-200">
@@ -178,6 +494,16 @@
     <!-- Right Controls -->
     <div class="flex items-center gap-2.5">
       <!-- 🔄 再読み込みボタン（リログ不要・最新データ即時反映） -->
+            <!-- ☀️/🌙 画面の明暗クイック切り替えボタン（1タップでダーク/ライト） -->
+      <button id="quickThemeBtn" onclick="toggleQuickTheme()" title="画面の明暗をワンタップ切り替え (ダーク ⇔ ライト)" class="p-2 rounded-lg bg-slate-800 hover:bg-slate-700 border border-slate-700 text-amber-300 hover:text-amber-200 transition shadow-sm active:scale-95">
+        <i id="quickThemeIcon" data-lucide="sun" class="w-4 h-4"></i>
+      </button>
+
+      <!-- 🎨 見やすさ・表示設定ボタン（色付け・文字サイズ・端末調整） -->
+      <button onclick="openAppearanceModal()" title="見やすさ・表示設定（明暗・色付け・文字サイズ・端末調整）" class="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 border border-slate-700 text-slate-200 hover:text-white text-xs font-semibold transition shadow-sm active:scale-95">
+        <i data-lucide="palette" class="w-3.5 h-3.5 text-indigo-400"></i>
+        <span class="hidden md:inline">見やすさ設定</span>
+      </button>
       <button id="refreshDataBtn" onclick="handleDataReload()" title="データを最新状態に再読み込み（リログ不要）" class="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-emerald-500/15 hover:bg-emerald-500/25 border border-emerald-500/40 text-emerald-300 text-xs font-semibold shadow-sm transition active:scale-95 group">
         <i id="refreshDataIcon" data-lucide="refresh-cw" class="w-3.5 h-3.5 text-emerald-400 group-hover:rotate-180 transition-transform duration-500"></i>
         <span>再読み込み</span>
@@ -416,6 +742,17 @@
             <i data-lucide="search" class="w-3.5 h-3.5 absolute left-3 top-2.5 text-slate-400"></i>
             <input type="text" id="pipelineSearchQuery" oninput="renderPipeline()" placeholder="企業名・日程・説明会メモ..." class="w-full text-xs pl-8 pr-3 py-2 rounded-lg bg-slate-800 border border-slate-700 text-slate-200 placeholder-slate-500 focus:outline-none focus:border-indigo-500">
           </div>
+        </div>
+      </div>
+
+            <!-- モバイル・タブレット向け：選考ステージ クイックナビ（横スクロールジャンプ） -->
+      <div class="bg-slate-800/50 border border-slate-800/90 rounded-xl p-2 flex items-center gap-1.5 overflow-x-auto custom-scrollbar text-xs">
+        <span class="text-[11px] text-slate-400 font-bold shrink-0 px-2 flex items-center gap-1">
+          <i data-lucide="compass" class="w-3.5 h-3.5 text-indigo-400"></i>
+          <span class="hidden sm:inline">ステージジャンプ:</span>
+        </span>
+        <div id="pipelineStageQuickNav" class="flex items-center gap-1.5 shrink-0">
+          <!-- Dynamically populated or stage pills -->
         </div>
       </div>
 
@@ -925,6 +1262,228 @@
       </div>
     </div>
   </div><!-- ============================================== -->
+    <!-- ============================================== -->
+  <!-- MODAL: 見やすさ・表示設定 (明暗・色付け・端末調整) -->
+  <!-- ============================================== -->
+  <div id="appearanceModal" class="fixed inset-0 z-50 bg-black/80 backdrop-blur-md hidden items-center justify-center p-3 sm:p-4 overflow-y-auto">
+    <div class="bg-slate-900 border border-slate-700 rounded-3xl w-full max-w-2xl shadow-2xl overflow-hidden my-6 flex flex-col max-h-[90vh]">
+      
+      <!-- Modal Header -->
+      <div class="bg-gradient-to-r from-slate-800 via-indigo-950 to-slate-800 px-6 py-4 border-b border-slate-700/80 flex items-center justify-between shrink-0">
+        <div class="flex items-center gap-3">
+          <div class="p-2.5 rounded-2xl bg-indigo-500/20 text-indigo-300 border border-indigo-500/40 shadow-inner">
+            <i data-lucide="sliders" class="w-6 h-6 text-indigo-400"></i>
+          </div>
+          <div>
+            <h3 class="text-base sm:text-lg font-bold text-white tracking-tight flex items-center gap-2">
+              <span>画面の見やすさ ＆ 外観カスタマイズ</span>
+              <span class="text-[11px] px-2 py-0.5 rounded-full bg-indigo-500/20 text-indigo-300 border border-indigo-500/40 font-bold">全端末対応</span>
+            </h3>
+            <p class="text-xs text-slate-400 mt-0.5">明暗（ダーク/ライト/セピア）・色付け・文字サイズ・端末レイアウトを自由に調整</p>
+          </div>
+        </div>
+        <button onclick="closeModal('appearanceModal')" class="text-slate-400 hover:text-white p-2 rounded-xl hover:bg-slate-800 transition">
+          <i data-lucide="x" class="w-5 h-5"></i>
+        </button>
+      </div>
+
+      <!-- Modal Body -->
+      <div class="p-6 space-y-6 overflow-y-auto custom-scrollbar flex-1 text-xs">
+
+        <!-- SECTION 1: 画面の明暗（テーマ） -->
+        <div class="space-y-3">
+          <div class="flex items-center justify-between">
+            <label class="font-bold text-white text-xs flex items-center gap-2">
+              <i data-lucide="sun-moon" class="w-4 h-4 text-amber-400"></i>
+              <span>1. 画面の明暗（テーマモード）</span>
+            </label>
+            <span class="text-[11px] text-slate-400">環境や好みに合わせて瞬時切替</span>
+          </div>
+          
+          <div class="grid grid-cols-2 sm:grid-cols-4 gap-2.5">
+            <!-- Dark -->
+            <button type="button" onclick="setAppearanceOption('theme', 'dark')" id="themeBtn-dark" class="appearance-theme-card p-3 rounded-2xl border-2 border-indigo-500 bg-slate-950 text-left transition hover:border-indigo-400 flex flex-col justify-between h-24 relative group">
+              <div class="flex items-center justify-between">
+                <span class="text-amber-400"><i data-lucide="moon" class="w-5 h-5"></i></span>
+                <span class="theme-check-icon w-4 h-4 rounded-full bg-indigo-500 text-white flex items-center justify-center text-[10px]"><i data-lucide="check" class="w-3 h-3"></i></span>
+              </div>
+              <div>
+                <div class="font-bold text-white text-xs">ダーク</div>
+                <div class="text-[10px] text-slate-400 mt-0.5">宇宙ネイビー（標準）</div>
+              </div>
+            </button>
+
+            <!-- Light -->
+            <button type="button" onclick="setAppearanceOption('theme', 'light')" id="themeBtn-light" class="appearance-theme-card p-3 rounded-2xl border-2 border-slate-700 bg-white text-left transition hover:border-slate-500 flex flex-col justify-between h-24 relative group">
+              <div class="flex items-center justify-between">
+                <span class="text-amber-500"><i data-lucide="sun" class="w-5 h-5"></i></span>
+                <span class="theme-check-icon w-4 h-4 rounded-full bg-indigo-500 text-white hidden items-center justify-center text-[10px]"><i data-lucide="check" class="w-3 h-3"></i></span>
+              </div>
+              <div>
+                <div class="font-bold text-slate-900 text-xs">ライト</div>
+                <div class="text-[10px] text-slate-600 mt-0.5">オフィス・昼間向け白</div>
+              </div>
+            </button>
+
+            <!-- High Contrast / OLED -->
+            <button type="button" onclick="setAppearanceOption('theme', 'contrast')" id="themeBtn-contrast" class="appearance-theme-card p-3 rounded-2xl border-2 border-slate-700 bg-black text-left transition hover:border-slate-500 flex flex-col justify-between h-24 relative group">
+              <div class="flex items-center justify-between">
+                <span class="text-sky-400"><i data-lucide="zap" class="w-5 h-5"></i></span>
+                <span class="theme-check-icon w-4 h-4 rounded-full bg-indigo-500 text-white hidden items-center justify-center text-[10px]"><i data-lucide="check" class="w-3 h-3"></i></span>
+              </div>
+              <div>
+                <div class="font-bold text-white text-xs">高コントラスト</div>
+                <div class="text-[10px] text-slate-400 mt-0.5">OLED漆黒・直射日光下</div>
+              </div>
+            </button>
+
+            <!-- Sepia / Eye Care -->
+            <button type="button" onclick="setAppearanceOption('theme', 'sepia')" id="themeBtn-sepia" class="appearance-theme-card p-3 rounded-2xl border-2 border-slate-700 bg-[#fbf7ee] text-left transition hover:border-slate-500 flex flex-col justify-between h-24 relative group">
+              <div class="flex items-center justify-between">
+                <span class="text-amber-700"><i data-lucide="book-open" class="w-5 h-5"></i></span>
+                <span class="theme-check-icon w-4 h-4 rounded-full bg-indigo-500 text-white hidden items-center justify-center text-[10px]"><i data-lucide="check" class="w-3 h-3"></i></span>
+              </div>
+              <div>
+                <div class="font-bold text-[#2c251e] text-xs">アイケア</div>
+                <div class="text-[10px] text-[#736354] mt-0.5">目に優しい暖色ペーパー</div>
+              </div>
+            </button>
+          </div>
+        </div>
+
+        <!-- SECTION 2: 色付け（アクセントカラー） -->
+        <div class="space-y-3 pt-3 border-t border-slate-800">
+          <div class="flex items-center justify-between">
+            <label class="font-bold text-white text-xs flex items-center gap-2">
+              <i data-lucide="palette" class="w-4 h-4 text-indigo-400"></i>
+              <span>2. 色付け（アクセントカラーパレット）</span>
+            </label>
+            <span class="text-[11px] text-slate-400">ボタンやバッジのテーマ色</span>
+          </div>
+
+          <div class="grid grid-cols-2 sm:grid-cols-5 gap-2">
+            <!-- Indigo -->
+            <button type="button" onclick="setAppearanceOption('accent', 'indigo')" id="accentBtn-indigo" class="p-2.5 rounded-xl border-2 border-indigo-500 bg-indigo-500/20 text-indigo-300 font-bold flex items-center gap-2 transition hover:scale-105">
+              <span class="w-3.5 h-3.5 rounded-full bg-indigo-500 shrink-0 shadow"></span>
+              <span class="text-xs">インディゴ</span>
+            </button>
+
+            <!-- Emerald -->
+            <button type="button" onclick="setAppearanceOption('accent', 'emerald')" id="accentBtn-emerald" class="p-2.5 rounded-xl border border-slate-700 bg-slate-800 text-slate-300 font-medium flex items-center gap-2 transition hover:scale-105">
+              <span class="w-3.5 h-3.5 rounded-full bg-emerald-500 shrink-0 shadow"></span>
+              <span class="text-xs">エメラルド</span>
+            </button>
+
+            <!-- Purple -->
+            <button type="button" onclick="setAppearanceOption('accent', 'purple')" id="accentBtn-purple" class="p-2.5 rounded-xl border border-slate-700 bg-slate-800 text-slate-300 font-medium flex items-center gap-2 transition hover:scale-105">
+              <span class="w-3.5 h-3.5 rounded-full bg-purple-500 shrink-0 shadow"></span>
+              <span class="text-xs">パープル</span>
+            </button>
+
+            <!-- Amber -->
+            <button type="button" onclick="setAppearanceOption('accent', 'amber')" id="accentBtn-amber" class="p-2.5 rounded-xl border border-slate-700 bg-slate-800 text-slate-300 font-medium flex items-center gap-2 transition hover:scale-105">
+              <span class="w-3.5 h-3.5 rounded-full bg-amber-500 shrink-0 shadow"></span>
+              <span class="text-xs">アンバー</span>
+            </button>
+
+            <!-- Sky -->
+            <button type="button" onclick="setAppearanceOption('accent', 'sky')" id="accentBtn-sky" class="p-2.5 rounded-xl border border-slate-700 bg-slate-800 text-slate-300 font-medium flex items-center gap-2 transition hover:scale-105">
+              <span class="w-3.5 h-3.5 rounded-full bg-sky-500 shrink-0 shadow"></span>
+              <span class="text-xs">スカイ</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- SECTION 3: 端末・文字の大きさ（フォントサイズ調整） -->
+        <div class="space-y-3 pt-3 border-t border-slate-800">
+          <div class="flex items-center justify-between">
+            <label class="font-bold text-white text-xs flex items-center gap-2">
+              <i data-lucide="type" class="w-4 h-4 text-sky-400"></i>
+              <span>3. 端末・文字の大きさ（フォントサイズ）</span>
+            </label>
+            <span class="text-[11px] text-slate-400">スマホ・タブレット・PCに合わせて即時拡大</span>
+          </div>
+
+          <div class="grid grid-cols-5 gap-2">
+            <button type="button" onclick="setAppearanceOption('fontSize', 'small')" id="fontBtn-small" class="p-2.5 rounded-xl border border-slate-700 bg-slate-800 text-slate-300 text-center transition hover:border-slate-500">
+              <div class="text-[11px] font-bold">小 (90%)</div>
+              <div class="text-[10px] text-slate-500 mt-0.5">情報一覧</div>
+            </button>
+            <button type="button" onclick="setAppearanceOption('fontSize', 'normal')" id="fontBtn-normal" class="p-2.5 rounded-xl border-2 border-indigo-500 bg-indigo-500/15 text-indigo-300 text-center font-bold transition">
+              <div class="text-xs font-bold">標準 (100%)</div>
+              <div class="text-[10px] text-indigo-400/80 mt-0.5">デフォルト</div>
+            </button>
+            <button type="button" onclick="setAppearanceOption('fontSize', 'medium')" id="fontBtn-medium" class="p-2.5 rounded-xl border border-slate-700 bg-slate-800 text-slate-300 text-center transition hover:border-slate-500">
+              <div class="text-xs font-bold">中 (110%)</div>
+              <div class="text-[10px] text-slate-500 mt-0.5">タブレット</div>
+            </button>
+            <button type="button" onclick="setAppearanceOption('fontSize', 'large')" id="fontBtn-large" class="p-2.5 rounded-xl border border-slate-700 bg-slate-800 text-slate-300 text-center transition hover:border-slate-500">
+              <div class="text-sm font-bold">大 (120%)</div>
+              <div class="text-[10px] text-slate-500 mt-0.5">スマホ推奨</div>
+            </button>
+            <button type="button" onclick="setAppearanceOption('fontSize', 'xlarge')" id="fontBtn-xlarge" class="p-2.5 rounded-xl border border-slate-700 bg-slate-800 text-slate-300 text-center transition hover:border-slate-500">
+              <div class="text-base font-bold">特大 (130%)</div>
+              <div class="text-[10px] text-slate-500 mt-0.5">見やすさ最優先</div>
+            </button>
+          </div>
+        </div>
+
+        <!-- SECTION 4: 端末レイアウト ＆ カンバン表示調整 -->
+        <div class="space-y-4 pt-3 border-t border-slate-800">
+          <label class="font-bold text-white text-xs flex items-center gap-2">
+            <i data-lucide="layout" class="w-4 h-4 text-emerald-400"></i>
+            <span>4. 端末レイアウト ＆ カンバン表示調整</span>
+          </label>
+
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <!-- Density -->
+            <div class="bg-slate-800/60 border border-slate-700/80 p-3.5 rounded-2xl space-y-2">
+              <span class="font-bold text-slate-200 text-xs block">表示密度（カード余白）</span>
+              <div class="grid grid-cols-2 gap-2">
+                <button type="button" onclick="setAppearanceOption('density', 'comfortable')" id="densityBtn-comfortable" class="p-2 rounded-xl border-2 border-indigo-500 bg-indigo-500/15 text-indigo-300 font-bold text-xs text-center transition">
+                  ゆったり（快適）
+                </button>
+                <button type="button" onclick="setAppearanceOption('density', 'compact')" id="densityBtn-compact" class="p-2 rounded-xl border border-slate-700 bg-slate-800 text-slate-400 text-xs text-center transition hover:border-slate-500">
+                  コンパクト（高密度）
+                </button>
+              </div>
+            </div>
+
+            <!-- Column Width -->
+            <div class="bg-slate-800/60 border border-slate-700/80 p-3.5 rounded-2xl space-y-2">
+              <span class="font-bold text-slate-200 text-xs block">カンバン列幅 / 画面フィット</span>
+              <div class="grid grid-cols-3 gap-1.5">
+                <button type="button" onclick="setAppearanceOption('colWidth', 'narrow')" id="colWidthBtn-narrow" class="p-2 rounded-xl border border-slate-700 bg-slate-800 text-slate-400 text-[11px] text-center transition hover:border-slate-500">
+                  狭め (280px)
+                </button>
+                <button type="button" onclick="setAppearanceOption('colWidth', 'fixed')" id="colWidthBtn-fixed" class="p-2 rounded-xl border-2 border-indigo-500 bg-indigo-500/15 text-indigo-300 font-bold text-[11px] text-center transition">
+                  標準 (320px)
+                </button>
+                <button type="button" onclick="setAppearanceOption('colWidth', 'fit')" id="colWidthBtn-fit" class="p-2 rounded-xl border border-slate-700 bg-slate-800 text-slate-400 text-[11px] text-center transition hover:border-slate-500">
+                  画面均等フィット
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- Modal Footer -->
+      <div class="bg-slate-850 px-6 py-3.5 border-t border-slate-800 flex items-center justify-between shrink-0">
+        <button type="button" onclick="resetAppearanceToDefault()" class="flex items-center gap-1.5 text-xs text-slate-400 hover:text-amber-400 transition font-medium">
+          <i data-lucide="rotate-ccw" class="w-3.5 h-3.5"></i>
+          <span>初期設定（デフォルト）に戻す</span>
+        </button>
+
+        <button type="button" onclick="closeModal('appearanceModal')" class="px-5 py-2 rounded-xl bg-gradient-to-r from-indigo-500 to-sky-500 text-white font-bold text-xs shadow-lg shadow-indigo-500/25 transition transform active:scale-95">
+          完了
+        </button>
+      </div>
+
+    </div>
+  </div>
+
   <!-- MODAL: 新規作成モーダル -->
   <!-- ============================================== -->
   <div id="createModal" class="fixed inset-0 z-50 bg-black/70 backdrop-blur-sm hidden items-center justify-center p-4 overflow-y-auto">
@@ -3181,6 +3740,225 @@
     }
 
     // ==========================================
+    
+    // ========================================================
+    // APPEARANCE & DEVICE ACCESSIBILITY CONTROLS (見やすさ調整ロジック)
+    // ========================================================
+    const APPEARANCE_STORAGE_KEY = 'jobhunt_appearance_settings_v1';
+    const DEFAULT_APPEARANCE = {
+      theme: 'dark',        // 'dark', 'light', 'contrast', 'sepia'
+      accent: 'indigo',     // 'indigo', 'emerald', 'purple', 'amber', 'sky'
+      fontSize: 'normal',   // 'small', 'normal', 'medium', 'large', 'xlarge'
+      density: 'comfortable',// 'comfortable', 'compact'
+      colWidth: 'fixed'     // 'narrow', 'fixed', 'wide', 'fit'
+    };
+
+    function loadAppearanceSettings() {
+      try {
+        const raw = localStorage.getItem(APPEARANCE_STORAGE_KEY);
+        if (!raw) return { ...DEFAULT_APPEARANCE };
+        return { ...DEFAULT_APPEARANCE, ...JSON.parse(raw) };
+      } catch (e) {
+        return { ...DEFAULT_APPEARANCE };
+      }
+    }
+
+    function saveAppearanceSettings(settings) {
+      try {
+        localStorage.setItem(APPEARANCE_STORAGE_KEY, JSON.stringify(settings));
+      } catch (e) {}
+    }
+
+    function applyAppearance(settings) {
+      const root = document.documentElement;
+
+      // 1. Theme (明暗)
+      root.classList.remove('theme-dark', 'theme-light', 'theme-contrast', 'theme-sepia');
+      root.classList.add('theme-' + (settings.theme || 'dark'));
+      if (settings.theme === 'light' || settings.theme === 'sepia') {
+        root.classList.remove('dark');
+      } else {
+        root.classList.add('dark');
+      }
+
+      // 2. Accent Color (色付け)
+      root.setAttribute('data-accent', settings.accent || 'indigo');
+
+      // 3. Font Size (文字サイズ)
+      root.setAttribute('data-font-size', settings.fontSize || 'normal');
+
+      // 4. Density (表示密度)
+      root.setAttribute('data-density', settings.density || 'comfortable');
+
+      // 5. Kanban Column Width (列幅・端末調整)
+      root.setAttribute('data-col-width', settings.colWidth || 'fixed');
+
+      // Update Quick Theme Toggle icon in header
+      updateQuickThemeIcon(settings.theme);
+
+      // Update Modal UI buttons if modal is open
+      updateAppearanceModalUI(settings);
+    }
+
+    function updateQuickThemeIcon(currentTheme) {
+      const icon = document.getElementById('quickThemeIcon');
+      const btn = document.getElementById('quickThemeBtn');
+      if (!icon) return;
+
+      if (currentTheme === 'light') {
+        icon.setAttribute('data-lucide', 'moon');
+        btn.setAttribute('title', '画面をダークモードに切り替え');
+        btn.className = 'p-2 rounded-lg bg-slate-800 hover:bg-slate-700 border border-slate-700 text-indigo-400 hover:text-indigo-300 transition shadow-sm active:scale-95';
+      } else if (currentTheme === 'sepia') {
+        icon.setAttribute('data-lucide', 'sun');
+        btn.setAttribute('title', '画面をダークモードに切り替え');
+        btn.className = 'p-2 rounded-lg bg-slate-800 hover:bg-slate-700 border border-slate-700 text-amber-600 hover:text-amber-500 transition shadow-sm active:scale-95';
+      } else {
+        icon.setAttribute('data-lucide', 'sun');
+        btn.setAttribute('title', '画面をライトモードに切り替え');
+        btn.className = 'p-2 rounded-lg bg-slate-800 hover:bg-slate-700 border border-slate-700 text-amber-300 hover:text-amber-200 transition shadow-sm active:scale-95';
+      }
+      lucide.createIcons();
+    }
+
+    function toggleQuickTheme() {
+      const current = loadAppearanceSettings();
+      // Simple toggle: If dark/contrast -> switch to light. If light/sepia -> switch to dark.
+      if (current.theme === 'dark' || current.theme === 'contrast') {
+        current.theme = 'light';
+      } else {
+        current.theme = 'dark';
+      }
+      saveAppearanceSettings(current);
+      applyAppearance(current);
+    }
+
+    function openAppearanceModal() {
+      const settings = loadAppearanceSettings();
+      updateAppearanceModalUI(settings);
+      openModal('appearanceModal');
+    }
+
+    function setAppearanceOption(key, value) {
+      const settings = loadAppearanceSettings();
+      settings[key] = value;
+      saveAppearanceSettings(settings);
+      applyAppearance(settings);
+    }
+
+    function resetAppearanceToDefault() {
+      const settings = { ...DEFAULT_APPEARANCE };
+      saveAppearanceSettings(settings);
+      applyAppearance(settings);
+    }
+
+    function updateAppearanceModalUI(settings) {
+      // 1. Theme cards
+      ['dark', 'light', 'contrast', 'sepia'].forEach(t => {
+        const btn = document.getElementById('themeBtn-' + t);
+        if (!btn) return;
+        const checkIcon = btn.querySelector('.theme-check-icon');
+        if (settings.theme === t) {
+          btn.className = btn.className.replace(/border-slate-[0-9]+/g, '').replace('border-2', '') + ' border-2 border-indigo-500';
+          if (checkIcon) {
+            checkIcon.classList.remove('hidden');
+            checkIcon.classList.add('flex');
+          }
+        } else {
+          btn.className = btn.className.replace(/border-indigo-[0-9]+/g, '').replace('border-2', '') + ' border-2 border-slate-700';
+          if (checkIcon) {
+            checkIcon.classList.add('hidden');
+            checkIcon.classList.remove('flex');
+          }
+        }
+      });
+
+      // 2. Accent colors
+      ['indigo', 'emerald', 'purple', 'amber', 'sky'].forEach(a => {
+        const btn = document.getElementById('accentBtn-' + a);
+        if (!btn) return;
+        if (settings.accent === a) {
+          btn.className = 'p-2.5 rounded-xl border-2 border-indigo-500 bg-indigo-500/20 text-indigo-300 font-bold flex items-center gap-2 transition hover:scale-105';
+        } else {
+          btn.className = 'p-2.5 rounded-xl border border-slate-700 bg-slate-800 text-slate-300 font-medium flex items-center gap-2 transition hover:scale-105';
+        }
+      });
+
+      // 3. Font size
+      ['small', 'normal', 'medium', 'large', 'xlarge'].forEach(f => {
+        const btn = document.getElementById('fontBtn-' + f);
+        if (!btn) return;
+        if (settings.fontSize === f) {
+          btn.className = 'p-2.5 rounded-xl border-2 border-indigo-500 bg-indigo-500/20 text-indigo-300 text-center font-bold transition';
+        } else {
+          btn.className = 'p-2.5 rounded-xl border border-slate-700 bg-slate-800 text-slate-400 text-center transition hover:border-slate-500';
+        }
+      });
+
+      // 4. Density
+      ['comfortable', 'compact'].forEach(d => {
+        const btn = document.getElementById('densityBtn-' + d);
+        if (!btn) return;
+        if (settings.density === d) {
+          btn.className = 'p-2 rounded-xl border-2 border-indigo-500 bg-indigo-500/20 text-indigo-300 font-bold text-xs text-center transition';
+        } else {
+          btn.className = 'p-2 rounded-xl border border-slate-700 bg-slate-800 text-slate-400 text-xs text-center transition hover:border-slate-500';
+        }
+      });
+
+      // 5. Column Width
+      ['narrow', 'fixed', 'fit'].forEach(w => {
+        const btn = document.getElementById('colWidthBtn-' + w);
+        if (!btn) return;
+        if (settings.colWidth === w) {
+          btn.className = 'p-2 rounded-xl border-2 border-indigo-500 bg-indigo-500/20 text-indigo-300 font-bold text-[11px] text-center transition';
+        } else {
+          btn.className = 'p-2 rounded-xl border border-slate-700 bg-slate-800 text-slate-400 text-[11px] text-center transition hover:border-slate-500';
+        }
+      });
+
+      lucide.createIcons();
+    }
+
+    // Mobile / Tablet Stage Quick Scroll
+    function scrollToKanbanStage(stageIndex) {
+      const col = document.getElementById('kanban-col-' + stageIndex);
+      if (col) {
+        col.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' });
+        // Pulse effect
+        col.classList.add('ring-2', 'ring-indigo-500');
+        setTimeout(() => {
+          col.classList.remove('ring-2', 'ring-indigo-500');
+        }, 1200);
+      }
+    }
+
+    function renderStageQuickNav() {
+      const container = document.getElementById('pipelineStageQuickNav');
+      if (!container) return;
+
+      let pillsHtml = '';
+      PIPELINE_STAGES.forEach((stage, idx) => {
+        const count = pipeline.filter(i => i.stage === stage).length;
+        let shortName = stage;
+        if (stage.includes('説明会 (参加予定)')) shortName = '説明会予';
+        else if (stage.includes('説明会 (参加済)')) shortName = '説明会済';
+        else if (stage.includes('面談')) shortName = '🤝面談';
+        else if (stage.includes('一次面接')) shortName = '一次面接';
+        else if (stage.includes('二次')) shortName = '二次面接';
+        else if (stage.includes('最終面接')) shortName = '最終面接';
+        else if (stage.includes('内定')) shortName = '🎉内定';
+
+        pillsHtml += `
+          <button onclick="scrollToKanbanStage(${idx})" class="px-2.5 py-1 rounded-lg bg-slate-800 hover:bg-slate-700 border border-slate-700 hover:border-indigo-500/50 text-slate-300 hover:text-white transition flex items-center gap-1.5 shrink-0 text-[11px] active:scale-95">
+            <span>${shortName}</span>
+            <span class="px-1.5 py-0.2 rounded-full ${count > 0 ? 'bg-indigo-500/30 text-indigo-200 font-bold' : 'bg-slate-700 text-slate-400'} text-[10px]">${count}</span>
+          </button>
+        `;
+      });
+      container.innerHTML = pillsHtml;
+    }
+
     // Render Kanban Pipeline View
     // ==========================================
     function renderPipeline() {
@@ -3219,7 +3997,7 @@
       document.getElementById('pipelineStatsTotal').innerText = `${filtered.length}社（新基準反映済）`;
 
       let columnsHtml = '';
-      PIPELINE_STAGES.forEach((stage) => {
+      PIPELINE_STAGES.forEach((stage, stageIdx) => {
         const stageItems = filtered.filter(i => i.stage === stage);
 
         let headerColorClass = 'text-indigo-400';
@@ -3253,7 +4031,7 @@
         }
 
         columnsHtml += `
-          <div class="kanban-col flex-1 bg-slate-800/40 border border-slate-800/90 rounded-2xl p-3.5 flex flex-col min-h-[660px] max-h-[840px] transition-all"
+          <div id="kanban-col-${stageIdx}" class="kanban-col flex-1 bg-slate-800/40 border border-slate-800/90 rounded-2xl p-3.5 flex flex-col min-h-[660px] max-h-[840px] transition-all"
                ondragover="handleKanbanDragOver(event)"
                ondragleave="handleKanbanDragLeave(event)"
                ondrop="handleKanbanDrop(event, '${stage}')">
