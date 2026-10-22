@@ -1143,13 +1143,13 @@
             <div class="flex items-center gap-4 text-center md:text-left">
               <div class="w-20 h-20 rounded-2xl bg-slate-900 border border-indigo-500/40 flex flex-col items-center justify-center shadow-lg shadow-indigo-950/50 shrink-0">
                 <span class="text-[10px] text-indigo-400 font-bold uppercase tracking-wider">合計スコア</span>
-                <span id="simScoreDisplay" class="text-3xl font-black text-transparent bg-clip-text bg-gradient-to-r from-indigo-300 via-sky-300 to-emerald-300 font-mono">8.5</span>
+                <span id="simScoreDisplay" class="text-3xl font-black text-transparent bg-clip-text bg-gradient-to-r from-indigo-300 via-sky-300 to-emerald-300 font-mono">7.5</span>
                 <span class="text-[10px] text-slate-500">/ 10.0 点</span>
               </div>
               <div>
                 <div class="flex items-center gap-2 justify-center md:justify-start mb-1 flex-wrap">
                   <span id="simVerdictBadge" class="px-3 py-1 rounded-full bg-emerald-500/20 text-emerald-300 border border-emerald-500/40 font-bold text-xs">
-                    【8.5】高評価・本命併願枠 ★目指す水準
+                    【7.5】高評価・本命併願枠 ★目指す水準
                   </span>
                   <div id="simStarsDisplay" class="flex items-center gap-0.5 text-amber-400">
                     <i data-lucide="star" class="w-4 h-4 fill-amber-400"></i>
@@ -1200,14 +1200,14 @@
               <!-- 2. 商流・配属先 -->
               <div>
                 <label class="block text-slate-300 font-semibold mb-1 flex items-center justify-between">
-                  <span>② 商流・配属先（自社開発 vs 客先常駐SES排除）</span>
-                  <span id="ptsTrade" class="text-indigo-400 font-mono font-bold">+1.5点</span>
+                  <span>② 商流・配属先（自社開発 vs 客先常駐排除）</span>
+                  <span id="ptsTrade" class="text-indigo-400 font-mono font-bold">+2.0点</span>
                 </label>
                 <select id="simTrade" onchange="runSimulatorCalc()" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-white text-xs focus:border-indigo-500">
-                  <option value="2.0">自社IP・自社ゲーム/プロダクト開発100% [+2.0点]</option>
-                  <option value="1.5" selected>プライム一次請け・自社内受託 70%以上（常駐極小） [+1.5点]</option>
-                  <option value="0.8">二次請け自社内受託メイン [+0.8点]</option>
-                  <option value="-2.0">客先常駐（SES）メイン または ⚠️隠れSES・偽装自社受託（準委任9割） [-2.0点 減点]</option>
+                  <option value="2.0">自社IP・自社ゲーム/プロダクト開発100%（常駐ゼロ） [+2.0点]</option>
+                  <option value="1.0">プライム一次請け・自社内受託100%（持ち帰り開発徹底） [+1.0点]</option>
+                  <option value="-0.5" selected>⚠️ 客先常駐が混在（常駐比率80%未満・一部常駐あり） [-0.5点 少し減点]</option>
+                  <option value="-2.0">🚫 客先常駐メイン（常駐比率80%以上 / SES・特定派遣モデル） [-2.0点 減点]</option>
                 </select>
               </div>
 
@@ -1250,18 +1250,16 @@
                 <span class="text-[10px] text-slate-400">※強みが活きる度合い</span>
               </div>
 
-              <!-- 5. 担当工程・C++直結度 & レガシー回避 -->
+              <!-- 5. 担当工程・エンジニア業務（言語不問・開発工程の有無） -->
               <div>
                 <label class="block text-slate-300 font-semibold mb-1 flex items-center justify-between">
-                  <span>⑤ 担当工程・技術直結度（C++ / エンジン / モダン技術）</span>
-                  <span id="ptsTech" class="text-sky-400 font-mono font-bold">+1.0点</span>
+                  <span>⑤ 担当工程（言語不問：プログラミング開発工程の有無）</span>
+                  <span id="ptsTech" class="text-sky-400 font-mono font-bold">0.0点</span>
                 </label>
                 <select id="simTech" onchange="runSimulatorCalc()" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-white text-xs focus:border-indigo-500">
-                  <option value="1.0" selected>C/C++、ゲームエンジン、3D数学、物理演算直結 [+1.0点]</option>
-                  <option value="0.8">制御系・組込系・インフラ基盤（C言語親和性） [+0.8点]</option>
-                  <option value="0.7">Web・アプリ・DX受託開発（モダン技術確約） [+0.7点]</option>
-                  <option value="-1.0">⚠️他社で通用しないレガシー技術（COBOL・古い独自基盤保守）固定 [-1.0点 減点]</option>
-                  <option value="-1.5">プログラミングなし（運用監視・マニュアルテスト） [-1.5点 減点]</option>
+                  <option value="0.0" selected>開発・プログラミング工程（言語不問：C++, Java, C#, Go, Web等何でもOK） [0.0点 基準]</option>
+                  <option value="-0.5">⚠️他社で生かせないレガシー技術（COBOL・古い独自基盤保守）固定 [-0.5点 減点]</option>
+                  <option value="-1.5">🚫プログラミングなし（運用監視・マニュアルテスト・ヘルプデスク） [-1.5点 減点]</option>
                 </select>
               </div>
 
@@ -1296,12 +1294,12 @@
               <div class="grid grid-cols-2 gap-2">
                 <div>
                   <label class="block text-slate-300 font-semibold mb-1 flex items-center justify-between">
-                    <span>⑧ 福利厚生（住宅/資格）</span>
+                    <span>⑧ 福利厚生（住宅/寮）</span>
                     <span id="ptsWelfare" class="text-sky-400 font-mono font-bold">+0.5点</span>
                   </label>
                   <select id="simWelfare" onchange="runSimulatorCalc()" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-2.5 py-2 text-white text-xs focus:border-indigo-500">
-                    <option value="1.0">【超充実】住宅手当（月3万↑）または格安独身寮・社宅 ＋ 資格手当 ＋ 退職金 [+1.0点]</option>
-                    <option value="0.5" selected>【標準充実】住宅手当（月1〜2万）または資格手当あり [+0.5点]</option>
+                    <option value="0.5" selected>【超充実】住宅手当（月3万↑）または格安独身寮・社宅 ＋ 退職金 [+0.5点]</option>
+                    <option value="0.2">【標準充実】住宅手当（月1〜2万）または資格手当あり [+0.2点]</option>
                     <option value="0.0">手当なし（法定福利のみ・家賃全額自腹） [0.0点]</option>
                   </select>
                 </div>
@@ -1363,8 +1361,8 @@
                   <td class="py-2.5 px-3 font-bold text-indigo-400">優先度 2位</td>
                   <td class="py-2.5 px-3 font-bold text-white">② 商流・配属先<br><span class="text-[10px] text-slate-400">（客先常駐SES排除）</span></td>
                   <td class="py-2.5 px-3 font-mono font-bold text-emerald-400">-2.0 〜 +2.0点</td>
-                  <td class="py-2.5 px-3">・自社IP/プロダクト開発100%: +2.0点<br>・プライム直受託70%以上: +1.5点</td>
-                  <td class="py-2.5 px-3 text-rose-300">客先常駐SESメイン、または⚠️「隠れSES・偽装自社受託（自社フロアでの準委任作業9割）」は-2.0点ペナルティ＆4大条件不合格。</td>
+                  <td class="py-2.5 px-3">・自社IP/プロダクト開発100%: +2.0点<br>・プライム直受託100%（持ち帰り徹底）: +1.0点</td>
+                  <td class="py-2.5 px-3 text-rose-300">・⚠️客先常駐が混在（常駐比率80%未満・一部常駐あり）は-0.5点少し減点。<br>・🚫客先常駐メイン（常駐比率80%以上 / SES・特定派遣）は-2.0点ペナルティ＆4大条件不合格。</td>
                 </tr>
                 <tr>
                   <td class="py-2.5 px-3 font-bold text-indigo-400">優先度 3位</td>
@@ -1381,21 +1379,21 @@
                   <td class="py-2.5 px-3 text-rose-300">年間休日110日未満は-1.0点ペナルティ。</td>
                 </tr>
                 <tr class="bg-sky-950/20 font-semibold text-white">
-                  <td colspan="5" class="py-2 px-3 text-sky-300">【第2グループ：就活軸・スキル＆待遇加点（加点：最大 3.0点）】※手取り豊かさ＆強み発揮度</td>
+                  <td colspan="5" class="py-2 px-3 text-sky-300">【第2グループ：就活軸・スキル＆待遇加点（加点：最大 2.0点）】※言語不問・実態重視</td>
                 </tr>
                 <tr>
                   <td class="py-2.5 px-3 font-bold text-sky-400">優先度 5位</td>
-                  <td class="py-2.5 px-3 font-bold text-white">⑤ 福利厚生（住宅/資格）<br><span class="text-[10px] text-emerald-400">★大手・隠れ優良の強み</span></td>
-                  <td class="py-2.5 px-3 font-mono font-bold text-emerald-400">0.0 〜 +1.0点</td>
-                  <td class="py-2.5 px-3">・【超充実】手厚い住宅手当（月3万↑）または格安独身寮・社宅（月1〜2万負担） ＋ 資格手当・一時金 ＋ 退職金: +1.0点<br>・【標準充実】住宅手当（月1〜2万）または資格手当: +0.5点</td>
-                  <td class="py-2.5 px-3 text-slate-400">手当なし（家賃全額自腹）は加点0点。</td>
+                  <td class="py-2.5 px-3 font-bold text-white">⑤ 担当工程<br><span class="text-[10px] text-slate-400">（言語不問・開発工程有無）</span></td>
+                  <td class="py-2.5 px-3 font-mono font-bold text-emerald-400">-1.5 〜 0.0点</td>
+                  <td class="py-2.5 px-3">プログラミング・システム開発工程（言語不問：C++, Java, C#, Go, Web等何でもOK）: 0.0点（基準）</td>
+                  <td class="py-2.5 px-3 text-rose-300">・⚠️他社で生かせないレガシー技術（COBOL等）固定は-0.5点<br>・🚫プログラミングなし（運用監視・マニュアルテスト）は-1.5点</td>
                 </tr>
                 <tr>
                   <td class="py-2.5 px-3 font-bold text-sky-400">優先度 6位</td>
-                  <td class="py-2.5 px-3 font-bold text-white">⑥ 技術直結・モダン設計<br><span class="text-[10px] text-slate-400">（市場価値保護）</span></td>
-                  <td class="py-2.5 px-3 font-mono font-bold text-emerald-400">-1.5 〜 +1.0点</td>
-                  <td class="py-2.5 px-3">C/C++、3D物理、ゲームエンジン開発が直結: +1.0点（Web/DXモダン受託は+0.7点）</td>
-                  <td class="py-2.5 px-3 text-rose-300">・プログラミングなし（運用監視）は-1.5点<br>・⚠️他社で通用しないレガシー技術（COBOL・古い独自基盤保守）固定は-1.0点</td>
+                  <td class="py-2.5 px-3 font-bold text-white">⑥ 福利厚生（住宅/寮）<br><span class="text-[10px] text-emerald-400">★大手・隠れ優良の実質手取り</span></td>
+                  <td class="py-2.5 px-3 font-mono font-bold text-emerald-400">0.0 〜 +0.5点</td>
+                  <td class="py-2.5 px-3">・【超充実】手厚い住宅手当（月3万↑）または格安独身寮・社宅（月1〜2万負担） ＋ 退職金: +0.5点<br>・【標準充実】住宅手当（月1〜2万）または資格手当: +0.2点</td>
+                  <td class="py-2.5 px-3 text-slate-400">手当なし（家賃全額自腹）は加点0点。</td>
                 </tr>
                 <tr>
                   <td class="py-2.5 px-3 font-bold text-sky-400">優先度 7位</td>
@@ -1489,39 +1487,40 @@
             </h4>
             
             <!-- Tier 1: 9.0〜10.0 -->
+            <!-- Tier 1: 8.5〜10.0 -->
             <div class="bg-slate-800/40 border-l-4 border-l-purple-500 border border-slate-700/70 p-4 rounded-xl">
               <div class="flex items-center justify-between gap-2 mb-1.5">
                 <span class="text-sm font-bold text-purple-300 flex items-center gap-2">
-                  <span class="px-2 py-0.5 rounded bg-purple-500/20 border border-purple-500/40">9.0 〜 10.0点（★★★★★）</span>
+                  <span class="px-2 py-0.5 rounded bg-purple-500/20 border border-purple-500/40">8.5 〜 10.0点（★★★★★）</span>
                   最高峰・理想枠 / トップティア
                 </span>
-                <span class="text-[11px] text-slate-400">例：ハル研究所、アトラス、コーエーテクモHD</span>
+                <span class="text-[11px] text-slate-400">例：ハル研究所、コーエーテクモHD、アトラス</span>
               </div>
-              <p class="text-slate-300 leading-relaxed">全ての就活軸を完璧にクリア。完全自社開発、基本給単体で23万〜25万円以上、みなし残業なし、年間休日125日、C++技術フル活用。</p>
+              <p class="text-slate-300 leading-relaxed">全ての就活軸を完璧にクリア。完全自社開発、基本給単体で23万〜25万円以上、みなし残業なし、年間休日125日、手厚い福利厚生。</p>
             </div>
 
-            <!-- Tier 2: 7.5〜8.9 -->
+            <!-- Tier 2: 7.0〜8.4 -->
             <div class="bg-slate-800/40 border-l-4 border-l-emerald-500 border border-slate-700/70 p-4 rounded-xl">
               <div class="flex items-center justify-between gap-2 mb-1.5">
                 <span class="text-sm font-bold text-emerald-300 flex items-center gap-2">
-                  <span class="px-2 py-0.5 rounded bg-emerald-500/20 border border-emerald-500/40">7.5 〜 8.9点（★★★★☆）</span>
+                  <span class="px-2 py-0.5 rounded bg-emerald-500/20 border border-emerald-500/40">7.0 〜 8.4点（★★★★☆）</span>
                   高評価・本命併願 / 滑り止め最有力 ★ここを目指す
                 </span>
-                <span class="text-[11px] text-slate-400">例：セガ フェイブ、バンダイナムコアミューズメント、NCD、アトミテック</span>
+                <span class="text-[11px] text-slate-400">例：セガ フェイブ、エムスリーインテック、バンダイナムコアミューズメント、アトミテック、NCD</span>
               </div>
-              <p class="text-slate-300 leading-relaxed">致命的なリスクがなく、基本給単体21万円以上クリア、自社内受託または直取引メイン（常駐リスク小）、年間休日120日以上。</p>
+              <p class="text-slate-300 leading-relaxed">致命的なリスクがなく、基本給単体21万円以上クリア、自社製品・プライム受託メイン、年間休日120日以上。</p>
             </div>
 
-            <!-- Tier 3: 6.0〜7.4 -->
+            <!-- Tier 3: 6.0〜6.9 -->
             <div class="bg-slate-800/40 border-l-4 border-l-indigo-400 border border-slate-700/70 p-4 rounded-xl">
               <div class="flex items-center justify-between gap-2 mb-1.5">
                 <span class="text-sm font-bold text-indigo-300 flex items-center gap-2">
-                  <span class="px-2 py-0.5 rounded bg-indigo-500/20 border border-indigo-500/40">6.0 〜 7.4点（★★★☆☆）</span>
+                  <span class="px-2 py-0.5 rounded bg-indigo-500/20 border border-indigo-500/40">6.0 〜 6.9点（★★★☆☆）</span>
                   中位・条件付き検討枠（セーフティネット）
                 </span>
-                <span class="text-[11px] text-slate-400">例：コンピュータマインド社、パーソルクロステクノロジー、エスピック</span>
+                <span class="text-[11px] text-slate-400">例：エスピック、エイエイエス、国際ソフトウェア、コンピュータマインド社</span>
               </div>
-              <p class="text-slate-300 leading-relaxed">基本給単体が20万〜21万円未満でわずかに届かない、または開発上流だが一部クライアント先常駐を含むなど条件付き枠。</p>
+              <p class="text-slate-300 leading-relaxed">開発上流または受託開発メインだが一部客先常駐が混在（常駐80%未満減点）、または基本給が20万〜21万円前後の条件付き枠。</p>
             </div>
 
             <!-- Tier 4: 4.5〜5.9 -->
@@ -1531,9 +1530,9 @@
                   <span class="px-2 py-0.5 rounded bg-amber-500/20 border border-amber-500/40">4.5 〜 5.9点（★★☆☆☆）</span>
                   注意・リスク大の懸念枠（面接練習用のみ）
                 </span>
-                <span class="text-[11px] text-slate-400">例：エスユーエス、テクノエージェント</span>
+                <span class="text-[11px] text-slate-400">例：パーソルクロステクノロジー、エスユーエス、テクノエージェント</span>
               </div>
-              <p class="text-slate-300 leading-relaxed">基本給単体が低く固定残業代で月給をカサ増し、または客先常駐SES率が6〜8割以上で案件ガチャ・下流工程リスク大。</p>
+              <p class="text-slate-300 leading-relaxed">客先常駐SES率が8割以上で案件ガチャ・下流工程リスク大、または基本給単体が20万未満で固定残業代カサ増し。</p>
             </div>
 
             <!-- Tier 5: 1.0〜4.4 -->
@@ -1545,7 +1544,7 @@
                 </span>
                 <span class="text-[11px] text-slate-400">例：株式会社MJE（文系営業）、フューチャーAIシステムズ</span>
               </div>
-              <p class="text-slate-300 leading-relaxed">自社IT開発なし、多重下請けSES、新卒使い捨て構造。新基準ルールによりオファー一覧から自動削除。</p>
+              <p class="text-slate-300 leading-relaxed">4大必須条件が全滅、ITエンジニア職でない（営業等）、または悪質ブラックSES。自動削除対象。</p>
             </div>
           </div>
         </div>
@@ -2647,12 +2646,12 @@
     // 新スコアリング基準（5段階ルーブリック ＆ 4大必須条件）
     // ==========================================
     const ANALYST_REPORTS = {
-      // TIER 1: 【9.0〜10.0】最高峰・理想枠
+      // TIER 1: 【8.5〜10.0】最高峰・理想枠（自社開発100%・最高待遇）
       '株式会社アトラス': {
-        score: 9.2,
+        score: 8.6,
         tier: 'TIER_TOP',
-        verdict: '【9.2】最高峰・理想枠 / トップティア',
-        headline: '『ペルソナ』『真・女神転生』等で知られる世界的RPG開発メーカー（セガサミー傘下）。自社開発100%。基本給23.5万〜24万、固定残業なし、年休125日。4大条件を完全クリア。',
+        verdict: '【8.6】最高峰・理想枠 / トップティア',
+        headline: '『ペルソナ』世界的RPG開発メーカー（セガサミー傘下）。自社開発100%。基本給23.5万〜24万、固定残業なし、年休125日。4大条件完全クリア。',
         mustConditions: { salary: true, directTrade: true, transparency: true, workLife: true },
         axes: { jobType: true, salary: true, overtime: true, holidays: true, workType: true, welfare: true, training: true, bonus: true, retention: true, remote: true },
         items: [
@@ -2661,16 +2660,16 @@
           '【3. リモートワーク制度】ハイブリッド勤務（プロジェクト進捗や機密保持要件に応じた出社・在宅の併用体制）。',
           '【4. 担当工程・下流リスク】ゲームプログラマーとしてバトルシステム、イベント演出、UI挙動、グラフィックス最適化等の中核実装を担当。下流リスク皆無。',
           '【5. 開発設備・IT環境】開発専用ハイエンドPC、コンソール開発実機機材、内製エディタ・ツール群が充実。',
-          '【6. 研修・専門生の立ち位置】高度クリエイター学科（3年制）のC++・3D数学・自作ゲームエンジン知見は最も評価される領域。',
+          '【6. 研修・専門生の立ち位置】高度クリエイター学科（3年制）の実力作品主義大卒同等評価。C++・3D数学・自作ゲームエンジン知見が高評価。',
           '【7. paizaランク換算】paiza Aランク相当のプログラミング力と、ゲームアーキテクチャの深い理解が必須。',
-          '【8. 採用難易度・選考攻略法】最難関枠。自作C++ゲームやシェーダー・演出のこだわりを言語化することが重要。※9/16説明会は不参加だったが、今後の本選考エントリーや中途採用の動向を要チェック。',
+          '【8. 採用難易度・選考攻略法】最難関枠。自作ゲームや演出のこだわりを言語化することが重要。※本選考エントリーや中途動向を要チェック。',
           '【9. 総合判定総括】4大条件（基本給21万↑・自社100%・みなし無・年休120日↑）を満たす最高峰枠。ゲームプログラマーとしての理想郷。'
         ]
       },
       '株式会社ハル研究所': {
-        score: 9.3,
+        score: 8.8,
         tier: 'TIER_TOP',
-        verdict: '【9.3】最高峰・理想枠 / トップティア',
+        verdict: '【8.8】最高峰・理想枠 / トップティア',
         headline: '『星のカービィ』『スマブラ』の世界的名門。自社内開発100%。基本給24万、みなし残業なし、年休125日。4大条件を完全クリア。',
         mustConditions: { salary: true, directTrade: true, transparency: true, workLife: true },
         axes: { jobType: true, salary: true, overtime: true, holidays: true, workType: true, welfare: true, training: true, bonus: true, retention: true, remote: true },
@@ -2680,19 +2679,19 @@
           '【3. リモートワーク制度】ハイブリッド勤務体制あり。機密保持ゲーム開発のためオフィス出社も重視されるが、働きやすさは業界トップクラス。',
           '【4. 担当工程・下流リスク】新卒からコアゲームプログラミング（プレイヤー制御・アクション・物理・ツール制作）を担当。下流リスク皆無。',
           '【5. 開発設備・IT環境】最高水準のワークステーション、Switch/新世代機開発キット、デュアルディスプレイ完備。自社内開発環境・内製ライブラリ多数。',
-          '【6. 研修・専門生の立ち位置】高度クリエイター学科（3年制）のC++・3D数学・DxLibでの低レイヤ理解は最大のアドバンテージ。大卒と対等以上の技術評価。',
+          '【6. 研修・専門生の立ち位置】高度クリエイター学科（3年制）の作品主義・低レイヤ理解は最大のアドバンテージ。大卒と対等以上の技術評価。',
           '【7. paizaランク換算】paiza A〜Sランク相当のアルゴリズム能力と、ゲームの「手触り・触感」への情熱が問われる。',
-          '【8. 採用難易度・選考攻略法】難易度：最難関。自作ゲームエンジンのアーキテクチャ解説、C++でのパフォーマンスチューニング、制作したゲームの面白さを徹底プレゼンすることが必須。',
-          '【9. 総合判定総括】全ての就活軸を完璧にクリアした最高峰枠。客先常駐排除・高待遇・定着率のすべてを満たす。選考応募は絶対に行うべき本命企業。'
+          '【8. 採用難易度・選考攻略法】難易度：最難関。自作ゲームエンジンのアーキテクチャ解説、C++でのパフォーマンスチューニングを徹底プレゼンすることが必須。',
+          '【9. 総合判定総括】自社開発100%・客先常駐完全排除・高待遇のすべてを満たす最高峰枠。選考応募は絶対に行うべき本命企業。'
         ]
       },
 
-      // TIER 2: 【7.5〜8.5】高評価・強力な併願/滑り止め候補 ★ここを目指す
+      // TIER 2: 【7.0〜8.4】高評価・強力な併願/滑り止め候補 ★ここを目指す
       '株式会社エムスリーインテック': {
-        score: 8.8,
+        score: 8.3,
         tier: 'TIER_TARGET',
-        verdict: '【8.8】高評価・強力な併願候補 ★最有力ホワイト',
-        headline: '医療DX基盤自社開発80%+直請け20%。基本給22.8万＋住宅手当2万、固定残業なし、賞与4.5ヶ月。4大必須条件をすべて高水準でクリア。',
+        verdict: '【8.3】高評価・強力な併願候補 ★最有力ホワイト',
+        headline: '医療DX基盤自社開発80%+直請け20%（客先常駐ゼロ）。基本給22.8万＋住宅手当2万（実質24.8万）、固定残業なし、賞与4.5ヶ月。4大必須条件クリア。',
         mustConditions: { salary: true, directTrade: true, transparency: true, workLife: true },
         axes: { jobType: true, salary: true, overtime: true, holidays: true, workType: true, welfare: true, training: true, bonus: true, retention: true, remote: true },
         items: [
@@ -2708,9 +2707,9 @@
         ]
       },
       'サイバーアークゲームズ株式会社': {
-        score: 8.4,
+        score: 8.0,
         tier: 'TIER_TARGET',
-        verdict: '【8.4】高評価・強力な併願候補 ★夢枠推奨',
+        verdict: '【8.0】高評価・自社開発ゲーム ★夢枠推奨',
         headline: '自社開発100%。基本給23.5万、固定残業なし、年休125日。4大必須条件を完全クリア。特別選考オファー面談は最優先推奨。',
         mustConditions: { salary: true, directTrade: true, transparency: true, workLife: true },
         axes: { jobType: true, salary: true, overtime: true, holidays: true, workType: true, welfare: true, training: true, bonus: true, retention: true, remote: true },
@@ -2723,33 +2722,33 @@
           '【6. 研修・専門生の立ち位置】高度クリエイター学科（3年制）は大卒と同額基本給の即戦力待遇。',
           '【7. paizaランク換算】paiza B〜Aランク相当。',
           '【8. 採用難易度・選考攻略法】特別オファーにより1次免除。自作ゲームエンジンのメモリ効率をアピール。',
-          '【9. 総合判定総括】4大条件を全クリア。ゲーム業界特有のマスターアップ前の残業管理に注意すれば、夢と待遇を両立できる最有力企業。'
+          '【9. 総合判定総括】4大条件を全クリア。ゲーム業界特有の残業管理に注意すれば、夢と待遇を両立できる有力企業。'
         ]
       },
       'NCD株式会社': {
-        score: 8.0,
+        score: 7.1,
         tier: 'TIER_TARGET',
-        verdict: '【8.0】東証上場・自社受託直取引 ★安全併願の最有力',
-        headline: '東証スタンダード上場独立系SIer。直取引・自社内受託比率6割以上。基本給21.8万、賞与4ヶ月、年休123日。住宅手当・資格手当等の手厚い福利厚生で8.0点へ上方修正。',
+        verdict: '【7.1】東証上場・独立系SIer ★安全併願の有力候補',
+        headline: '東証スタンダード上場独立系SIer。直取引・受託多数だが一部客先常駐が混在（常駐80%未満減点）。基本給21.8万、賞与4ヶ月、年休123日。',
         mustConditions: { salary: true, directTrade: true, transparency: true, workLife: true },
         axes: { jobType: true, salary: true, overtime: true, holidays: true, workType: true, welfare: true, training: true, bonus: true, retention: true, remote: true },
         items: [
-          '【1. 企業概要と仕事内容】東証スタンダード上場独立系SIer。直取引・プライム案件多数。自社内受託チーム比率高い。隠れSESリスク極小。',
-          '【2. 働き方・契約条件】①基本給：218,000円（※21万クリア） / ③固定残業代：なし（全額支給）。賞与年2回（約4.0ヶ月分）。年間休日123日。住宅手当・家族手当・確定拠出年金あり。',
+          '【1. 企業概要と仕事内容】東証スタンダード上場独立系SIer。直取引多数だが一部客先常駐案件が混在するため事前確認が必要。',
+          '【2. 働き方・契約条件】①基本給：218,000円（※21万クリア） / ③固定残業代：なし（全額支給）。賞与年2回（約4.0ヶ月分）。年間休日123日。住宅手当あり。',
           '【3. リモートワーク制度】週2〜3日のハイブリッド勤務実績あり。',
           '【4. 担当工程・下流リスク】要件定義〜設計〜製造まで一貫。開発部門志望を明確にすることで下流固定を回避可能。',
           '【5. 開発設備・IT環境】社内開発環境整備、デュアルディスプレイ、資格取得祝金制度・手当充実。',
           '【6. 研修・専門生の立ち位置】入社後3ヶ月研修（給与100%全額支給・違約金なし）。専門卒新卒の採用実績多数あり。',
           '【7. paizaランク換算】paiza B〜Cランク相当。11/4に「プログラミング仕事体験」あり。',
           '【8. 採用難易度・選考攻略法】10/23座談会、11/4仕事体験に参加して早期選考ルートを確定させる。',
-          '【9. 総合判定総括】高評価（7.5点以上）の4大必須条件に加え、上場企業ならではの手厚い福利厚生が高く評価され【8.0点】。安全併願の最有力枠。'
+          '【9. 総合判定総括】4大条件を満たし安定性は抜群だが、一部客先常駐が混在するため新基準（常駐混在ペナルティ）により【7.1点】。安全併願枠として適格。'
         ]
       },
       '株式会社アトミテック': {
-        score: 8.1,
+        score: 7.6,
         tier: 'TIER_TARGET',
-        verdict: '【8.1】自社製品Hinemos開発元 ★高評価ホワイトSIer',
-        headline: 'OSS統合運用管理「Hinemos」の自社開発元。基本給22万、みなし残業なし、年休124日。4大必須条件クリア＆自社製品開発で客先常駐完全排除。',
+        verdict: '【7.6】自社製品Hinemos開発元 ★高評価ホワイトSIer',
+        headline: 'OSS統合運用管理「Hinemos」の自社開発元。基本給22万、みなし残業なし、年休124日。自社製品100%開発で客先常駐SES完全排除。',
         mustConditions: { salary: true, directTrade: true, transparency: true, workLife: true },
         axes: { jobType: true, salary: true, overtime: true, holidays: true, workType: true, welfare: true, training: true, bonus: true, retention: true, remote: true },
         items: [
@@ -2758,16 +2757,16 @@
           '【3. リモートワーク制度】リモートワーク導入済み。在宅・出社バランス良。',
           '【4. 担当工程・下流リスク】自社製品開発のため下流オペレーター塩漬けリスク極めて低。',
           '【5. 開発設備・IT環境】GitHub、ハイスペックPC、Linuxサーバー検証環境自由利用。',
-          '【6. 研修・専門生の立ち位置】技術志向・専門生採用実績あり。田中さんの低レイヤ・C++の素養が高く評価される。',
+          '【6. 研修・専門生の立ち位置】技術志向・専門生採用実績あり。低レイヤ・システム設計の素養が高く評価される。',
           '【7. paizaランク換算】paiza Bランク以上推奨。',
           '【8. 採用難易度・選考攻略法】11/16〜18の3Dayインターンでの積極的発言が鍵。',
           '【9. 総合判定総括】自社製品開発×基本給22万×客先常駐排除と4大必須条件を満たす高評価企業。'
         ]
       },
       '日本NonStopイノベーション株式会社': {
-        score: 7.6,
+        score: 7.3,
         tier: 'TIER_TARGET',
-        verdict: '【7.6】高評価・強力な併願候補（無停止基盤）',
+        verdict: '【7.3】無停止基盤専門SIer ★堅実な併願候補',
         headline: '金融・決済の無停止サーバー（HPE NonStop）専門SIer。基本給21.5万〜22.5万、年休122日。低レイヤC言語が直結する優良企業。',
         mustConditions: { salary: true, directTrade: true, transparency: true, workLife: true },
         axes: { jobType: true, salary: true, overtime: true, holidays: true, workType: true, welfare: true, training: true, bonus: true, retention: true, remote: true },
@@ -2784,9 +2783,9 @@
         ]
       },
       '4samurai': {
-        score: 7.5,
+        score: 7.2,
         tier: 'TIER_TARGET',
-        verdict: '【7.5】高評価・強力な併願候補（ゲーム開発・夢枠）',
+        verdict: '【7.2】自社ゲーム開発・夢枠 ★併願候補',
         headline: 'モバイル・オンラインゲーム自社開発。基本給22万前後、年休120日。田中さんのゲーム開発意欲と合致。',
         mustConditions: { salary: true, directTrade: true, transparency: true, workLife: true },
         axes: { jobType: true, salary: true, overtime: true, holidays: true, workType: true, welfare: true, training: true, bonus: true, retention: true, remote: true },
@@ -2803,12 +2802,12 @@
         ]
       },
 
-      // TIER 3: 【6.0〜7.0】中位・条件付き検討枠
+      // TIER 3: 【6.0〜6.9】中位・条件付き検討枠（客先常駐混在・セーフティネット）
       '株式会社エイエイエス': {
-        score: 7.1,
+        score: 6.3,
         tier: 'TIER_MID',
-        verdict: '【7.1】中位・条件付き検討枠（制御・組込系）',
-        headline: '制御・通信に強みを持つ独立系。基本給21万クリアだが、客先常駐案件が一部混在するため商流の事前確認が必要。',
+        verdict: '【6.3】中位・条件付き検討枠（制御・組込系 / 常駐混在減点）',
+        headline: '制御・通信に強みを持つ独立系。基本給21万クリアだが、客先常駐が一部混在するため新基準（常駐80%未満減点）により6.3点。商流の事前確認が必要。',
         mustConditions: { salary: true, directTrade: false, transparency: true, workLife: true },
         axes: { jobType: true, salary: true, overtime: true, holidays: true, workType: false, welfare: true, training: true, bonus: true, retention: true, remote: true },
         items: [
@@ -2820,14 +2819,14 @@
           '【6. 研修・専門生の立ち位置】C/C++を学んでいる田中さんは優位。',
           '【7. paizaランク換算】paiza C〜Bランク相当。',
           '【8. 採用難易度・選考攻略法】10/22説明会で自社内開発と客先常駐の比率を質問。',
-          '【9. 総合判定総括】基本給21万はクリアしているが、客先常駐比率の懸念があるため「中位・条件付き検討枠（7.1点）」。'
+          '【9. 総合判定総括】基本給21万はクリアしているが、客先常駐が一部混在するため「中位・条件付き検討枠（6.3点）」。'
         ]
       },
       '国際ソフトウェア株式会社': {
-        score: 7.0,
+        score: 6.2,
         tier: 'TIER_MID',
-        verdict: '【7.0】中位・条件付き検討枠（独立系中堅SIer）',
-        headline: '独立系として歴史あるSIer。基本給21.2万・年休120日だが、客先常駐案件が混在。セーフティネット併願枠。',
+        verdict: '【6.2】中位・セーフティネット枠（客先常駐混在減点）',
+        headline: '独立系として歴史あるSIer。基本給21.2万・年休120日だが、客先常駐案件が混在（常駐混在減点）。セーフティネット併願枠。',
         mustConditions: { salary: true, directTrade: false, transparency: true, workLife: true },
         axes: { jobType: true, salary: true, overtime: true, holidays: true, workType: false, welfare: true, training: true, bonus: true, retention: true, remote: true },
         items: [
@@ -2843,29 +2842,29 @@
         ]
       },
       '株式会社コンピュータマインド社': {
-        score: 6.7,
+        score: 6.0,
         tier: 'TIER_MID',
-        verdict: '【6.7】中位・条件付き検討枠（制御ソフトウェア）',
-        headline: '半導体・医療・産業ロボット制御。C/C++技術が活きるが、常駐比率の精査が必要。',
+        verdict: '【6.0】中位・条件付き検討枠（制御開発 / 常駐混在減点）',
+        headline: '半導体・医療・産業ロボット制御。開発工程はあるが客先常駐が一部混在（常駐混在減点）。商流の事前確認が必要。',
         mustConditions: { salary: true, directTrade: false, transparency: true, workLife: true },
         axes: { jobType: true, salary: true, overtime: true, holidays: true, workType: false, welfare: true, training: true, bonus: true, retention: true, remote: false },
         items: [
           '【1. 企業概要と仕事内容】制御ソフトウェア開発。一次請けと二次請け混在。',
           '【2. 働き方・契約条件】①基本給：210,000円前後 / 固定残業なし。年間休日120日。',
           '【3. リモートワーク制度】実機検証のため出社多め。',
-          '【4. 担当工程・下流リスク】C/C++制御実装。コード実装中心。',
+          '【4. 担当工程・下流リスク】制御系プログラミング。コード実装中心。',
           '【5. 開発設備・IT環境】制御シミュレータ、ワークステーション。',
-          '【6. 研修・専門生の立ち位置】C++のポインタ・メモリ管理知識が高評価。',
+          '【6. 研修・専門生の立ち位置】ポインタ・メモリ管理知識が高評価。',
           '【7. paizaランク換算】paiza C〜Bランク。',
           '【8. 採用難易度・選考攻略法】実機制御への興味をアピール。',
-          '【9. 総合判定総括】技術軸は合致するが商流の確認が必要なため中位枠。'
+          '【9. 総合判定総括】プログラミング工程はあるが商流（常駐混在）の懸念があるため【6.0点】。'
         ]
       },
       'シーエスエスグループ': {
-        score: 6.8,
+        score: 6.1,
         tier: 'TIER_MID',
-        verdict: '【6.8】中位・条件付き検討枠（金融・公共SIer）',
-        headline: '9/17体験済。金融・官公庁システム受託。基本給21.2万だが客先常駐あり。',
+        verdict: '【6.1】中位・セーフティネット枠（客先常駐混在減点）',
+        headline: '9/17体験済。金融・官公庁システム受託。基本給21.2万だが客先常駐あり（常駐混在減点）。',
         mustConditions: { salary: true, directTrade: false, transparency: true, workLife: true },
         axes: { jobType: true, salary: true, overtime: true, holidays: true, workType: false, welfare: true, training: true, bonus: true, retention: true, remote: false },
         items: [
@@ -2877,18 +2876,18 @@
           '【6. 研修・専門生の立ち位置】研修手厚い。',
           '【7. paizaランク換算】paiza Cランク。',
           '【8. 採用難易度・選考攻略法】本選考エントリー検討。',
-          '【9. 総合判定総括】セーフティネット併願枠。'
+          '【9. 総合判定総括】客先常駐案件が一定割合あるため新基準により【6.1点】。セーフティネット併願枠。'
         ]
       },
       '株式会社ウィルウェイ': {
-        score: 6.6,
-        tier: 'TIER_MID',
-        verdict: '【6.6】中位・条件付き検討枠',
-        headline: '10/20説明会参加済。業務系システム開発。客先常駐比率要確認。',
+        score: 5.9,
+        tier: 'TIER_WARN',
+        verdict: '【5.9】中位下・条件付き枠（常駐比率要確認）',
+        headline: '10/20説明会参加済。業務系システム開発。客先常駐比率が高く新基準により5.9点。',
         mustConditions: { salary: true, directTrade: false, transparency: true, workLife: true },
         axes: { jobType: true, salary: true, overtime: true, holidays: true, workType: false, welfare: true, training: true, bonus: true, retention: true, remote: true },
         items: [
-          '【1. 企業概要と仕事内容】業務系システムインテグレーション。',
+          '【1. 企業概要と仕事内容】業務系システムインテグレーション。客先常駐比率要確認。',
           '【2. 働き方・契約条件】①基本給：210,000円前後 / 固定残業なし。年間休日120日。',
           '【3. リモートワーク制度】案件による。',
           '【4. 担当工程・下流リスク】オープン系開発。',
@@ -2896,35 +2895,35 @@
           '【6. 研修・専門生の立ち位置】専門卒歓迎。',
           '【7. paizaランク換算】paiza Cランク。',
           '【8. 採用難易度・選考攻略法】案内待ち。',
-          '【9. 総合判定総括】併願キープ枠。'
+          '【9. 総合判定総括】客先常駐リスクがあるため【5.9点】。併願キープ枠。'
         ]
       },
       '株式会社エスユーエス': {
-        score: 6.4,
-        tier: 'TIER_MID',
-        verdict: '【6.4】中位・条件付き検討枠（VR体験は魅力）',
-        headline: '11/20 VR仕事体験。自社VRラボは魅力だが、本質は【技術系SES/派遣】。配属確約が得られない場合は入社非推奨。',
+        score: 5.0,
+        tier: 'TIER_WARN',
+        verdict: '【5.0】注意・客先常駐SES/派遣モデル警戒',
+        headline: '11/20 VR仕事体験。自社VRラボは魅力的だが実態は客先常駐80%以上の技術者派遣。新基準（常駐80%以上ペナルティ）により5.0点。',
         mustConditions: { salary: true, directTrade: false, transparency: true, workLife: true },
         axes: { jobType: true, salary: true, overtime: true, holidays: true, workType: false, welfare: true, training: true, bonus: true, retention: false, remote: true },
         items: [
-          '【1. 企業概要と仕事内容】技術系SESおよびVR/AR自社開発。新卒の多くは社外派遣。',
+          '【1. 企業概要と仕事内容】技術系SESおよびVR自社開発。新卒の8割以上は客先常駐・技術者派遣モデル。',
           '【2. 働き方・契約条件】①基本給：210,000円前後 / 固定残業なし。年間休日125日。',
-          '【3. リモートワーク制度】配属先依存。',
-          '【4. 担当工程・下流リスク】VRラボならUnity/Unreal。常駐に回されると一般ITテストのリスクあり。',
+          '【3. リモートワーク制度】常駐先クライアントに100%依存。',
+          '【4. 担当工程・下流リスク】自社VRラボ配属確約が得られない場合、一般ITのテストや運用に回されるリスク大。',
           '【5. 開発設備・IT環境】VR機器完備。',
-          '【6. 研修・専門生の立ち位置】3D数学・ゲームスキルは大歓迎。',
+          '【6. 研修・専門生の立ち位置】3D数学・ゲームスキルは大歓迎だが配属ガチャに注意。',
           '【7. paizaランク換算】paiza C〜Bランク。',
-          '【8. 採用難易度・選考攻略法】11/20仕事体験で「VR自社チーム限定」での選考が可能か打診。',
-          '【9. 総合判定総括】商流の第2条件（自社比率6割以上）を満たせない懸念があり中位枠（6.4点）。'
+          '【8. 採用難易度・選考攻略法】11/20仕事体験で「自社VRチーム確約」が可能か打診。',
+          '【9. 総合判定総括】常駐80%以上のSESモデルのため【5.0点】。体験のみ参加し、選考は慎重判断。'
         ]
       },
 
-      // TIER 4: 【4.5〜5.5】注意・リスク大の懸念枠
+      // TIER 4: 【4.5〜5.5】注意・リスク大の懸念枠（面接練習用のみ）
       'パーソルクロステクノロジー株式会社': {
         score: 5.0,
         tier: 'TIER_WARN',
-        verdict: '【5.0】注意・リスク大の懸念枠（客先常駐SES警戒）',
-        headline: '11/6一次面接確定だが、客先常駐比率8割以上のSESモデル。案件ガチャ・下流工程（監視・テスト）リスク大。',
+        verdict: '【5.0】注意・客先常駐SES警戒（面接練習用のみ）',
+        headline: '適性検査合格＆一次面接直結だが、実態は客先常駐比率8割以上のSESモデル。案件ガチャ・下流工程リスク大のため【5.0点】。',
         mustConditions: { salary: false, directTrade: false, transparency: true, workLife: true },
         axes: { jobType: true, salary: false, overtime: true, holidays: true, workType: false, welfare: true, training: true, bonus: true, retention: false, remote: false },
         items: [
@@ -2933,16 +2932,16 @@
           '【3. リモートワーク制度】常駐先クライアントに100%依存。現場判断で完全出社になる可能性大。',
           '【4. 担当工程・下流リスク】極めて高い警戒要。「開発・インフラ」名目でテスト実施や運用監視などの下流作業に回される実例多数。',
           '【5. 開発設備・IT環境】客先貸与PC中心。',
-          '【6. 研修・専門生の立ち位置】C++自作エンジンの高度スキルが活かせる現場に配属される確率は低い。',
+          '【6. 研修・専門生の立ち位置】専門卒新卒の採用実績多数だが、配属先ガチャの回避が困難。',
           '【7. paizaランク換算】paiza D〜Cランク。',
-          '【8. 採用難易度・選考攻略法】10/26インターン、11/6一次面接。「自社受託案件の割合」を厳しく質問すること。',
-          '【9. 総合判定総括】4大必須条件の「基本給21万以上」「直取引6割以上」を大幅に外すため【5.0点】。面接練習用として割り切るべき。'
+          '【8. 採用難易度・選考攻略法】一次面接予約済。本命にせず「面接練習用」として割り切って受けること。',
+          '【9. 総合判定総括】4大必須条件の「直取引6割以上」を大幅に外すため【5.0点】。面接練習用として活用。'
         ]
       },
       'フューチャー・ウェブ・イノベーション': {
-        score: 5.4,
+        score: 4.7,
         tier: 'TIER_WARN',
-        verdict: '【5.4】注意・リスク大の懸念枠（給与カラクリあり）',
+        verdict: '【4.7】注意・給与カラクリあり（非推奨）',
         headline: '基本給19.5万＋固定残業20h（3.5万）で見かけ月給23万。基本給21万未満で賞与算出も不利。',
         mustConditions: { salary: false, directTrade: true, transparency: false, workLife: true },
         axes: { jobType: true, salary: false, overtime: true, holidays: true, workType: true, welfare: false, training: true, bonus: false, retention: false, remote: true },
@@ -2952,21 +2951,21 @@
           '【3. リモートワーク制度】フルリモート可。',
           '【4. 担当工程・下流リスク】フロントエンド制作中心。',
           '【5. 開発設備・IT環境】MacBook Air。',
-          '【6. 研修・専門生の立ち位置】専門卒歓迎だがC++技術は活きない。',
+          '【6. 研修・専門生の立ち位置】専門卒歓迎。',
           '【7. paizaランク換算】paiza Cランク。',
           '【8. 採用難易度・選考攻略法】Webデモで容易に内定可能。',
-          '【9. 総合判定総括】第1必須条件「基本給21万以上」を満たさないため懸念枠（5.4点）。'
+          '【9. 総合判定総括】第1必須条件「基本給21万以上」を満たさないため懸念枠（4.7点）。'
         ]
       },
       '株式会社テクノエージェント': {
-        score: 5.2,
+        score: 4.8,
         tier: 'TIER_WARN',
-        verdict: '【5.2】注意・リスク大の懸念枠（人材・派遣SES要素）',
-        headline: '11/2カジュアル面談。ITエンジニア人材サービス企業。客先常駐依存度と基本給単体の確認が必須。',
+        verdict: '【4.8】注意・人材派遣SES主力（練習用のみ）',
+        headline: '11/2カジュアル面談。ITエンジニア人材サービス企業。客先常駐依存度80%以上・下流工程リスク大。',
         mustConditions: { salary: false, directTrade: false, transparency: false, workLife: true },
         axes: { jobType: true, salary: false, overtime: true, holidays: true, workType: false, welfare: true, training: true, bonus: false, retention: false, remote: true },
         items: [
-          '【1. 企業概要と仕事内容】ITエンジニア人材派遣・SES主力。',
+          '【1. 企業概要と仕事内容】ITエンジニア人材派遣・SES主力。客先常駐80%以上。',
           '【2. 働き方・契約条件】基本給20万前後の疑いあり。固定残業代の有無を面談で質問。',
           '【3. リモートワーク制度】常駐先依存。',
           '【4. 担当工程・下流リスク】テスト・サポートデスク・運用監視リスク要警戒。',
@@ -2974,7 +2973,7 @@
           '【6. 研修・専門生の立ち位置】高単価で現場に派遣される構造に注意。',
           '【7. paizaランク換算】paiza D〜Cランク。',
           '【8. 採用難易度・選考攻略法】11/2 11:00面談で商流を徹底ヒアリング。',
-          '【9. 総合判定総括】商流と基本給の4大条件を満たさないリスクが高いため注意枠（5.2点）。'
+          '【9. 総合判定総括】商流と基本給の4大条件を満たさないリスクが高いため注意枠（4.8点）。'
         ]
       },
 
@@ -3000,30 +2999,11 @@
       }
 ,
       // 新規受信・抽出企業アナリスト診断
-      'パーソルクロステクノロジー株式会社': {
-        score: 6.0,
-        tier: 'TIER_MID',
-        verdict: '【6.0】大手パーソルIT / 一次面接直結（※客先常駐SES比率・配属先要確認）',
-        headline: 'IT適性検査合格に伴い一次面接直結だが、実態は技術者派遣・客先常駐が主力。新基準（隠れSES・案件ガチャリスク）により6.0点。面接で自社受託比率の確認が必須。',
-        mustConditions: { salary: true, directTrade: false, transparency: true, workLife: true },
-        axes: { jobType: true, salary: true, overtime: true, holidays: true, workType: false, welfare: true, training: true, bonus: true, retention: false, remote: true },
-        items: [
-          '【1. 企業概要と仕事内容】大手パーソルグループのIT中核企業。受託もあるが実態は客先常駐・特定派遣プロジェクトが主力。隠れSES比率の精査が必須。',
-          '【2. 働き方・契約条件】基本給：約215,000円〜225,000円。残業代別途全額支給。年間休日125日。',
-          '【3. リモートワーク制度】常駐先プロジェクトによりハイブリッド可能だが、現場指示で出社固定のリスクあり。',
-          '【4. 担当工程・下流リスク】開発工程メインを希望しても、現場都合で運用保守や評価テスト等の下流工程に回されるリスク要警戒。',
-          '【5. 開発設備・IT環境】常駐先クライアント支給PC中心。',
-          '【6. 研修・専門生の立ち位置】専門卒新卒の採用実績多数。入社時研修は手厚いが、配属先ガチャに注意。',
-          '【7. paizaランク換算】paiza B〜Aランク相当。',
-          '【8. 採用難易度・選考攻略法】適性検査通過済。一次面接では「自社内受託開発チームへの配属が可能か」を逆質問で確認すること。',
-          '【9. 総合判定総括】大手ブランドの安定性はあるが、客先常駐SESメインのリスクがあるため【6.0点】。本命ではなく面接練習・セーフティネット枠。'
-        ]
-      },
       '株式会社セガ フェイブ': {
-        score: 8.9,
-        tier: 'TIER_EXCELLENT',
-        verdict: '【8.9】名門セガグループ・開発職直結 ★最有力ホワイト',
-        headline: 'セガサミーグループのアーケード・メダル・トイ開発企業。基本給23万以上＋グループ手厚い福利厚生（新基準加点）。C/C++リアルタイム制御を直接活かせる最有力枠。',
+        score: 8.4,
+        tier: 'TIER_TARGET',
+        verdict: '【8.4】名門セガグループ・開発職直結 ★最有力ホワイト',
+        headline: 'セガサミーグループのアーケード・メダル・トイ開発企業。自社開発100%・基本給23万以上＋グループ手厚い福利厚生。C/C++リアルタイム制御を直接活かせる最有力枠。',
         mustConditions: { salary: true, directTrade: true, transparency: true, workLife: true },
         axes: { jobType: true, salary: true, overtime: true, holidays: true, workType: true, welfare: true, training: true, bonus: true, retention: true, remote: true },
         items: [
@@ -3035,14 +3015,14 @@
           '【6. 研修・専門生の立ち位置】高度クリエイター学科（3年制）のC++・3D数学・自作ゲームエンジン知見がドンピシャで刺さる領域。専門生採用実績豊富。',
           '【7. paizaランク換算】paiza B〜Aランク相当。ハードと連携するリアルタイムC++処理の理解が武器になる。',
           '【8. 採用難易度・選考攻略法】3daysカレッジ参加が本選考・早期内定への最速最短ルート。自作ゲームの演出・制御ロジックを強力にアピール。',
-          '【9. 総合判定総括】田中さんのC++自作エンジン技術を100%直接活かせるトップクラスの優良ゲーム開発企業。'
+          '【9. 総合判定総括】自社開発100%・4大条件完全クリアで【8.4点】。田中さんのC++自作エンジン技術を直接活かせる最有力併願企業。'
         ]
       },
       '株式会社コーエーテクモホールディングス': {
-        score: 9.3,
+        score: 8.8,
         tier: 'TIER_TOP',
-        verdict: '【9.3】世界的ゲームメーカー・自社開発100% ★最高峰枠',
-        headline: '自社IP開発100%、手厚い住宅支援・独身寮・福利厚生（新基準+1.0評価）、年休125日以上。C++・自作エンジン技術のアピール先として最高峰。',
+        verdict: '【8.8】世界的ゲームメーカー・自社開発100% ★最高峰枠',
+        headline: '自社IP開発100%、手厚い住宅支援・独身寮・福利厚生（新基準加点）、年休125日以上。C++・自作エンジン技術のアピール先として最高峰。',
         mustConditions: { salary: true, directTrade: true, transparency: true, workLife: true },
         axes: { jobType: true, salary: true, overtime: true, holidays: true, workType: true, welfare: true, training: true, bonus: true, retention: true, remote: true },
         items: [
@@ -3054,14 +3034,14 @@
           '【6. 研修・専門生の立ち位置】高度クリエイター学科（3年制）の実力作品主義大卒同等評価。ゲーム数学・物理演算・C++自作エンジンは最高評価。',
           '【7. paizaランク換算】paiza Aランク相当。',
           '【8. 採用難易度・選考攻略法】難関だがインターンES通過で早期本選考への道が開ける。自作エンジンのアーキテクチャ解説が必須。',
-          '【9. 総合判定総括】4大条件（基本給21万・自社100%・みなし無・年休120日）に加え、手厚い福利厚生が高く評価され【9.3点】の最高峰理想枠。'
+          '【9. 総合判定総括】4大条件（基本給21万・自社100%・みなし無・年休120日）に加え、手厚い福利厚生が高く評価され【8.8点】の最高峰理想枠。'
         ]
       },
       'バンダイナムコアミューズメント': {
-        score: 8.8,
-        tier: 'TIER_EXCELLENT',
-        verdict: '【8.8】アミューズメントエンタメ名門 ★大手グループ盤石',
-        headline: 'バンダイナムコグループ。体験型ゲーム機器自社開発。基本給23万以上、固定残業なし、年休125日。グループの充実した福利厚生（新基準加点）。',
+        score: 8.2,
+        tier: 'TIER_TARGET',
+        verdict: '【8.2】アミューズメントエンタメ名門 ★大手グループ盤石',
+        headline: 'バンダイナムコグループ。体験型ゲーム機器自社開発。基本給23万以上、固定残業なし、年休125日。グループの充実した福利厚生。',
         mustConditions: { salary: true, directTrade: true, transparency: true, workLife: true },
         axes: { jobType: true, salary: true, overtime: true, holidays: true, workType: true, welfare: true, training: true, bonus: true, retention: true, remote: true },
         items: [
@@ -3073,18 +3053,18 @@
           '【6. 研修・専門生の立ち位置】専門卒採用実績多数。ゲーム制作への情熱と企画力を高く評価。',
           '【7. paizaランク換算】paiza Bランク相当。',
           '【8. 採用難易度・選考攻略法】仕事体験での積極的な発言とアイデア提案が鍵。',
-          '【9. 総合判定総括】ゲーム・エンタメ志望として非常に高評価のグループ企業。'
+          '【9. 総合判定総括】自社製品・体験型エンタメ開発と大手グループ福利厚生により【8.2点】。ゲーム・エンタメ志望として非常に高評価の有力企業。'
         ]
       },
       '株式会社エスピック': {
-        score: 7.1,
-        tier: 'TIER_TARGET',
-        verdict: '【7.1】独立系SIer / マイナビ個別メッセージ受信',
-        headline: '独立系ITソリューション・システム開発企業。マイナビ経由で個別メッセージを受信済。基本給・年休条件を概ね満たす堅実枠。',
+        score: 6.6,
+        tier: 'TIER_MID',
+        verdict: '【6.6】独立系SIer / マイナビ個別メッセージ受信（一部常駐混在）',
+        headline: '独立系ITソリューション・システム開発企業。マイナビ経由で個別メッセージを受信済。基本給・年休条件を概ね満たすが、一部客先常駐混在のため新基準で6.6点。',
         mustConditions: { salary: true, directTrade: true, transparency: true, workLife: true },
         axes: { jobType: true, salary: true, overtime: true, holidays: true, workType: true, welfare: true, training: true, bonus: true, retention: true, remote: true },
         items: [
-          '【1. 企業概要と仕事内容】独立系情報サービス企業。官公庁・金融・産業向け業務システム受託開発。',
+          '【1. 企業概要と仕事内容】独立系情報サービス企業。官公庁・金融・産業向け業務システム受託開発。一部客先常駐案件が混在。',
           '【2. 働き方・契約条件】基本給：約210,000円〜215,000円。年休120日以上。',
           '【3. リモートワーク制度】在宅勤務制度あり（案件による）。',
           '【4. 担当工程・下流リスク】開発上流〜プログラミング工程。',
@@ -3092,7 +3072,7 @@
           '【6. 研修・専門生の立ち位置】情報系専門生歓迎。',
           '【7. paizaランク換算】paiza C〜Bランク。',
           '【8. 採用難易度・選考攻略法】マイナビメッセージから説明会・面談へエントリー。',
-          '【9. 総合判定総括】ITエンジニア就活における安全圏・併願先として適格。'
+          '【9. 総合判定総括】基本給21万・年休120日を満たすが一部客先常駐が混在するため【6.6点】。ITエンジニア就活における安全圏・併願先として適格。'
         ]
       },
       '株式会社MJE': {
@@ -6206,10 +6186,10 @@
 
     function resetSimulatorDefaults() {
       document.getElementById('simSalary').value = '1.5';
-      document.getElementById('simTrade').value = '1.5';
+      document.getElementById('simTrade').value = '2.0';
       document.getElementById('simOvertime').value = '1.0';
       document.getElementById('simHolidays').value = '1.0';
-      document.getElementById('simTech').value = '1.0';
+      document.getElementById('simTech').value = '0.0';
       document.getElementById('simEducation').value = '0.5';
       document.getElementById('simRemote').value = '0.5';
       document.getElementById('simWelfare').value = '0.5';
