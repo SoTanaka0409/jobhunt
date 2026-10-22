@@ -975,22 +975,82 @@
 
       <!-- Mode 3: Google Calendar Embed & Direct Sync View -->
       <div id="calendarGCalContainer" class="bg-slate-900 border border-slate-800 rounded-2xl p-4 sm:p-6 space-y-5 hidden">
-        <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 bg-slate-800/40 border border-slate-800 p-4 rounded-xl">
-          <div class="space-y-1">
-            <h4 class="text-sm font-bold text-white flex items-center gap-2">
-              <i data-lucide="calendar" class="w-4 h-4 text-sky-400"></i>
-              <span>Googleカレンダー 直接同期・埋め込み表示</span>
-            </h4>
-            <p class="text-xs text-slate-400 leading-relaxed">
-              Googleアカウントのカレンダーを直接開くか、またはGoogleカレンダーの埋め込み表示をこの画面内で確認できます。
-            </p>
+        <!-- Google Calendar Direct & Relog Sync Settings Panel -->
+        <div class="bg-slate-800/60 border border-slate-700/80 rounded-2xl p-4 sm:p-5 space-y-4 shadow-lg">
+          <div class="flex flex-col md:flex-row md:items-center justify-between gap-3 border-b border-slate-700/60 pb-3.5">
+            <div>
+              <div class="flex items-center gap-2">
+                <span class="w-2.5 h-2.5 rounded-full bg-emerald-400 animate-pulse"></span>
+                <h4 class="text-sm font-bold text-white flex items-center gap-2">
+                  <i data-lucide="refresh-cw" class="w-4 h-4 text-sky-400"></i>
+                  <span>リログ時 Googleカレンダー自動同期設定</span>
+                </h4>
+                <span class="text-[10px] px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 font-bold">常時連動対応</span>
+              </div>
+              <p class="text-xs text-slate-300 mt-1 leading-relaxed">
+                <strong class="text-white">リログ（ログイン認証通過）や画面再読み込みを行うたびに、Googleカレンダーから新しい予定を自動検知してカレンダー＆パイプラインへ自動追加します。</strong>
+              </p>
+            </div>
+            <div class="flex items-center gap-2 shrink-0">
+              <a href="https://calendar.google.com/" target="_blank" rel="noopener noreferrer" class="px-3.5 py-2 rounded-xl bg-sky-600 hover:bg-sky-500 text-white font-bold text-xs flex items-center gap-1.5 shadow-md shadow-sky-600/30 transition active:scale-95">
+                <i data-lucide="external-link" class="w-3.5 h-3.5"></i>
+                <span>Googleカレンダーを開く</span>
+              </a>
+            </div>
           </div>
-          <div class="flex items-center gap-2">
-            <a href="https://calendar.google.com/" target="_blank" rel="noopener noreferrer" class="px-4 py-2 rounded-xl bg-sky-600 hover:bg-sky-500 text-white font-bold text-xs flex items-center gap-2 shadow-lg shadow-sky-600/30 transition active:scale-95">
-              <i data-lucide="external-link" class="w-4 h-4"></i>
-              <span>Googleカレンダーを別タブで開く</span>
-            </a>
+
+          <!-- Configuration Fields -->
+          <div class="grid grid-cols-1 lg:grid-cols-12 gap-3.5">
+            <!-- Left: URL Input & Save -->
+            <div class="lg:col-span-8 space-y-2">
+              <label class="block text-xs font-semibold text-slate-200">
+                Googleカレンダー iCal形式の非公開URL（秘密のアドレス）
+              </label>
+              <div class="flex flex-col sm:flex-row gap-2">
+                <input type="url" id="gcalIcalUrlInput" placeholder="https://calendar.google.com/calendar/ical/.../basic.ics" class="flex-1 text-xs rounded-xl bg-slate-900 border border-slate-700 px-3.5 py-2 text-white placeholder-slate-500 focus:border-sky-500 focus:outline-none">
+                <button type="button" onclick="saveGCalConfigAndSync()" class="px-4 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white font-bold text-xs flex items-center justify-center gap-1.5 transition active:scale-95 shrink-0 shadow-sm">
+                  <i data-lucide="check" class="w-3.5 h-3.5"></i>
+                  <span>保存して同期</span>
+                </button>
+              </div>
+              <p class="text-[11px] text-slate-400">
+                ※ URLを設定しておくと、リログするたびにGoogleカレンダー側の新着予定（面接や説明会）を自動フェッチして取り込みます。
+              </p>
+            </div>
+
+            <!-- Right: Toggle & Manual Actions -->
+            <div class="lg:col-span-4 bg-slate-900/80 border border-slate-700/60 p-3 rounded-xl flex flex-col justify-between space-y-2.5">
+              <label class="flex items-center gap-2 cursor-pointer">
+                <input type="checkbox" id="gcalAutoSyncOnRelogToggle" onchange="toggleGCalAutoSync(this.checked)" checked class="rounded border-slate-700 text-sky-500 focus:ring-0">
+                <span class="text-xs text-white font-bold">リログ時に自動同期する</span>
+              </label>
+              <div class="flex items-center gap-2 pt-1">
+                <button type="button" onclick="syncFromGoogleCalendar({ manual: true })" class="flex-1 py-1.5 px-2.5 rounded-lg bg-sky-500/20 hover:bg-sky-500/30 border border-sky-500/40 text-sky-300 font-bold text-xs flex items-center justify-center gap-1.5 transition">
+                  <i data-lucide="refresh-cw" class="w-3 h-3"></i>
+                  <span>今すぐ同期</span>
+                </button>
+                <label class="py-1.5 px-2.5 rounded-lg bg-slate-800 hover:bg-slate-700 border border-slate-700 text-slate-300 hover:text-white font-semibold text-xs flex items-center justify-center gap-1 transition cursor-pointer" title=".icsファイルを直接アップロードして予定を追加">
+                  <i data-lucide="upload" class="w-3 h-3"></i>
+                  <span>.ics取込</span>
+                  <input type="file" accept=".ics,text/calendar" class="hidden" onchange="handleICSFileUpload(event)">
+                </label>
+              </div>
+            </div>
           </div>
+
+          <!-- How to get URL instructions (Accordion) -->
+          <details class="bg-slate-900/50 border border-slate-700/50 rounded-xl p-3 text-xs text-slate-300 cursor-pointer">
+            <summary class="font-bold text-sky-300 flex items-center gap-1.5 select-none hover:text-sky-200">
+              <i data-lucide="help-circle" class="w-3.5 h-3.5"></i>
+              <span>Googleカレンダーの「iCal非公開URL（秘密のアドレス）」の取得手順はこちら（30秒）</span>
+            </summary>
+            <div class="mt-2.5 space-y-1.5 text-[11px] text-slate-300 pl-5 border-l-2 border-sky-500/40">
+              <p>1. PCブラウザで <a href="https://calendar.google.com/" target="_blank" class="text-sky-400 underline">Googleカレンダー</a> を開きます。</p>
+              <p>2. 画面左側の「マイカレンダー」から自分のカレンダーの横にある <strong class="text-white">縦の「︙」メニュー →「設定と共有」</strong> をクリックします。</p>
+              <p>3. ページ内の「カレンダーの統合」セクションにある <strong class="text-amber-300">「iCal 形式の非公開 URL」</strong>（または「秘密のアドレス」）をコピーします。</p>
+              <p>4. 上記の入力欄に貼り付けて「保存して同期」を押せば完了です。以降はリログするたびに全自動で新しい予定が取り込まれます。</p>
+            </div>
+          </details>
         </div>
 
         <!-- Google Calendar Iframe Embed Area -->
@@ -2012,6 +2072,31 @@
             <p class="text-xs text-slate-400 mt-1 leading-relaxed">
               就活情報・個人プロファイル（田中壮さん専用データ）を第三者に見られないよう、ワンタッチで安全にログアウトして画面をロックできます。
             </p>
+          </div>
+
+          <!-- Google Calendar Sync on Relog Setting -->
+          <div class="bg-slate-800/60 border border-slate-700/80 p-4 rounded-2xl space-y-3">
+            <div class="flex items-center justify-between">
+              <div class="flex items-center gap-2">
+                <span class="p-2 rounded-xl bg-sky-500/15 text-sky-400 border border-sky-500/30">
+                  <i data-lucide="refresh-cw" class="w-4 h-4"></i>
+                </span>
+                <div>
+                  <h5 class="text-xs font-bold text-white">リログ時のGoogleカレンダー自動同期</h5>
+                  <p class="text-[11px] text-slate-400">ログイン認証（リログ）を行うたびにGoogleカレンダーの新着予定を自動追加します</p>
+                </div>
+              </div>
+              <label class="flex items-center cursor-pointer">
+                <input type="checkbox" id="gcalAutoSyncModalToggle" onchange="toggleGCalAutoSync(this.checked)" checked class="rounded border-slate-700 text-sky-500 focus:ring-0">
+              </label>
+            </div>
+            <div class="pt-2 border-t border-slate-700/50 flex items-center justify-between text-[11px]">
+              <span class="text-slate-400">詳細設定・非公開URL登録はカレンダー画面の「Google連携」タブから行えます</span>
+              <button type="button" onclick="closeModal('settingsModal'); switchTab('calendar'); setCalendarViewSubMode('gcal')" class="text-sky-400 hover:underline font-semibold flex items-center gap-1">
+                <span>Google連携設定を開く</span>
+                <i data-lucide="chevron-right" class="w-3 h-3"></i>
+              </button>
+            </div>
           </div>
 
           <div class="bg-slate-800/60 border border-slate-700/80 p-5 rounded-2xl space-y-4">
@@ -3087,6 +3172,7 @@
     const STORAGE_KEY_PIPELINE = 'job_hunt_pipeline_v10';
     const STORAGE_KEY_ARCHIVED = 'job_hunt_archived_v10';
     const STORAGE_KEY_CALENDAR = 'job_hunt_calendar_v10';
+    const STORAGE_KEY_GCAL_CONFIG = 'job_hunt_gcal_config_v10';
 
     const PIPELINE_STAGES = [
       '会社説明会 (参加予定)',
@@ -4455,7 +4541,56 @@
     let calendarViewSubMode = 'month'; // 'month' | 'agenda' | 'gcal'
     let activeCalendarEventId = null;
 
+    // Googleカレンダー自動同期設定（リログ連動）
+    let gcalConfig = {
+      autoSyncOnRelog: true,
+      icalUrl: '',
+      lastSyncAt: null
+    };
+
+    function loadGCalConfig() {
+      try {
+        const stored = localStorage.getItem(STORAGE_KEY_GCAL_CONFIG);
+        if (stored) {
+          gcalConfig = Object.assign(gcalConfig, JSON.parse(stored));
+        }
+      } catch (e) {
+        console.error("Failed to load gcal config", e);
+      }
+      updateGCalConfigUI();
+    }
+
+    function saveGCalConfig() {
+      localStorage.setItem(STORAGE_KEY_GCAL_CONFIG, JSON.stringify(gcalConfig));
+      updateGCalConfigUI();
+    }
+
+    function updateGCalConfigUI() {
+      const urlInput = document.getElementById('gcalIcalUrlInput');
+      if (urlInput) urlInput.value = gcalConfig.icalUrl || '';
+      const toggle = document.getElementById('gcalAutoSyncOnRelogToggle');
+      if (toggle) toggle.checked = !!gcalConfig.autoSyncOnRelog;
+      const modalToggle = document.getElementById('gcalAutoSyncModalToggle');
+      if (modalToggle) modalToggle.checked = !!gcalConfig.autoSyncOnRelog;
+    }
+
+    function toggleGCalAutoSync(enabled) {
+      gcalConfig.autoSyncOnRelog = enabled;
+      saveGCalConfig();
+      showToast(enabled ? 'リログ時のGoogleカレンダー自動同期を有効にしました' : 'リログ時のGoogleカレンダー自動同期を停止しました');
+    }
+
+    function saveGCalConfigAndSync() {
+      const urlInput = document.getElementById('gcalIcalUrlInput');
+      if (urlInput) {
+        gcalConfig.icalUrl = urlInput.value.trim();
+        saveGCalConfig();
+      }
+      syncFromGoogleCalendar({ manual: true });
+    }
+
     function loadState() {
+      loadGCalConfig();
       let storedOffers = localStorage.getItem(STORAGE_KEY_OFFERS);
       let storedPipeline = localStorage.getItem(STORAGE_KEY_PIPELINE);
       let storedArchived = localStorage.getItem(STORAGE_KEY_ARCHIVED);
@@ -6948,6 +7083,13 @@
         }, 300);
 
         showToast('認証に成功しました。おかえりなさい！', 'success');
+
+        // リログ時Googleカレンダー自動同期
+        if (gcalConfig && gcalConfig.autoSyncOnRelog) {
+          setTimeout(() => {
+            syncFromGoogleCalendar({ source: 'relog' });
+          }, 350);
+        }
       } else {
         errorMsg.classList.remove('hidden');
         const inputEl = document.getElementById('authPasswordInput');
@@ -6972,6 +7114,11 @@
       renderOffers();
       renderPipeline();
       renderArchived();
+
+      // リログ・再読み込み時のGoogleカレンダー自動同期
+      if (gcalConfig && gcalConfig.autoSyncOnRelog) {
+        syncFromGoogleCalendar({ source: 'reload' });
+      }
 
       setTimeout(() => {
         icons.forEach(icon => icon.classList.remove('animate-spin'));
@@ -7300,6 +7447,247 @@
       saveState();
       renderCalendar();
       showToast(`🔄 パイプライン・オファーの全予定（合計 ${calendarEvents.length}件）をカレンダーに完全同期しました！`);
+    }
+
+    // ==========================================
+    // Googleカレンダー iCal パーサー ＆ リログ連動同期エンジン
+    // ==========================================
+
+    function parseICS(icsText) {
+      if (!icsText) return [];
+      const events = [];
+      const lines = icsText.split(/\r\n|\n|\r/);
+      let currentEvent = null;
+
+      for (let i = 0; i < lines.length; i++) {
+        let line = lines[i];
+        while (i + 1 < lines.length && (lines[i + 1].startsWith(' ') || lines[i + 1].startsWith('\t'))) {
+          line += lines[i + 1].substring(1);
+          i++;
+        }
+
+        if (line.startsWith('BEGIN:VEVENT')) {
+          currentEvent = {
+            id: 'gcal-' + Date.now() + '-' + Math.random().toString(36).substring(2, 6),
+            companyName: '',
+            title: '',
+            eventType: '会社説明会',
+            startDate: '',
+            startTime: '10:00',
+            endDate: '',
+            endTime: '11:00',
+            locationType: 'オンライン (Google同期)',
+            meetingUrl: '',
+            notes: '',
+            gmailUrl: '',
+            completed: false,
+            source: 'google_calendar'
+          };
+        } else if (line.startsWith('END:VEVENT')) {
+          if (currentEvent && currentEvent.startDate) {
+            cleanAndCategorizeEvent(currentEvent);
+            events.push(currentEvent);
+          }
+          currentEvent = null;
+        } else if (currentEvent) {
+          const colonIdx = line.indexOf(':');
+          if (colonIdx === -1) continue;
+          const keyPart = line.substring(0, colonIdx);
+          const valPart = line.substring(colonIdx + 1);
+          const key = keyPart.split(';')[0].trim().toUpperCase();
+          const val = valPart.trim();
+
+          if (key === 'SUMMARY') {
+            currentEvent.title = val.replace(/\\,/g, ',').replace(/\\;/g, ';');
+          } else if (key === 'DESCRIPTION') {
+            currentEvent.notes = val.replace(/\\n/g, '\n').replace(/\\,/g, ',').replace(/\\;/g, ';');
+            const urlMatch = currentEvent.notes.match(/https?:\/\/[^\s\n<>"]+/);
+            if (urlMatch && !currentEvent.meetingUrl) {
+              currentEvent.meetingUrl = urlMatch[0];
+            }
+          } else if (key === 'LOCATION') {
+            currentEvent.locationType = val.replace(/\\,/g, ',').replace(/\\;/g, ';') || 'オンライン';
+            if (val.startsWith('http')) currentEvent.meetingUrl = val;
+          } else if (key === 'UID') {
+            currentEvent.id = 'gcal-' + val.replace(/[^a-zA-Z0-9_-]/g, '').substring(0, 32);
+          } else if (key === 'DTSTART') {
+            const dt = parseICSDate(val);
+            if (dt) {
+              currentEvent.startDate = dt.date;
+              currentEvent.startTime = dt.time;
+            }
+          } else if (key === 'DTEND') {
+            const dt = parseICSDate(val);
+            if (dt) {
+              currentEvent.endDate = dt.date;
+              currentEvent.endTime = dt.time;
+            }
+          }
+        }
+      }
+      return events;
+    }
+
+    function parseICSDate(icsDateStr) {
+      if (!icsDateStr) return null;
+      const m = icsDateStr.match(/(\d{4})(\d{2})(\d{2})(?:T(\d{2})(\d{2})(\d{2})Z?)?/);
+      if (!m) return null;
+      const y = m[1];
+      const mon = m[2];
+      const d = m[3];
+      const date = `${y}-${mon}-${d}`;
+      const time = m[4] && m[5] ? `${m[4]}:${m[5]}` : '';
+      return { date, time };
+    }
+
+    function cleanAndCategorizeEvent(evt) {
+      let rawTitle = evt.title || '';
+      
+      // 企業名の自動判定
+      const allKnown = [...pipeline, ...offers].map(x => x.companyName);
+      let matchedComp = '';
+      for (const comp of allKnown) {
+        const norm = normalizeCompanyName(comp);
+        if (norm && (rawTitle.includes(norm) || (evt.notes && evt.notes.includes(norm)))) {
+          matchedComp = comp;
+          break;
+        }
+      }
+
+      if (!matchedComp) {
+        const compMatch = rawTitle.match(/(?:株式会社|合同会社|有限会社)[^\s\n、。！？【】「」()（）]+|[^\s\n、。！？【】「」()（）]+(?:株式会社|合同会社|有限会社)/);
+        if (compMatch) {
+          matchedComp = compMatch[0].replace(/^[【「]|[】」]$/g, '').trim();
+        } else {
+          matchedComp = rawTitle.split(/[\s\-:：_]/)[0] || 'Google同期予定';
+        }
+      }
+      evt.companyName = matchedComp;
+
+      // 予定種別の自動判定
+      const fullText = (rawTitle + ' ' + (evt.notes || '')).toLowerCase();
+      if (/最終面接|役員面接/.test(fullText)) evt.eventType = '最終面接';
+      else if (/二次面接|2次面接|三次面接/.test(fullText)) evt.eventType = '二次 / 三次面接';
+      else if (/一次面接|1次面接|面接/.test(fullText)) evt.eventType = '一次面接';
+      else if (/面談|カジュアル面談|リクルーター/.test(fullText)) evt.eventType = '面談 (カジュアル/リクルーター)';
+      else if (/インターン|仕事体験|ワークショップ|1day/.test(fullText)) evt.eventType = '仕事体験・ワークショップ';
+      else if (/座談会|セミナー|質問会/.test(fullText)) evt.eventType = '座談会・セミナー';
+      else if (/締切|期限|es提出|エントリーシート|受検/.test(fullText)) evt.eventType = 'ES提出締切';
+      else evt.eventType = '会社説明会';
+
+      if (!evt.gmailUrl && evt.companyName) {
+        evt.gmailUrl = `https://mail.google.com/mail/u/0/#search/${encodeURIComponent(evt.companyName)}`;
+      }
+    }
+
+    async function syncFromGoogleCalendar(options = {}) {
+      const isManual = !!options.manual;
+      const source = options.source || 'manual';
+
+      // オフの場合は手動実行以外スキップ
+      if (!isManual && !gcalConfig.autoSyncOnRelog) return;
+
+      const url = (gcalConfig.icalUrl || '').trim();
+
+      // URLが登録されている場合：オンラインフェッチ
+      if (url) {
+        showToast('🔄 Googleカレンダーから最新予定を取得中...', 'info');
+        let icsText = '';
+
+        // 1. 直接フェッチ試行
+        try {
+          const res = await fetch(url, { cache: 'no-store' });
+          if (res.ok) {
+            icsText = await res.text();
+          }
+        } catch (err) {
+          console.warn("Direct fetch failed (likely CORS), trying CORS proxy fallback...", err);
+        }
+
+        // 2. CORSプロキシ経由でフォールバック
+        if (!icsText) {
+          try {
+            const proxyUrl = `https://api.allorigins.win/raw?url=${encodeURIComponent(url)}`;
+            const resProxy = await fetch(proxyUrl, { cache: 'no-store' });
+            if (resProxy.ok) {
+              icsText = await resProxy.text();
+            }
+          } catch (errProxy) {
+            console.error("CORS proxy fetch failed as well", errProxy);
+          }
+        }
+
+        if (icsText && icsText.includes('BEGIN:VCALENDAR')) {
+          const importedEvents = parseICS(icsText);
+          let newCount = 0;
+
+          importedEvents.forEach(imp => {
+            const exists = calendarEvents.find(e => e.id === imp.id || (e.startDate === imp.startDate && e.startTime === imp.startTime && normalizeCompanyName(e.companyName) === normalizeCompanyName(imp.companyName)));
+            if (!exists) {
+              calendarEvents.push(imp);
+              newCount++;
+
+              // パイプライン連携：同名企業があればステージや日程を更新
+              const pItem = pipeline.find(p => normalizeCompanyName(p.companyName) === normalizeCompanyName(imp.companyName));
+              if (pItem) {
+                pItem.nextDate = imp.startDate;
+                if (imp.eventType.includes('面接')) {
+                  pItem.stage = imp.eventType;
+                }
+              }
+            }
+          });
+
+          gcalConfig.lastSyncAt = new Date().toISOString();
+          saveGCalConfig();
+          saveState();
+          renderCalendar();
+
+          if (newCount > 0) {
+            showToast(`🎉 リログ同期完了: Googleカレンダーから新着予定を ${newCount}件 追加しました！`, 'success');
+          } else {
+            showToast(`📅 Googleカレンダーと同期完了（最新の予定はすべて反映済みです）`, 'info');
+          }
+          return;
+        } else if (isManual) {
+          showToast('⚠️ GoogleカレンダーURLからカレンダー情報を取得できませんでした。URLをご確認ください。', 'error');
+        }
+      }
+
+      // URL未設定時、またはフォールバック：
+      // パイプラインとオファーからの最新日程を再同期
+      syncCalendarFromPipelineAndOffers();
+      if (source === 'relog') {
+        showToast('📅 リログ完了: 全選考・オファースケジュールを最新状態で同期しました！', 'success');
+      }
+    }
+
+    function handleICSFileUpload(event) {
+      const file = event.target.files && event.target.files[0];
+      if (!file) return;
+
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        const text = e.target.result;
+        if (!text || !text.includes('BEGIN:VCALENDAR')) {
+          showToast('有効な .ics カレンダーファイルではありません', 'error');
+          return;
+        }
+        const imported = parseICS(text);
+        let count = 0;
+        imported.forEach(imp => {
+          const exists = calendarEvents.find(e => e.id === imp.id || (e.startDate === imp.startDate && normalizeCompanyName(e.companyName) === normalizeCompanyName(imp.companyName)));
+          if (!exists) {
+            calendarEvents.push(imp);
+            count++;
+          }
+        });
+        saveState();
+        renderCalendar();
+        showToast(`📁 .icsファイルから ${count}件 の新しい予定を取り込みました！`, 'success');
+      };
+      reader.readAsText(file, 'utf-8');
+      event.target.value = '';
     }
 
     function setCalendarViewSubMode(mode) {
@@ -8041,6 +8429,11 @@ URL: https://www.ncd.co.jp/
       renderPipeline();
       renderArchived();
       lucide.createIcons();
+
+      // リログ/起動時 Googleカレンダー自動同期
+      if (typeof gcalConfig !== 'undefined' && gcalConfig.autoSyncOnRelog) {
+        syncFromGoogleCalendar({ source: 'init' });
+      }
     });
   </script>
 </body>
