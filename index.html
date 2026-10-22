@@ -506,17 +506,17 @@
 
       <!-- Center Navigation Tabs: 3-column equal grid on mobile, flex on desktop -->
       <nav class="grid grid-cols-3 md:flex items-center bg-slate-800/80 p-0.5 sm:p-1 rounded-xl border border-slate-700/60 shadow-inner w-full md:w-auto">
-        <button id="tabOffersBtn" onclick="switchTab('offers')" class="flex items-center justify-center gap-1 sm:gap-2 px-2 sm:px-4 py-1.5 sm:py-2 rounded-lg text-xs sm:text-sm font-semibold transition-all duration-150 text-slate-400 hover:text-slate-200 text-center">
+        <button id="tabOffersBtn" onclick="switchTab('offers')" class="flex items-center justify-center gap-1 sm:gap-2 px-2 sm:px-4 py-1.5 sm:py-2 rounded-lg text-xs sm:text-sm font-semibold transition-all duration-150 bg-indigo-600 text-white shadow-sm text-center">
           <i data-lucide="mail-check" class="w-3.5 h-3.5 sm:w-4 sm:h-4 shrink-0"></i>
           <span class="hidden sm:inline">オファー・スカウト管理</span>
           <span class="sm:hidden">オファー</span>
-          <span id="offersBadgeCount" class="text-[10px] sm:text-xs px-1.5 py-0.2 rounded-full bg-slate-700 text-slate-300 shrink-0">0</span>
+          <span id="offersBadgeCount" class="text-[10px] sm:text-xs px-1.5 py-0.2 rounded-full bg-indigo-800/80 text-indigo-200 shrink-0">0</span>
         </button>
-        <button id="tabPipelineBtn" onclick="switchTab('pipeline')" class="flex items-center justify-center gap-1 sm:gap-2 px-2 sm:px-4 py-1.5 sm:py-2 rounded-lg text-xs sm:text-sm font-semibold transition-all duration-150 bg-indigo-600 text-white shadow-sm text-center">
+        <button id="tabPipelineBtn" onclick="switchTab('pipeline')" class="flex items-center justify-center gap-1 sm:gap-2 px-2 sm:px-4 py-1.5 sm:py-2 rounded-lg text-xs sm:text-sm font-semibold transition-all duration-150 text-slate-400 hover:text-slate-200 text-center">
           <i data-lucide="kanban-square" class="w-3.5 h-3.5 sm:w-4 sm:h-4 shrink-0"></i>
           <span class="hidden sm:inline">選考パイプライン (全日程反映済)</span>
           <span class="sm:hidden">選考中</span>
-          <span id="pipelineBadgeCount" class="text-[10px] sm:text-xs px-1.5 py-0.2 rounded-full bg-indigo-800/80 text-indigo-200 shrink-0">0</span>
+          <span id="pipelineBadgeCount" class="text-[10px] sm:text-xs px-1.5 py-0.2 rounded-full bg-slate-700 text-slate-300 shrink-0">0</span>
         </button>
         <button id="tabArchivedBtn" onclick="switchTab('archived')" class="flex items-center justify-center gap-1 sm:gap-2 px-2 sm:px-4 py-1.5 sm:py-2 rounded-lg text-xs sm:text-sm font-semibold transition-all duration-150 text-slate-400 hover:text-slate-200 text-center">
           <i data-lucide="archive" class="w-3.5 h-3.5 sm:w-4 sm:h-4 shrink-0"></i>
@@ -562,7 +562,7 @@
     <!-- ============================================== -->
     <!-- VIEW 1: オファー・スカウト管理ビュー -->
     <!-- ============================================== -->
-    <section id="viewOffers" class="flex-1 flex flex-col space-y-4 hidden">
+    <section id="viewOffers" class="flex-1 flex flex-col space-y-4">
       <!-- Sub header & Filter Controls -->
       <div class="bg-slate-800/40 border border-slate-800 p-3 sm:p-4 rounded-2xl space-y-3">
         <!-- Top Row: Title, Stats Badge & Layout Switcher -->
@@ -747,7 +747,7 @@
     <!-- ============================================== -->
     <!-- VIEW 2: 選考パイプライン管理ビュー（カンバン / 全体リスト） -->
     <!-- ============================================== -->
-    <section id="viewPipeline" class="flex-1 flex flex-col space-y-3 sm:space-y-4">
+    <section id="viewPipeline" class="flex-1 flex flex-col space-y-3 sm:space-y-4 hidden">
       <!-- Pipeline Header & Filter Controls -->
       <div class="bg-slate-800/40 border border-slate-800 p-3 sm:p-4 rounded-2xl space-y-3">
         <!-- Top Row: Title, Stats Badge & View Mode Switcher -->
@@ -5985,6 +5985,8 @@
           sessionStorage.setItem('job_hunt_auth', 'true');
         }
         
+        switchTab('offers');
+
         lockScreen.classList.add('opacity-0');
         setTimeout(() => {
           lockScreen.classList.add('hidden');
@@ -6190,6 +6192,7 @@
     window.addEventListener('DOMContentLoaded', () => {
       checkAuth();
       loadState();
+      switchTab('offers');
       renderOffers();
       renderPipeline();
       renderArchived();
