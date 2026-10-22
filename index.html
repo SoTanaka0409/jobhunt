@@ -82,6 +82,12 @@
   <!-- ============================================== -->
   <!-- 🔒 パスワード認証ロック画面 (Password: Sou180409ts) -->
   <!-- ============================================== -->
+  <script>
+    // ログイン保持チェック：リロード（F5）時にロック画面が一瞬でも表示されるのを完全防止
+    if (localStorage.getItem('job_hunt_auth') === 'true' || sessionStorage.getItem('job_hunt_auth') === 'true') {
+      document.write('<style id="authPersistentStyle">#authLockScreen { display: none !important; }</style>');
+    }
+  </script>
   <div id="authLockScreen" class="fixed inset-0 z-[100] bg-slate-950 flex items-center justify-center p-4 transition-opacity duration-300">
     <div class="bg-slate-900 border border-slate-700/80 rounded-3xl p-6 sm:p-8 w-full max-w-md shadow-2xl shadow-indigo-950/50 flex flex-col items-center text-center">
       
@@ -171,6 +177,12 @@
 
     <!-- Right Controls -->
     <div class="flex items-center gap-2.5">
+      <!-- 🔄 再読み込みボタン（リログ不要・最新データ即時反映） -->
+      <button id="refreshDataBtn" onclick="handleDataReload()" title="データを最新状態に再読み込み（リログ不要）" class="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-emerald-500/15 hover:bg-emerald-500/25 border border-emerald-500/40 text-emerald-300 text-xs font-semibold shadow-sm transition active:scale-95 group">
+        <i id="refreshDataIcon" data-lucide="refresh-cw" class="w-3.5 h-3.5 text-emerald-400 group-hover:rotate-180 transition-transform duration-500"></i>
+        <span>再読み込み</span>
+      </button>
+
       <!-- Rubric & Profile Modal Quick Button -->
       <button onclick="openProfileModal()" title="10段階評価基準 & 4大必須条件を確認" class="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-indigo-500/15 hover:bg-indigo-500/25 border border-indigo-500/30 text-indigo-300 text-xs font-semibold transition">
         <i data-lucide="award" class="w-3.5 h-3.5 text-indigo-400"></i>
@@ -2305,6 +2317,14 @@
           offers = JSON.parse(storedOffers);
           if (!offers || offers.length === 0) {
             offers = JSON.parse(JSON.stringify(SAMPLE_OFFERS));
+          } else if (typeof SAMPLE_OFFERS !== 'undefined' && Array.isArray(SAMPLE_OFFERS)) {
+            // 新規追加された優先スカウト実データを自動マージ（既存の選考状況は維持）
+            SAMPLE_OFFERS.forEach(s => {
+              const exists = offers.some(o => o.id === s.id || (o.companyName === s.companyName && o.offerType === s.offerType));
+              if (!exists) {
+                offers.unshift(JSON.parse(JSON.stringify(s)));
+              }
+            });
           }
           pipeline = JSON.parse(storedPipeline);
           archivedPipeline = JSON.parse(storedArchived);
@@ -4036,10 +4056,33 @@
       }
     }
 
+    // 🔄 最新データ再読み込み（リログ不要）
+    function handleDataReload() {
+      const icon = document.getElementById('refreshDataIcon');
+      if (icon) icon.classList.add('animate-spin');
+
+      // ログイン状態を確実に保持
+      localStorage.setItem('job_hunt_auth', 'true');
+
+      // 最新状態を再読み込み＆画面再描画
+      loadState();
+      attachAnalystReports();
+      renderOffers();
+      renderPipeline();
+      renderArchived();
+
+      setTimeout(() => {
+        if (icon) icon.classList.remove('animate-spin');
+        showToast('データを最新状態に再読み込みしました（リログ不要）', 'success');
+      }, 400);
+    }
+
     function handleAuthLogout() {
       if (!confirm('ログアウトしてダッシュボードをロックしますか？')) return;
       localStorage.removeItem('job_hunt_auth');
       sessionStorage.removeItem('job_hunt_auth');
+      const persistentStyle = document.getElementById('authPersistentStyle');
+      if (persistentStyle) persistentStyle.remove();
       const lockScreen = document.getElementById('authLockScreen');
       document.getElementById('authPasswordInput').value = '';
       document.getElementById('authErrorMessage').classList.add('hidden');
