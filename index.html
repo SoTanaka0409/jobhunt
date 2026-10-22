@@ -859,9 +859,11 @@
           <div>
             <label class="block text-xs font-medium text-slate-300 mb-1">興味度</label>
             <select id="editOfferRating" class="w-full text-xs rounded-lg bg-slate-800 border border-slate-700 px-3 py-2 text-white">
-              <option value="3">★★★ (高)</option>
-              <option value="2">★★☆ (中)</option>
-              <option value="1">★☆☆ (低)</option>
+              <option value="5">★★★★★ (9.0〜10.0 最高峰・理想枠)</option>
+              <option value="4">★★★★☆ (7.5〜8.9 高評価・本命併願枠)</option>
+              <option value="3">★★★☆☆ (6.0〜7.4 中位・条件付き検討枠)</option>
+              <option value="2">★★☆☆☆ (4.5〜5.9 注意・リスク大の懸念枠)</option>
+              <option value="1">★☆☆☆☆ (1.0〜4.4 地雷・自動除外対象)</option>
             </select>
           </div>
         </div>
@@ -2520,17 +2522,25 @@
       }
     }
 
-    function getStarsHtml(rating) {
+    function getStarsHtml(rating, companyName) {
+      let r = Number(rating) || 3;
+      if (companyName && typeof ANALYST_REPORTS !== 'undefined' && ANALYST_REPORTS[companyName]) {
+        const s = ANALYST_REPORTS[companyName].score;
+        if (s >= 9.0) r = 5;
+        else if (s >= 7.5) r = 4;
+        else if (s >= 6.0) r = 3;
+        else if (s >= 4.5) r = 2;
+        else r = 1;
+      }
       let stars = '';
-      const r = Number(rating) || 1;
-      for (let i = 1; i <= 3; i++) {
+      for (let i = 1; i <= 5; i++) {
         if (i <= r) {
           stars += `<i data-lucide="star" class="w-3.5 h-3.5 fill-amber-400 text-amber-400 inline"></i>`;
         } else {
           stars += `<i data-lucide="star" class="w-3.5 h-3.5 text-slate-600 inline"></i>`;
         }
       }
-      return `<span class="inline-flex items-center gap-0.5" title="興味度 ★${r}">${stars}</span>`;
+      return `<span class="inline-flex items-center gap-0.5" title="総合アナリスト評価 ★${r} / 5">${stars}</span>`;
     }
 
     function getOfferStatusBadgeHtml(status) {
@@ -2641,7 +2651,7 @@
                     ${getScoreBadgeSmallHtml(item.companyName)}
                   </div>
                   <div>
-                    ${getStarsHtml(item.rating)}
+                    ${getStarsHtml(item.rating, item.companyName)}
                   </div>
                 </div>
 
@@ -2776,7 +2786,7 @@
                 ${escapeHtml(item.notes || '—')}
               </td>
               <td class="px-3 py-3 text-center whitespace-nowrap">
-                ${getStarsHtml(item.rating)}
+                ${getStarsHtml(item.rating, item.companyName)}
               </td>
               <td class="px-3 py-3 whitespace-nowrap">
                 ${getOfferStatusBadgeHtml(item.status)}
