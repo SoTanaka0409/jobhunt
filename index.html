@@ -1978,7 +1978,7 @@
             </div>
           </div>
 
-          <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
             <div>
               <label class="block text-xs font-medium text-slate-300 mb-1">ステータス</label>
               <select id="offerStatus" class="w-full text-xs rounded-lg bg-slate-800 border border-slate-700 px-3 py-2.5 text-white focus:outline-none focus:border-indigo-500">
@@ -1990,6 +1990,13 @@
             <div>
               <label class="block text-xs font-medium text-slate-300 mb-1">オファーURL / 媒体リンク</label>
               <input type="url" id="offerUrl" placeholder="https://..." class="w-full text-xs rounded-lg bg-slate-800 border border-slate-700 px-3 py-2.5 text-white focus:outline-none focus:border-indigo-500">
+            </div>
+            <div>
+              <label class="block text-xs font-medium text-slate-300 mb-1 flex items-center gap-1">
+                <i data-lucide="mail" class="w-3.5 h-3.5 text-rose-400"></i>
+                <span class="text-rose-300 font-bold">Gmail URL (メール直通)</span>
+              </label>
+              <input type="url" id="offerGmailUrl" placeholder="https://mail.google.com/..." class="w-full text-xs rounded-lg bg-slate-800 border border-rose-500/40 px-3 py-2.5 text-white focus:outline-none focus:border-rose-500">
             </div>
           </div>
 
@@ -2175,7 +2182,7 @@
           </div>
         </div>
 
-        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
           <div>
             <label class="block text-xs font-medium text-slate-300 mb-1">ステータス</label>
             <select id="editOfferStatus" class="w-full text-xs rounded-lg bg-slate-800 border border-slate-700 px-3 py-2 text-white">
@@ -2187,7 +2194,14 @@
           </div>
           <div>
             <label class="block text-xs font-medium text-slate-300 mb-1">オファーURL</label>
-            <input type="url" id="editOfferUrl" class="w-full text-xs rounded-lg bg-slate-800 border border-slate-700 px-3 py-2 text-white">
+            <input type="url" id="editOfferUrl" placeholder="https://..." class="w-full text-xs rounded-lg bg-slate-800 border border-slate-700 px-3 py-2 text-white">
+          </div>
+          <div>
+            <label class="block text-xs font-medium text-slate-300 mb-1 flex items-center gap-1">
+              <i data-lucide="mail" class="w-3.5 h-3.5 text-rose-400"></i>
+              <span class="text-rose-300 font-bold">Gmail URL (直通)</span>
+            </label>
+            <input type="url" id="editOfferGmailUrl" placeholder="https://mail.google.com/..." class="w-full text-xs rounded-lg bg-slate-800 border border-rose-500/40 px-3 py-2 text-white focus:border-rose-500">
           </div>
         </div>
 
@@ -2225,6 +2239,11 @@
           </div>
         </div>
         <div class="flex items-center gap-2">
+          <!-- Direct Gmail Button in Modal Header -->
+          <a id="detailGmailHeaderBtn" href="#" target="_blank" rel="noopener noreferrer" title="該当メールまたは企業メールをGmailで開く" class="px-3 py-1.5 rounded-lg bg-rose-500/20 hover:bg-rose-500/30 border border-rose-500/40 text-rose-300 text-xs font-bold flex items-center gap-1.5 transition shadow-sm hover:scale-105 active:scale-95">
+            <i data-lucide="mail" class="w-3.5 h-3.5 text-rose-400"></i>
+            <span>✉️ Gmailを開く</span>
+          </a>
           <!-- Revert to offer button -->
           <button id="modalRevertBtn" type="button" onclick="revertActiveDetailToOffer()" title="オファー管理へ戻す（誤って選考に入れた場合）" class="px-3 py-1.5 rounded-lg bg-amber-500/15 hover:bg-amber-500/25 border border-amber-500/30 text-amber-300 text-xs font-medium flex items-center gap-1.5 transition">
             <i data-lucide="undo-2" class="w-3.5 h-3.5"></i>
@@ -2532,22 +2551,35 @@
             </div>
           </div>
 
-          <!-- Portal & Credentials -->
+          <!-- Portal & Credentials & Gmail -->
           <div class="bg-slate-800/30 border border-slate-800 p-4 rounded-xl space-y-3">
             <div class="flex items-center justify-between">
               <span class="text-xs font-bold text-slate-300 flex items-center gap-1.5">
                 <i data-lucide="key-round" class="w-3.5 h-3.5 text-amber-400"></i>
-                マイページ・ログイン情報
+                マイページ・Gmail・ログイン情報
               </span>
-              <a id="detailPortalDirectLink" href="#" target="_blank" rel="noopener noreferrer" class="text-xs text-indigo-400 hover:text-indigo-300 hover:underline flex items-center gap-1">
-                <span>マイページを開く</span>
-                <i data-lucide="external-link" class="w-3 h-3"></i>
-              </a>
+              <div class="flex items-center gap-3">
+                <a id="detailGmailFormDirectLink" href="#" target="_blank" rel="noopener noreferrer" class="text-xs text-rose-400 hover:text-rose-300 hover:underline flex items-center gap-1">
+                  <i data-lucide="mail" class="w-3 h-3"></i>
+                  <span>Gmailを開く</span>
+                </a>
+                <a id="detailPortalDirectLink" href="#" target="_blank" rel="noopener noreferrer" class="text-xs text-indigo-400 hover:text-indigo-300 hover:underline flex items-center gap-1">
+                  <span>マイページを開く</span>
+                  <i data-lucide="external-link" class="w-3 h-3"></i>
+                </a>
+              </div>
             </div>
-            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
               <div>
                 <label class="block text-[11px] text-slate-400 mb-1">採用マイページ URL</label>
                 <input type="url" id="detailMypageUrl" placeholder="https://..." class="w-full text-xs rounded-lg bg-slate-800 border border-slate-700 px-3 py-2 text-white focus:border-indigo-500">
+              </div>
+              <div>
+                <label class="block text-[11px] text-rose-300 font-medium mb-1 flex items-center gap-1">
+                  <i data-lucide="mail" class="w-3 h-3 text-rose-400"></i>
+                  <span>Gmail URL (該当メール直通)</span>
+                </label>
+                <input type="url" id="detailGmailUrl" placeholder="https://mail.google.com/..." class="w-full text-xs rounded-lg bg-slate-800 border border-rose-500/40 px-3 py-2 text-white focus:border-rose-500">
               </div>
               <div>
                 <label class="block text-[11px] text-slate-400 mb-1">ログインID / パスワード等のメモ</label>
@@ -3506,6 +3538,7 @@
         isViewed: false,
         matchedRule: 'その他: 早期選考案内 / 3daysカレッジ',
         url: 'https://job.saiyo.jp/sega/',
+        gmailUrl: '',
         notes: '10/20「【SEGA FAVE】メダル開発職(プランナー・プログラマ） 3daysカレッジ 応募受付開始」受信。メダルゲームのソフトウェア開発職直結型。C++や自作ゲームエンジンの知見がダイレクトに評価される最有力枠。'
       },
       {
@@ -3521,6 +3554,7 @@
         isViewed: false,
         matchedRule: 'その他: 早期選考案内 / ES提出',
         url: 'https://mypage.snar.jp/koeitecmo/',
+        gmailUrl: '',
         notes: '10/16「インターンシップ エントリーシート提出のご案内」受信。自社IP家庭用ゲーム開発100%。早期選考ルートへの最重要ステップ。'
       },
       {
@@ -3536,6 +3570,7 @@
         isViewed: true,
         matchedRule: 'その他: 早期選考案内 / 仕事体験',
         url: 'https://job.saiyo.jp/bandainamco/',
+        gmailUrl: '',
         notes: '10/20「プランナー仕事体験 エントリーについてのご案内」受信。バンダイナムコグループの体験型エンタメ企画プログラム。'
       },
       {
@@ -3551,6 +3586,7 @@
         isViewed: true,
         matchedRule: 'マイナビ: エントリー・メッセージ受信',
         url: 'https://job.mynavi.jp/2028/',
+        gmailUrl: '',
         notes: '10/19「エントリーした企業からメッセージが届きました」受信。マイナビ経由の独立系ITソリューション企業。'
       }
     ];
@@ -3743,6 +3779,21 @@
         tableBtn.className = 'p-1.5 rounded text-indigo-400 bg-slate-700 transition';
       }
       renderOffers();
+    }
+
+    // ==========================================
+    // Gmail Direct Link Helper
+    // ==========================================
+    function getGmailUrl(item) {
+      if (!item) return 'https://mail.google.com/mail/u/0/#inbox';
+      if (item.gmailUrl && item.gmailUrl.trim()) {
+        return item.gmailUrl.trim();
+      }
+      const cleanName = (item.companyName || '')
+        .replace(/株式会社|\(株\)|（株）/g, '')
+        .replace(/[・\-_]/g, ' ')
+        .trim();
+      return `https://mail.google.com/mail/u/0/#search/${encodeURIComponent(cleanName)}`;
     }
 
     // ==========================================
@@ -4117,11 +4168,16 @@
                     <i data-lucide="shield-alert" class="w-3.5 h-3.5"></i>
                     <span>🎓 診断</span>
                   </button>
-                  <button onclick="openOfferEditModal('${item.id}')" title="編集" class="p-2 rounded-lg bg-slate-700/50 hover:bg-slate-700 text-slate-300 hover:text-white transition">
+                  <!-- Direct Gmail Button -->
+                  <a href="${escapeHtml(getGmailUrl(item))}" target="_blank" rel="noopener noreferrer" title="${item.gmailUrl ? '該当メールをGmailで直接開く' : 'Gmailでこの企業を検索'}" class="px-2.5 py-1.5 rounded-lg bg-rose-500/15 hover:bg-rose-500/25 border border-rose-500/30 text-rose-300 text-xs font-semibold flex items-center gap-1 transition">
+                    <i data-lucide="mail" class="w-3.5 h-3.5 text-rose-400"></i>
+                    <span>✉️ Gmail</span>
+                  </a>
+                  <button onclick="openOfferEditModal('${item.id}')" title="オファー編集（Gmail URL登録など）" class="p-2 rounded-lg bg-slate-700/50 hover:bg-slate-700 text-slate-300 hover:text-white transition">
                     <i data-lucide="edit" class="w-4 h-4"></i>
                   </button>
                   ${item.url ? `
-                    <a href="${escapeHtml(item.url)}" target="_blank" rel="noopener noreferrer" title="オファーリンクを開く" class="p-2 rounded-lg bg-slate-700/50 hover:bg-slate-700 text-slate-300 hover:text-white transition">
+                    <a href="${escapeHtml(item.url)}" target="_blank" rel="noopener noreferrer" title="オファーリンク・マイページを開く" class="p-2 rounded-lg bg-slate-700/50 hover:bg-slate-700 text-slate-300 hover:text-white transition">
                       <i data-lucide="external-link" class="w-4 h-4"></i>
                     </a>
                   ` : ''}
@@ -4219,6 +4275,10 @@
               </td>
               <td class="px-4 py-3 text-right whitespace-nowrap">
                 <div class="flex items-center justify-end gap-2">
+                  <a href="${escapeHtml(getGmailUrl(item))}" target="_blank" rel="noopener noreferrer" class="px-2 py-1 rounded bg-rose-500/20 text-rose-300 hover:bg-rose-500/30 border border-rose-500/30 text-[11px] font-bold flex items-center gap-1" title="${item.gmailUrl ? '該当メールをGmailで直接開く' : 'Gmailでこの企業を検索'}">
+                    <i data-lucide="mail" class="w-3 h-3 text-rose-400"></i>
+                    Gmail
+                  </a>
                   <button onclick="openOfferAsDetailModal('${item.id}')" class="px-2 py-1 rounded bg-indigo-500/20 text-indigo-300 hover:bg-indigo-500/30 border border-indigo-500/30 text-[11px] font-bold">
                     🎓 診断
                   </button>
@@ -4666,6 +4726,9 @@
             </span>
             
             <div class="flex items-center gap-1" onclick="event.stopPropagation()">
+              <a href="${escapeHtml(getGmailUrl(item))}" target="_blank" rel="noopener noreferrer" title="${item.gmailUrl ? '該当メールをGmailで直接開く' : 'Gmailでこの企業を検索'}" class="p-1 rounded hover:bg-rose-500/20 text-rose-400 hover:text-rose-300 transition">
+                <i data-lucide="mail" class="w-3.5 h-3.5"></i>
+              </a>
               <button onclick="revertPipelineToOffer('${item.id}')" title="オファー管理へ戻す" class="p-1 rounded hover:bg-amber-500/20 text-slate-400 hover:text-amber-300 transition">
                 <i data-lucide="undo-2" class="w-3.5 h-3.5"></i>
               </button>
@@ -4970,6 +5033,7 @@
         infoSessionNotes: '',
         webTestType: offer.offerType || '',
         mypageUrl: offer.url || '',
+        gmailUrl: offer.gmailUrl || '',
         loginId: '',
         portfolioUrl: '',
         motiveSummary: offer.notes ? `【スカウト評価点引き継ぎ】\n${offer.notes}` : '',
@@ -5299,6 +5363,7 @@
         infoSessionNotes: offer.notes || '',
         webTestType: offer.offerType || '',
         mypageUrl: offer.url || '',
+        gmailUrl: offer.gmailUrl || '',
         loginId: '',
         portfolioUrl: '',
         motiveSummary: offer.notes || '',
@@ -5349,6 +5414,7 @@
 
       document.getElementById('detailWebTestType').value = item.webTestType || '';
       document.getElementById('detailMypageUrl').value = item.mypageUrl || '';
+      document.getElementById('detailGmailUrl').value = item.gmailUrl || '';
       document.getElementById('detailLoginId').value = item.loginId || '';
       document.getElementById('detailPortfolioUrl').value = item.portfolioUrl || '';
       document.getElementById('detailMotiveSummary').value = item.motiveSummary || '';
@@ -5362,6 +5428,19 @@
         portalBtn.classList.remove('hidden');
       } else {
         portalBtn.classList.add('hidden');
+      }
+
+      // Gmail Links (Direct URL or Company Search Fallback)
+      const targetGmailUrl = getGmailUrl(item);
+      const gmailHeaderBtn = document.getElementById('detailGmailHeaderBtn');
+      if (gmailHeaderBtn) {
+        gmailHeaderBtn.href = targetGmailUrl;
+        gmailHeaderBtn.title = item.gmailUrl ? '該当メールをGmailで直接開く' : 'Gmailでこの企業を検索';
+      }
+      const gmailFormBtn = document.getElementById('detailGmailFormDirectLink');
+      if (gmailFormBtn) {
+        gmailFormBtn.href = targetGmailUrl;
+        gmailFormBtn.title = item.gmailUrl ? '該当メールをGmailで直接開く' : 'Gmailでこの企業を検索';
       }
     }
 
@@ -5582,12 +5661,21 @@
 
       activeDetailItem.webTestType = document.getElementById('detailWebTestType').value.trim();
       activeDetailItem.mypageUrl = document.getElementById('detailMypageUrl').value.trim();
+      activeDetailItem.gmailUrl = (document.getElementById('detailGmailUrl')?.value || '').trim();
       activeDetailItem.loginId = document.getElementById('detailLoginId').value.trim();
       activeDetailItem.portfolioUrl = document.getElementById('detailPortfolioUrl').value.trim();
       activeDetailItem.motiveSummary = document.getElementById('detailMotiveSummary').value.trim();
       activeDetailItem.questionsAsked = document.getElementById('detailQuestionsAsked').value.trim();
       activeDetailItem.reverseQuestions = document.getElementById('detailReverseQuestions').value.trim();
       activeDetailItem.interviewReview = document.getElementById('detailInterviewReview').value.trim();
+
+      if (activeDetailType === 'offer') {
+        const off = offers.find(o => o.id === activeDetailItem.id);
+        if (off) {
+          off.gmailUrl = activeDetailItem.gmailUrl;
+        }
+        renderOffers();
+      }
 
       saveState();
       closeModal('pipelineDetailModal');
@@ -5683,6 +5771,7 @@
         rating: Number(document.getElementById('offerRating').value),
         status: document.getElementById('offerStatus').value,
         url: document.getElementById('offerUrl').value.trim(),
+        gmailUrl: (document.getElementById('offerGmailUrl')?.value || '').trim(),
         notes: document.getElementById('offerNotes').value.trim(),
         receivedDate: new Date().toISOString().split('T')[0],
         isViewed: false,
@@ -5719,6 +5808,7 @@
         infoSessionNotes: '',
         webTestType: document.getElementById('pipeWebTestType').value.trim(),
         mypageUrl: document.getElementById('pipeMypageUrl').value.trim(),
+        gmailUrl: '',
         loginId: document.getElementById('pipeLoginId').value.trim(),
         motiveSummary: document.getElementById('pipeMotiveSummary').value.trim(),
         portfolioUrl: '',
@@ -5768,6 +5858,7 @@
       document.getElementById('editOfferRating').value = offer.rating || 2;
       document.getElementById('editOfferStatus').value = offer.status || '検討中';
       document.getElementById('editOfferUrl').value = offer.url || '';
+      document.getElementById('editOfferGmailUrl').value = offer.gmailUrl || '';
       document.getElementById('editOfferNotes').value = offer.notes || '';
 
       document.getElementById('offerEditModal').classList.remove('hidden');
@@ -5788,6 +5879,7 @@
       offer.rating = Number(document.getElementById('editOfferRating').value);
       offer.status = document.getElementById('editOfferStatus').value;
       offer.url = document.getElementById('editOfferUrl').value.trim();
+      offer.gmailUrl = (document.getElementById('editOfferGmailUrl')?.value || '').trim();
       offer.notes = document.getElementById('editOfferNotes').value.trim();
 
       saveState();
