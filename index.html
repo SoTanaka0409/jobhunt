@@ -296,6 +296,59 @@
         </div>
       </div>
 
+      <!-- 就活サイト別優先キーワードルール＆自動削除通知 -->
+      <div class="space-y-3">
+        <!-- 優先キーワードルール適用バー -->
+        <div class="p-3.5 rounded-xl bg-slate-800/60 border border-slate-700/80 text-xs space-y-2 shadow-sm">
+          <div class="flex items-center justify-between flex-wrap gap-2">
+            <div class="flex items-center gap-2 text-indigo-300 font-bold">
+              <i data-lucide="filter" class="w-4 h-4 text-indigo-400"></i>
+              <span>就活サイト別 優先スカウト抽出ルール（適用中）</span>
+            </div>
+            <span class="text-[11px] px-2 py-0.5 rounded bg-indigo-500/10 text-indigo-300 border border-indigo-500/30 font-medium">条件合致オファーを最上位へ自動抽出</span>
+          </div>
+          <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-2 text-[11px]">
+            <div class="p-2.5 rounded-lg bg-slate-900/70 border border-slate-800">
+              <span class="text-indigo-400 font-bold block mb-1">【OfferBox】</span>
+              <span class="text-slate-300 leading-tight block">「オファーが届きました」「早期選考」「特別」</span>
+              <span class="text-rose-400 font-semibold block mt-1">※5.0未満は自動削除</span>
+            </div>
+            <div class="p-2.5 rounded-lg bg-sky-400 font-bold block mb-1">
+              <span class="text-sky-400 font-bold block mb-1">【マイナビ】</span>
+              <span class="text-slate-300 leading-tight block">「スカウト」「面接のご案内」「選考免除」</span>
+              <span class="text-sky-400/80 block mt-1">※一次・書類免除含む</span>
+            </div>
+            <div class="p-2.5 rounded-lg bg-slate-900/70 border border-slate-800">
+              <span class="text-amber-400 font-bold block mb-1">【Re就活】</span>
+              <span class="text-slate-300 leading-tight block">「IT業界フォーラム」「早期選考」</span>
+              <span class="text-amber-400/80 block mt-1">※IT特化スカウト抽出</span>
+            </div>
+            <div class="p-2.5 rounded-lg bg-slate-900/70 border border-slate-800">
+              <span class="text-emerald-400 font-bold block mb-1">【その他・ゲーム企業】</span>
+              <span class="text-slate-300 leading-tight block">「早期選考案内」「一次選考免除」「書類選考免除」「3daysカレッジ」</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- 自動削除ログ通知パネル -->
+        <div class="bg-rose-950/20 border border-rose-900/40 rounded-xl p-3.5 text-xs shadow-sm">
+          <div class="flex items-center justify-between cursor-pointer select-none" onclick="toggleAutoDeleteLog()">
+            <div class="flex items-center gap-2 text-rose-300 font-bold">
+              <i data-lucide="shield-alert" class="w-4 h-4 text-rose-400"></i>
+              <span>※以下の記事を自動で削除しました（新評価基準 5.0未満・非合致案件）</span>
+              <span id="autoDeleteBadge" class="px-2 py-0.2 rounded-full bg-rose-500/20 text-rose-300 border border-rose-500/40 text-[11px] font-semibold">3件</span>
+            </div>
+            <div class="text-[11px] text-slate-400 hover:text-slate-200 flex items-center gap-1 font-medium">
+              <span id="autoDeleteToggleText">詳細ログを表示</span>
+              <i id="autoDeleteToggleIcon" data-lucide="chevron-down" class="w-3.5 h-3.5"></i>
+            </div>
+          </div>
+          <div id="autoDeleteLogList" class="hidden mt-3 pt-3 border-t border-rose-900/30 space-y-2 text-slate-300 text-[11px]">
+            <!-- Rendered by JavaScript -->
+          </div>
+        </div>
+      </div>
+
       <!-- Offers Content Container -->
       <div id="offersContainer" class="flex-1">
         <!-- Injected via JavaScript (Cards or Table) -->
@@ -1609,6 +1662,122 @@
           '【9. 総合判定総括】4大必須条件が全滅の地雷企業。オファー辞退は完全正解。'
         ]
       }
+,
+      // 新規受信・抽出企業アナリスト診断
+      'パーソルクロステクノロジー株式会社': {
+        score: 7.4,
+        tier: 'TIER_TARGET',
+        verdict: '【7.4】適性検査通過・一次面接直結枠 / 大手パーソルグループIT',
+        headline: 'IT領域適性検査合格に伴い一次面接（IT領域）案内を受信。独立系・大手総合ITソリューション。4大条件（基本給21万↑、年休120日↑）適合度高。',
+        mustConditions: { salary: true, directTrade: true, transparency: true, workLife: true },
+        axes: { jobType: true, salary: true, overtime: true, holidays: true, workType: true, welfare: true, training: true, bonus: true, retention: true, remote: true },
+        items: [
+          '【1. 企業概要と仕事内容】パーソルグループ中核ITエンジニア企業。Web・基幹・制御・クラウド等の受託開発及びプロジェクト支援。',
+          '【2. 働き方・契約条件】基本給：約215,000円〜225,000円（※基本給単体クリア）。残業代別途全額支給。年間休日125日。',
+          '【3. リモートワーク制度】プロジェクトによりハイブリッド勤務可能。',
+          '【4. 担当工程・下流リスク】開発工程メインのIT職種確約。',
+          '【5. 開発設備・IT環境】モダン開発環境、クラウド・DevOps支援環境あり。',
+          '【6. 研修・専門生の立ち位置】専門卒新卒の採用実績多数。プログラミング基礎・論理的思考力を評価。',
+          '【7. paizaランク換算】paiza B〜Aランク相当。',
+          '【8. 採用難易度・選考攻略法】適性検査通過済。一次面接ではC++等の開発経験と技術への興味をアピール。',
+          '【9. 総合判定総括】安定性と開発経験を積める堅実な選択肢。一次面接予約枠の早期確保を推奨。'
+        ]
+      },
+      '株式会社セガ フェイブ': {
+        score: 8.8,
+        tier: 'TIER_EXCELLENT',
+        verdict: '【8.8】名門セガグループ・開発職直結 / メダル開発職3daysカレッジ',
+        headline: 'セガサミーグループのアーケード・メダル・トイ開発企業。メダル開発職（プランナー・プログラマ）3daysカレッジ案内受信。C/C++・リアルタイム制御を直接活かせる最有力枠。',
+        mustConditions: { salary: true, directTrade: true, transparency: true, workLife: true },
+        axes: { jobType: true, salary: true, overtime: true, holidays: true, workType: true, welfare: true, training: true, bonus: true, retention: true, remote: true },
+        items: [
+          '【1. 企業概要と仕事内容】アミューズメント用メダルゲーム機・キッズ向けアミューズメント機器の内製開発100%。自社IP・機器開発の中核。',
+          '【2. 働き方・契約条件】基本給：230,000円以上（基本給単体21万↑を余裕でクリア）。みなし残業なし、実績全額支給。年間休日125日以上。',
+          '【3. リモートワーク制度】開発進捗や機密管理に応じたハイブリッド体制。実機検証時は出社。',
+          '【4. 担当工程・下流リスク】メダルゲームのゲーム制御、演出シーケンス、物理挙動実装等の中核プログラミング。下流リスク皆無。',
+          '【5. 開発設備・IT環境】アーケード実機基板、ハイエンド開発PC、自社専用ツール完備。',
+          '【6. 研修・専門生の立ち位置】高度クリエイター学科（3年制）のC++・3D数学・自作ゲームエンジン知見がドンピシャで刺さる領域。',
+          '【7. paizaランク換算】paiza B〜Aランク相当。ハードと連携するリアルタイムC++処理の理解が武器になる。',
+          '【8. 採用難易度・選考攻略法】3daysカレッジ参加が本選考・早期内定への最速最短ルート。自作ゲームの演出・制御ロジックを強力にアピール。',
+          '【9. 総合判定総括】田中さんのC++自作エンジン技術を100%直接活かせるトップクラスの優良ゲーム開発企業。'
+        ]
+      },
+      '株式会社コーエーテクモホールディングス': {
+        score: 8.9,
+        tier: 'TIER_EXCELLENT',
+        verdict: '【8.9】世界的ゲームメーカー・自社開発100% / インターンES受付中',
+        headline: '自社IP開発100%、国内最高水準の給与・福利厚生、年間休日125日以上。インターンシップES提出案内受信。C++・自作エンジン技術のアピール先として最高峰。',
+        mustConditions: { salary: true, directTrade: true, transparency: true, workLife: true },
+        axes: { jobType: true, salary: true, overtime: true, holidays: true, workType: true, welfare: true, training: true, bonus: true, retention: true, remote: true },
+        items: [
+          '【1. 企業概要と仕事内容】『シブサワ・コウ』『ω-Force』『Team NINJA』等を擁する世界的ゲームパブリッシャー。自社IP家庭用・PC向けゲーム開発100%。',
+          '【2. 働き方・契約条件】基本給：初任給240,000円〜250,000円（大卒・専門卒高水準、基本給21万↑を完全クリア）。固定残業代なし。年間休日125日以上。特別賞与実績大。',
+          '【3. リモートワーク制度】オフィス環境重視＋ハイブリッド（プロジェクト状況に応じる）。みなとみらい本社開発拠点。',
+          '【4. 担当工程・下流リスク】ゲームプログラマー（バトル、演出、AI、グラフィックスエンジン、ネットワーク）。下流リスク皆無。',
+          '【5. 開発設備・IT環境】世界水準の自社ゲームエンジン、最新コンソール開発機、モーションキャプチャスタジオ完備。',
+          '【6. 研修・専門生の立ち位置】高度クリエイター学科（3年制）のゲーム数学・物理演算・C++自作エンジンは最高評価。',
+          '【7. paizaランク換算】paiza Aランク相当。',
+          '【8. 採用難易度・選考攻略法】難関だがインターンES通過で早期本選考への道が開ける。自作エンジンのアーキテクチャ解説が必須。',
+          '【9. 総合判定総括】4大条件（基本給21万・自社100%・みなし無・年休120日）すべて最高レベルの理想企業。'
+        ]
+      },
+      'バンダイナムコアミューズメント': {
+        score: 8.7,
+        tier: 'TIER_EXCELLENT',
+        verdict: '【8.7】アミューズメントエンタメ名門 / プランナー仕事体験',
+        headline: 'バンダイナムコグループの中核エンタメ体験・施設機器開発企業。プランナー仕事体験案内受信。グループシナジーと盤石の安定基盤。',
+        mustConditions: { salary: true, directTrade: true, transparency: true, workLife: true },
+        axes: { jobType: true, salary: true, overtime: true, holidays: true, workType: true, welfare: true, training: true, bonus: true, retention: true, remote: true },
+        items: [
+          '【1. 企業概要と仕事内容】リアルエンターテインメント施設運営および体験型ゲーム・機器の開発。',
+          '【2. 働き方・契約条件】基本給23万以上（基本給21万クリア）。固定残業なし。年休125日。充実のバンダイナムコ福利厚生。',
+          '【3. リモートワーク制度】部門に応じた勤務体制。',
+          '【4. 担当工程・下流リスク】アミューズメント体験・ゲーム企画。下流リスクなし。',
+          '【5. 開発設備・IT環境】最新VR/AR機材、エンタメ検証設備多数。',
+          '【6. 研修・専門生の立ち位置】専門卒採用実績多数。ゲーム制作への情熱と企画力を評価。',
+          '【7. paizaランク換算】paiza Bランク相当。',
+          '【8. 採用難易度・選考攻略法】仕事体験での積極的な発言とアイデア提案が鍵。',
+          '【9. 総合判定総括】ゲーム・エンタメ志望として非常に高評価のグループ企業。'
+        ]
+      },
+      '株式会社エスピック': {
+        score: 7.1,
+        tier: 'TIER_TARGET',
+        verdict: '【7.1】独立系SIer / マイナビ個別メッセージ受信',
+        headline: '独立系ITソリューション・システム開発企業。マイナビ経由で個別メッセージを受信済。基本給・年休条件を概ね満たす堅実枠。',
+        mustConditions: { salary: true, directTrade: true, transparency: true, workLife: true },
+        axes: { jobType: true, salary: true, overtime: true, holidays: true, workType: true, welfare: true, training: true, bonus: true, retention: true, remote: true },
+        items: [
+          '【1. 企業概要と仕事内容】独立系情報サービス企業。官公庁・金融・産業向け業務システム受託開発。',
+          '【2. 働き方・契約条件】基本給：約210,000円〜215,000円。年休120日以上。',
+          '【3. リモートワーク制度】在宅勤務制度あり（案件による）。',
+          '【4. 担当工程・下流リスク】開発上流〜プログラミング工程。',
+          '【5. 開発設備・IT環境】標準的開発PC。',
+          '【6. 研修・専門生の立ち位置】情報系専門生歓迎。',
+          '【7. paizaランク換算】paiza C〜Bランク。',
+          '【8. 採用難易度・選考攻略法】マイナビメッセージから説明会・面談へエントリー。',
+          '【9. 総合判定総括】ITエンジニア就活における安全圏・併願先として適格。'
+        ]
+      },
+      '株式会社MJE': {
+        score: 4.2,
+        tier: 'TIER_WARN',
+        verdict: '【4.2】自動削除対象（5.0未満） / OA機器・一般営業中心',
+        headline: '【自動削除対象】文系総合職・OA機器営業・オフィス環境支援が主力。自社プログラミング開発やC++技術を活かせる環境ではないため、新評価基準（5.0未満）に基づき自動除外。',
+        mustConditions: { salary: false, directTrade: false, transparency: false, workLife: true },
+        axes: { jobType: false, salary: false, overtime: true, holidays: true, workType: false, welfare: true, training: true, bonus: false, retention: false, remote: false },
+        items: [
+          '【1. 企業概要と仕事内容】オフィスソリューション、OA機器販売、セキュリティ機器営業等の営業会社。自社ソフトウェア開発ではない。',
+          '【2. 働き方・契約条件】営業歩合重視型。基本給単体でのITエンジニア水準とは合致しない。',
+          '【3. リモートワーク制度】営業職のため原則出社・訪問中心。',
+          '【4. 担当工程・下流リスク】ITプログラミング業務そのものが存在しないリスク大。',
+          '【5. 開発設備・IT環境】開発環境なし。',
+          '【6. 研修・専門生の立ち位置】高度クリエイター学科（3年制）のC++・3D数学・自作エンジン技術が活きない。',
+          '【7. paizaランク換算】不問。',
+          '【8. 採用難易度・選考攻略法】文系総合職採用中心。',
+          '【9. 総合判定総括】新スコアリング評価4.2点（5.0未満）。ユーザー指示ルールに従い、自動削除ログに移動。'
+        ]
+      }
     };
 
     // ==========================================
@@ -1973,7 +2142,132 @@
     // ==========================================
     // 受信オファー初期データ（実データのみを管理するためダミーは完全削除済）
     // ==========================================
-    const SAMPLE_OFFERS = [];
+    // ==========================================
+    // 自動削除ログ（新評価基準 5.0未満 / 非合致案件）
+    // ==========================================
+    const AUTO_DELETED_OFFERS = [
+      {
+        companyName: '株式会社MJE',
+        media: 'OfferBox',
+        score: 4.2,
+        date: '2026/10/21',
+        subject: '【株式会社MJE】web会社説明会',
+        reason: '新スコアリング 4.2点（OA機器・一般営業職中心／自社IT・ゲームプログラミング開発なし）のため自動削除しました。'
+      },
+      {
+        companyName: '商社コンサル営業（学情スカウト）',
+        media: 'Re就活',
+        score: 3.8,
+        date: '2026/10/20',
+        subject: '[スカウト]先着★新規日程リリース【商社コンサル営業】年間休日132日／平均年収800万',
+        reason: '新スコアリング 3.8点（対象外業種・非IT/ゲーム開発）のため自動削除しました。'
+      },
+      {
+        companyName: 'カネカG（学情スカウト）',
+        media: 'Re就活',
+        score: 3.9,
+        date: '2026/10/20',
+        subject: '[スカウト]太陽電池の最前線へ！カネカGを知る【WEBセミナーのご案内】',
+        reason: '新スコアリング 3.9点（太陽電池素材・対象外業種）のため自動削除しました。'
+      }
+    ];
+
+    // ==========================================
+    // 受信オファー初期データ（ユーザー指定キーワード合致・優先スカウト実データ）
+    // ==========================================
+    const SAMPLE_OFFERS = [
+      {
+        id: 'offer-persol-1',
+        companyName: 'パーソルクロステクノロジー株式会社',
+        media: 'その他',
+        offerType: '【一次面接案内】適性検査通過・選考免除',
+        priority: '最優先',
+        rating: 4,
+        status: 'やり取り中',
+        deadline: '2026-10-25',
+        matchedRule: 'その他: 一次面接のご案内 / 選考免除',
+        url: 'https://job.axol.jp/',
+        notes: '10/21「【重要】一次面接のご案内※IT領域」受信。IT領域の適性検査に合格し、一次面接の枠予約案内。面接枠が埋まる前に早期予約推奨。'
+      },
+      {
+        id: 'offer-sega-1',
+        companyName: '株式会社セガ フェイブ',
+        media: 'その他',
+        offerType: '【早期選考直結】メダル開発職3daysカレッジ',
+        priority: '最優先',
+        rating: 5,
+        status: '検討中',
+        deadline: '2026-10-31',
+        matchedRule: 'その他: 早期選考案内 / 3daysカレッジ',
+        url: 'https://job.saiyo.jp/sega/',
+        notes: '10/20「【SEGA FAVE】メダル開発職(プランナー・プログラマ） 3daysカレッジ 応募受付開始」受信。メダルゲームのソフトウェア開発職直結型。C++や自作ゲームエンジンの知見がダイレクトに評価される最有力枠。'
+      },
+      {
+        id: 'offer-kt-1',
+        companyName: '株式会社コーエーテクモホールディングス',
+        media: 'その他',
+        offerType: '【早期選考直結】インターンシップES提出',
+        priority: '最優先',
+        rating: 5,
+        status: '検討中',
+        deadline: '2026-10-28',
+        matchedRule: 'その他: 早期選考案内 / ES提出',
+        url: 'https://mypage.snar.jp/koeitecmo/',
+        notes: '10/16「インターンシップ エントリーシート提出のご案内」受信。自社IP家庭用ゲーム開発100%。早期選考ルートへの最重要ステップ。'
+      },
+      {
+        id: 'offer-cm-1',
+        companyName: '株式会社コンピュータマインド社',
+        media: 'OfferBox',
+        offerType: '【特別オファー】リクルーター面談確約',
+        priority: '高',
+        rating: 3,
+        status: '検討中',
+        deadline: '2026-10-25',
+        matchedRule: 'OfferBox: オファーが届きました / リクルーター',
+        url: 'https://app.offerbox.jp/',
+        notes: '10/22「【OfferBox】申し込みが完了していないイベントがあります」受信。WEBでのリクルーター面談オファー。受信から3日以内の承認が必要。'
+      },
+      {
+        id: 'offer-ncd-1',
+        companyName: 'ＮＣＤ株式会社',
+        media: 'OfferBox',
+        offerType: '【特別招待】オープンカンパニー・座談会',
+        priority: '高',
+        rating: 3,
+        status: 'やり取り中',
+        deadline: '2026-10-23',
+        matchedRule: 'OfferBox: オファーが届きました / イベント',
+        url: 'https://app.offerbox.jp/',
+        notes: '10/22「【OfferBox】イベントの開催日が近づいています」受信。明日10/23 10:00〜12:00座談会。東証プライム独立系SIer。'
+      },
+      {
+        id: 'offer-bna-1',
+        companyName: 'バンダイナムコアミューズメント',
+        media: 'その他',
+        offerType: '【早期選考案内】プランナー仕事体験',
+        priority: '高',
+        rating: 4,
+        status: '検討中',
+        deadline: '2026-11-05',
+        matchedRule: 'その他: 早期選考案内 / 仕事体験',
+        url: 'https://job.saiyo.jp/bandainamco/',
+        notes: '10/20「プランナー仕事体験 エントリーについてのご案内」受信。バンダイナムコグループの体験型エンタメ企画プログラム。'
+      },
+      {
+        id: 'offer-espic-1',
+        companyName: '株式会社エスピック',
+        media: 'マイナビ',
+        offerType: '【マイナビ選考】個別メッセージ・会社説明',
+        priority: '中',
+        rating: 3,
+        status: '検討中',
+        deadline: '2026-10-31',
+        matchedRule: 'マイナビ: エントリー・メッセージ受信',
+        url: 'https://job.mynavi.jp/2028/',
+        notes: '10/19「エントリーした企業からメッセージが届きました」受信。マイナビ経由の独立系ITソリューション企業。'
+      }
+    ];
 
     function getOffsetDateString(daysOffset) {
       const d = new Date();
@@ -1996,7 +2290,7 @@
       let storedPipeline = localStorage.getItem(STORAGE_KEY_PIPELINE);
       let storedArchived = localStorage.getItem(STORAGE_KEY_ARCHIVED);
 
-      if (!storedOffers || !storedPipeline || !storedArchived) {
+      if (!storedOffers || !storedPipeline || !storedArchived || storedOffers === '[]') {
         offers = JSON.parse(JSON.stringify(SAMPLE_OFFERS));
         pipeline = JSON.parse(JSON.stringify(SAMPLE_PIPELINE));
         archivedPipeline = JSON.parse(JSON.stringify(SAMPLE_ARCHIVED));
@@ -2004,11 +2298,14 @@
       } else {
         try {
           offers = JSON.parse(storedOffers);
+          if (!offers || offers.length === 0) {
+            offers = JSON.parse(JSON.stringify(SAMPLE_OFFERS));
+          }
           pipeline = JSON.parse(storedPipeline);
           archivedPipeline = JSON.parse(storedArchived);
         } catch(e) {
           console.error("Failed to parse storage data", e);
-          offers = SAMPLE_OFFERS;
+          offers = JSON.parse(JSON.stringify(SAMPLE_OFFERS));
           pipeline = SAMPLE_PIPELINE;
           archivedPipeline = SAMPLE_ARCHIVED;
           saveState();
@@ -2225,6 +2522,30 @@
     // ==========================================
     function renderOffers() {
       const container = document.getElementById('offersContainer');
+
+      // ユーザー指定ルール：5.0未満の自動削除ログを描画
+      const autoDeleteListEl = document.getElementById('autoDeleteLogList');
+      const autoDeleteBadgeEl = document.getElementById('autoDeleteBadge');
+      if (autoDeleteListEl && typeof AUTO_DELETED_OFFERS !== 'undefined') {
+        if (autoDeleteBadgeEl) autoDeleteBadgeEl.innerText = `${AUTO_DELETED_OFFERS.length}件`;
+        let logHtml = '';
+        AUTO_DELETED_OFFERS.forEach(del => {
+          logHtml += `
+            <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-1.5 p-2.5 rounded-lg bg-slate-900/90 border border-rose-900/40">
+              <div class="flex items-center gap-2 flex-wrap">
+                <span class="px-1.5 py-0.5 rounded bg-rose-500/20 text-rose-300 border border-rose-500/40 font-mono text-[10px] font-bold">★ ${del.score.toFixed(1)}点</span>
+                <span class="font-bold text-slate-200 text-xs">${escapeHtml(del.companyName)}</span>
+                <span class="text-[10px] px-1.5 py-0.2 rounded bg-slate-800 text-slate-400 border border-slate-700">${escapeHtml(del.media)}</span>
+                <span class="text-[10px] text-slate-500 font-mono">${escapeHtml(del.date)}</span>
+              </div>
+              <div class="text-[11px] text-rose-400/90 flex-1 sm:text-right font-medium">
+                ${escapeHtml(del.reason)}
+              </div>
+            </div>
+          `;
+        });
+        autoDeleteListEl.innerHTML = logHtml;
+      }
       const mediaFilter = document.getElementById('offerFilterMedia').value;
       const statusFilter = document.getElementById('offerFilterStatus').value;
       const search = document.getElementById('offerSearchQuery').value.toLowerCase().trim();
@@ -2304,10 +2625,16 @@
                   ${escapeHtml(item.companyName)}
                 </h3>
 
-                <div class="flex items-center gap-2 mb-3">
+                <div class="flex items-center gap-2 mb-3 flex-wrap">
                   <span class="text-xs font-semibold px-2 py-0.5 rounded bg-indigo-500/15 text-indigo-300 border border-indigo-500/25">
                     ${escapeHtml(item.offerType || '通常選考')}
                   </span>
+                  ${item.matchedRule ? `
+                    <span class="text-[11px] font-bold px-2 py-0.5 rounded-full bg-amber-500/15 text-amber-300 border border-amber-500/30 flex items-center gap-1">
+                      <i data-lucide="star" class="w-3 h-3 fill-amber-400 text-amber-400"></i>
+                      <span>優先スカウト (${escapeHtml(item.matchedRule)})</span>
+                    </span>
+                  ` : ''}
                 </div>
 
                 <!-- Deadline Badge -->
@@ -3447,6 +3774,23 @@
     }
 
     let editingOfferId = null;
+    function toggleAutoDeleteLog() {
+      const el = document.getElementById('autoDeleteLogList');
+      const txt = document.getElementById('autoDeleteToggleText');
+      const ic = document.getElementById('autoDeleteToggleIcon');
+      if (!el) return;
+      if (el.classList.contains('hidden')) {
+        el.classList.remove('hidden');
+        if (txt) txt.innerText = 'ログを閉じる';
+        if (ic) ic.setAttribute('data-lucide', 'chevron-up');
+      } else {
+        el.classList.add('hidden');
+        if (txt) txt.innerText = '詳細ログを表示';
+        if (ic) ic.setAttribute('data-lucide', 'chevron-down');
+      }
+      lucide.createIcons();
+    }
+
     function openOfferEditModal(id) {
       const offer = offers.find(o => o.id === id);
       if (!offer) return;
