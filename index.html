@@ -491,51 +491,30 @@
       </button>
     </nav>
 
-    <!-- Right Controls -->
-    <div class="flex items-center gap-2.5">
-      <!-- 🔄 再読み込みボタン（リログ不要・最新データ即時反映） -->
-            <!-- ☀️/🌙 画面の明暗クイック切り替えボタン（1タップでダーク/ライト） -->
-      <button id="quickThemeBtn" onclick="toggleQuickTheme()" title="画面の明暗をワンタップ切り替え (ダーク ⇔ ライト)" class="p-2 rounded-lg bg-slate-800 hover:bg-slate-700 border border-slate-700 text-amber-300 hover:text-amber-200 transition shadow-sm active:scale-95">
-        <i id="quickThemeIcon" data-lucide="sun" class="w-4 h-4"></i>
-      </button>
-
-      <!-- 🎨 見やすさ・表示設定ボタン（色付け・文字サイズ・端末調整） -->
-      <button onclick="openAppearanceModal()" title="見やすさ・表示設定（明暗・色付け・文字サイズ・端末調整）" class="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 border border-slate-700 text-slate-200 hover:text-white text-xs font-semibold transition shadow-sm active:scale-95">
-        <i data-lucide="palette" class="w-3.5 h-3.5 text-indigo-400"></i>
-        <span class="hidden md:inline">見やすさ設定</span>
-      </button>
-      <button id="refreshDataBtn" onclick="handleDataReload()" title="データを最新状態に再読み込み（リログ不要）" class="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-emerald-500/15 hover:bg-emerald-500/25 border border-emerald-500/40 text-emerald-300 text-xs font-semibold shadow-sm transition active:scale-95 group">
+    <!-- Right Controls: Clean, Non-overlapping, Categorized -->
+    <div class="flex items-center gap-2">
+      <!-- 1. 再読み込み（データ同期） -->
+      <button id="refreshDataBtn" onclick="handleDataReload()" title="データを最新状態に再読み込み（リログ不要）" class="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-emerald-500/15 hover:bg-emerald-500/25 border border-emerald-500/40 text-emerald-300 text-xs font-semibold shadow-sm transition active:scale-95 group">
         <i id="refreshDataIcon" data-lucide="refresh-cw" class="w-3.5 h-3.5 text-emerald-400 group-hover:rotate-180 transition-transform duration-500"></i>
-        <span>再読み込み</span>
+        <span class="hidden sm:inline">再読み込み</span>
       </button>
 
-      <!-- Rubric & Profile Modal Quick Button -->
-      <button onclick="openProfileModal()" title="10段階評価基準 & 4大必須条件を確認" class="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-indigo-500/15 hover:bg-indigo-500/25 border border-indigo-500/30 text-indigo-300 text-xs font-semibold transition">
-        <i data-lucide="award" class="w-3.5 h-3.5 text-indigo-400"></i>
-        <span class="hidden sm:inline">評価ルーブリック (4大条件)</span>
+      <!-- 2. 🔒 リログ機能（見失わないよう常設・ワンクリックで画面ロック） -->
+      <button onclick="handleAuthLogout()" title="ログアウトして画面をロック（リログ）" class="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-slate-800 hover:bg-rose-500/20 border border-slate-700 hover:border-rose-500/50 text-slate-300 hover:text-rose-400 text-xs font-semibold transition active:scale-95 shadow-sm group">
+        <i data-lucide="lock" class="w-3.5 h-3.5 text-rose-400 group-hover:scale-110 transition-transform"></i>
+        <span>リログ</span>
       </button>
 
-      <!-- Data action buttons -->
-      <button onclick="exportData()" title="データJSONエクスポート" class="p-2 rounded-lg bg-slate-800 hover:bg-slate-700 border border-slate-700 text-slate-300 hover:text-white transition">
-        <i data-lucide="download" class="w-4 h-4"></i>
-      </button>
-      <label title="データJSONインポート" class="p-2 rounded-lg bg-slate-800 hover:bg-slate-700 border border-slate-700 text-slate-300 hover:text-white transition cursor-pointer">
-        <i data-lucide="upload" class="w-4 h-4"></i>
-        <input type="file" id="importFileInput" accept=".json" class="hidden" onchange="importData(event)">
-      </label>
-      <button onclick="resetToSampleData()" title="【注意】デモデータへの初期化（現在のデータをサンプルに戻す）" class="p-2 rounded-lg bg-slate-800 hover:bg-rose-500/20 border border-slate-700 text-slate-500 hover:text-rose-400 transition" aria-label="初期データへリセット">
-        <i data-lucide="rotate-ccw" class="w-4 h-4"></i>
+      <!-- 3. ⚙️ 設定（明るさ設定・UI・自身の希望する条件・データをリスト化） -->
+      <button onclick="openSettingsModal('ui')" title="設定ハブ（明るさ設定、UI外観、自身の希望する条件、データ管理）" class="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 border border-slate-700 hover:border-indigo-500/50 text-slate-200 hover:text-white text-xs font-semibold transition active:scale-95 shadow-sm">
+        <i data-lucide="settings" class="w-3.5 h-3.5 text-indigo-400"></i>
+        <span>設定</span>
       </button>
 
-      <!-- Logout Button -->
-      <button onclick="handleAuthLogout()" title="ログアウトして画面をロック" class="p-2 rounded-lg bg-slate-800 hover:bg-rose-500/20 border border-slate-700 text-slate-400 hover:text-rose-400 transition">
-        <i data-lucide="lock" class="w-4 h-4"></i>
-      </button>
-
-      <!-- New Item Button -->
+      <!-- 4. ＋ 新規追加 -->
       <button onclick="openCreateModal()" class="flex items-center gap-2 px-3.5 py-2 rounded-xl bg-gradient-to-r from-indigo-500 to-sky-500 hover:from-indigo-600 hover:to-sky-600 text-white font-medium text-xs sm:text-sm shadow-lg shadow-indigo-500/25 transition-all transform active:scale-95">
         <i data-lucide="plus-circle" class="w-4 h-4"></i>
-        <span>新規追加</span>
+        <span class="hidden xs:inline">新規追加</span>
       </button>
     </div>
   </header>
@@ -801,52 +780,256 @@
   </main>
 
   <!-- ============================================== -->
-  <!-- MODAL: 評価基準・ルーブリック & 4大必須条件モーダル -->
+    <!-- ============================================== -->
+  <!-- MODAL: 統合設定ハブ (項目ごとにリスト化: 明暗/UI/希望条件/データ/リログ) -->
   <!-- ============================================== -->
-  <div id="profileModal" class="fixed inset-0 z-50 bg-black/80 backdrop-blur-md hidden items-center justify-center p-3 sm:p-4 overflow-y-auto">
-    <div class="bg-slate-900 border border-slate-700 rounded-3xl w-full max-w-5xl shadow-2xl overflow-hidden my-6 flex flex-col max-h-[90vh]">
+  <div id="settingsModal" class="fixed inset-0 z-50 bg-black/80 backdrop-blur-md hidden items-center justify-center p-3 sm:p-4 overflow-y-auto">
+    <div class="bg-slate-900 border border-slate-700 rounded-3xl w-full max-w-5xl shadow-2xl overflow-hidden my-6 flex flex-col max-h-[92vh]">
       
       <!-- Modal Header -->
       <div class="bg-gradient-to-r from-slate-800 via-indigo-950 to-slate-800 px-6 py-4 border-b border-slate-700/80 flex items-center justify-between shrink-0">
         <div class="flex items-center gap-3">
           <div class="p-2.5 rounded-2xl bg-indigo-500/20 text-indigo-300 border border-indigo-500/40 shadow-inner">
-            <i data-lucide="calculator" class="w-6 h-6 text-indigo-400"></i>
+            <i data-lucide="settings" class="w-6 h-6 text-indigo-400"></i>
           </div>
           <div>
             <div class="flex items-center gap-2">
               <h3 class="text-base sm:text-lg font-bold text-white tracking-tight">
-                専門アナリスト監修：企業採点基準 ＆ スコア計算シミュレーター
+                システム設定 ＆ 就活マネジメントハブ
               </h3>
-              <span class="text-[11px] px-2.5 py-0.5 rounded-full bg-indigo-500/20 text-indigo-300 border border-indigo-500/40 font-bold hidden sm:inline">10.0点満点・加点倍率体系</span>
+              <span class="text-[11px] px-2.5 py-0.5 rounded-full bg-indigo-500/20 text-indigo-300 border border-indigo-500/40 font-bold hidden sm:inline">全項目リスト化統合版</span>
             </div>
-            <p class="text-xs text-slate-400 mt-0.5">専門卒（3年制）・C++ゲームプログラマー基準に特化した厳格採点システム（他者共有対応版）</p>
+            <p class="text-xs text-slate-400 mt-0.5">明るさ設定・UI外観、自身の希望する条件、データ管理、リログ機能を項目別に一覧管理</p>
           </div>
         </div>
-        <button onclick="closeModal('profileModal')" class="text-slate-400 hover:text-white p-2 rounded-xl hover:bg-slate-800 transition">
+        <button onclick="closeModal('settingsModal')" class="text-slate-400 hover:text-white p-2 rounded-xl hover:bg-slate-800 transition">
           <i data-lucide="x" class="w-5 h-5"></i>
         </button>
       </div>
 
-      <!-- Navigation Tabs inside Modal -->
-      <div class="bg-slate-850 px-6 pt-3 border-b border-slate-800 flex items-center gap-2 overflow-x-auto shrink-0 custom-scrollbar">
-        <button id="rubricTabBtnSim" onclick="switchRubricTab('sim')" class="flex items-center gap-1.5 px-4 py-2.5 border-b-2 border-indigo-500 text-indigo-300 text-xs font-bold transition">
-          <i data-lucide="sparkles" class="w-4 h-4"></i>
-          <span>① 対話型スコア計算シミュレーター（採点電卓）</span>
+      <!-- Navigation Category List (項目リスト) -->
+      <div class="bg-slate-850 px-4 sm:px-6 pt-3 border-b border-slate-800 flex items-center gap-2 overflow-x-auto shrink-0 custom-scrollbar">
+        <button id="setCatBtn-ui" onclick="switchSettingsCategory('ui')" class="flex items-center gap-2 px-4 py-2.5 border-b-2 border-indigo-500 text-indigo-300 text-xs font-bold transition whitespace-nowrap">
+          <i data-lucide="palette" class="w-4 h-4"></i>
+          <span>① 画面の明るさ・UI設定</span>
         </button>
-        <button id="rubricTabBtnTable" onclick="switchRubricTab('table')" class="flex items-center gap-1.5 px-4 py-2.5 border-b-2 border-transparent text-slate-400 hover:text-slate-200 text-xs font-semibold transition">
-          <i data-lucide="table" class="w-4 h-4"></i>
-          <span>② 優先順位・配点・加算倍率 完全早見表</span>
+        <button id="setCatBtn-conditions" onclick="switchSettingsCategory('conditions')" class="flex items-center gap-2 px-4 py-2.5 border-b-2 border-transparent text-slate-400 hover:text-slate-200 text-xs font-semibold transition whitespace-nowrap">
+          <i data-lucide="award" class="w-4 h-4"></i>
+          <span>② 自身の希望する条件 ＆ 評価基準</span>
         </button>
-        <button id="rubricTabBtnTiers" onclick="switchRubricTab('tiers')" class="flex items-center gap-1.5 px-4 py-2.5 border-b-2 border-transparent text-slate-400 hover:text-slate-200 text-xs font-semibold transition">
-          <i data-lucide="layers" class="w-4 h-4"></i>
-          <span>③ 5段階ティア定義 ＆ 4大必須条件</span>
+        <button id="setCatBtn-data" onclick="switchSettingsCategory('data')" class="flex items-center gap-2 px-4 py-2.5 border-b-2 border-transparent text-slate-400 hover:text-slate-200 text-xs font-semibold transition whitespace-nowrap">
+          <i data-lucide="database" class="w-4 h-4"></i>
+          <span>③ データ管理・バックアップ</span>
+        </button>
+        <button id="setCatBtn-auth" onclick="switchSettingsCategory('auth')" class="flex items-center gap-2 px-4 py-2.5 border-b-2 border-transparent text-slate-400 hover:text-slate-200 text-xs font-semibold transition whitespace-nowrap">
+          <i data-lucide="shield" class="w-4 h-4"></i>
+          <span>④ セキュリティ ＆ リログ</span>
         </button>
       </div>
 
       <!-- Modal Body (Scrollable) -->
       <div class="p-5 sm:p-6 space-y-6 overflow-y-auto custom-scrollbar flex-1 text-xs">
 
-        <!-- TAB 1: 対話型スコア計算シミュレーター -->
+        <!-- CATEGORY 1: 画面の明るさ・UI設定 -->
+        <div id="setCatContent-ui" class="space-y-6">
+          <!-- SECTION 1: 画面の明暗（テーマ） -->
+        <div class="space-y-3">
+          <div class="flex items-center justify-between">
+            <label class="font-bold text-white text-xs flex items-center gap-2">
+              <i data-lucide="sun-moon" class="w-4 h-4 text-amber-400"></i>
+              <span>1. 画面の明暗（テーマモード）</span>
+            </label>
+            <span class="text-[11px] text-slate-400">環境や好みに合わせて瞬時切替</span>
+          </div>
+          
+          <div class="grid grid-cols-2 sm:grid-cols-4 gap-2.5">
+            <!-- Dark -->
+            <button type="button" onclick="setAppearanceOption('theme', 'dark')" id="themeBtn-dark" class="appearance-theme-card p-3 rounded-2xl border-2 border-indigo-500 bg-slate-950 text-left transition hover:border-indigo-400 flex flex-col justify-between h-24 relative group">
+              <div class="flex items-center justify-between">
+                <span class="text-amber-400"><i data-lucide="moon" class="w-5 h-5"></i></span>
+                <span class="theme-check-icon w-4 h-4 rounded-full bg-indigo-500 text-white flex items-center justify-center text-[10px]"><i data-lucide="check" class="w-3 h-3"></i></span>
+              </div>
+              <div>
+                <div class="font-bold text-white text-xs">ダーク</div>
+                <div class="text-[10px] text-slate-400 mt-0.5">宇宙ネイビー（標準）</div>
+              </div>
+            </button>
+
+            <!-- Light -->
+            <button type="button" onclick="setAppearanceOption('theme', 'light')" id="themeBtn-light" class="appearance-theme-card p-3 rounded-2xl border-2 border-slate-700 bg-white text-left transition hover:border-slate-500 flex flex-col justify-between h-24 relative group">
+              <div class="flex items-center justify-between">
+                <span class="text-amber-500"><i data-lucide="sun" class="w-5 h-5"></i></span>
+                <span class="theme-check-icon w-4 h-4 rounded-full bg-indigo-500 text-white hidden items-center justify-center text-[10px]"><i data-lucide="check" class="w-3 h-3"></i></span>
+              </div>
+              <div>
+                <div class="font-bold text-slate-900 text-xs">ライト</div>
+                <div class="text-[10px] text-slate-600 mt-0.5">オフィス・昼間向け白</div>
+              </div>
+            </button>
+
+            <!-- High Contrast / OLED -->
+            <button type="button" onclick="setAppearanceOption('theme', 'contrast')" id="themeBtn-contrast" class="appearance-theme-card p-3 rounded-2xl border-2 border-slate-700 bg-black text-left transition hover:border-slate-500 flex flex-col justify-between h-24 relative group">
+              <div class="flex items-center justify-between">
+                <span class="text-sky-400"><i data-lucide="zap" class="w-5 h-5"></i></span>
+                <span class="theme-check-icon w-4 h-4 rounded-full bg-indigo-500 text-white hidden items-center justify-center text-[10px]"><i data-lucide="check" class="w-3 h-3"></i></span>
+              </div>
+              <div>
+                <div class="font-bold text-white text-xs">高コントラスト</div>
+                <div class="text-[10px] text-slate-400 mt-0.5">OLED漆黒・直射日光下</div>
+              </div>
+            </button>
+
+            <!-- Sepia / Eye Care -->
+            <button type="button" onclick="setAppearanceOption('theme', 'sepia')" id="themeBtn-sepia" class="appearance-theme-card p-3 rounded-2xl border-2 border-slate-700 bg-[#fbf7ee] text-left transition hover:border-slate-500 flex flex-col justify-between h-24 relative group">
+              <div class="flex items-center justify-between">
+                <span class="text-amber-700"><i data-lucide="book-open" class="w-5 h-5"></i></span>
+                <span class="theme-check-icon w-4 h-4 rounded-full bg-indigo-500 text-white hidden items-center justify-center text-[10px]"><i data-lucide="check" class="w-3 h-3"></i></span>
+              </div>
+              <div>
+                <div class="font-bold text-[#2c251e] text-xs">アイケア</div>
+                <div class="text-[10px] text-[#736354] mt-0.5">目に優しい暖色ペーパー</div>
+              </div>
+            </button>
+          </div>
+        </div>
+
+        <!-- SECTION 2: 色付け（アクセントカラー） -->
+        <div class="space-y-3 pt-3 border-t border-slate-800">
+          <div class="flex items-center justify-between">
+            <label class="font-bold text-white text-xs flex items-center gap-2">
+              <i data-lucide="palette" class="w-4 h-4 text-indigo-400"></i>
+              <span>2. 色付け（アクセントカラーパレット）</span>
+            </label>
+            <span class="text-[11px] text-slate-400">ボタンやバッジのテーマ色</span>
+          </div>
+
+          <div class="grid grid-cols-2 sm:grid-cols-5 gap-2">
+            <!-- Indigo -->
+            <button type="button" onclick="setAppearanceOption('accent', 'indigo')" id="accentBtn-indigo" class="p-2.5 rounded-xl border-2 border-indigo-500 bg-indigo-500/20 text-indigo-300 font-bold flex items-center gap-2 transition hover:scale-105">
+              <span class="w-3.5 h-3.5 rounded-full bg-indigo-500 shrink-0 shadow"></span>
+              <span class="text-xs">インディゴ</span>
+            </button>
+
+            <!-- Emerald -->
+            <button type="button" onclick="setAppearanceOption('accent', 'emerald')" id="accentBtn-emerald" class="p-2.5 rounded-xl border border-slate-700 bg-slate-800 text-slate-300 font-medium flex items-center gap-2 transition hover:scale-105">
+              <span class="w-3.5 h-3.5 rounded-full bg-emerald-500 shrink-0 shadow"></span>
+              <span class="text-xs">エメラルド</span>
+            </button>
+
+            <!-- Purple -->
+            <button type="button" onclick="setAppearanceOption('accent', 'purple')" id="accentBtn-purple" class="p-2.5 rounded-xl border border-slate-700 bg-slate-800 text-slate-300 font-medium flex items-center gap-2 transition hover:scale-105">
+              <span class="w-3.5 h-3.5 rounded-full bg-purple-500 shrink-0 shadow"></span>
+              <span class="text-xs">パープル</span>
+            </button>
+
+            <!-- Amber -->
+            <button type="button" onclick="setAppearanceOption('accent', 'amber')" id="accentBtn-amber" class="p-2.5 rounded-xl border border-slate-700 bg-slate-800 text-slate-300 font-medium flex items-center gap-2 transition hover:scale-105">
+              <span class="w-3.5 h-3.5 rounded-full bg-amber-500 shrink-0 shadow"></span>
+              <span class="text-xs">アンバー</span>
+            </button>
+
+            <!-- Sky -->
+            <button type="button" onclick="setAppearanceOption('accent', 'sky')" id="accentBtn-sky" class="p-2.5 rounded-xl border border-slate-700 bg-slate-800 text-slate-300 font-medium flex items-center gap-2 transition hover:scale-105">
+              <span class="w-3.5 h-3.5 rounded-full bg-sky-500 shrink-0 shadow"></span>
+              <span class="text-xs">スカイ</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- SECTION 3: 端末・文字の大きさ（フォントサイズ調整） -->
+        <div class="space-y-3 pt-3 border-t border-slate-800">
+          <div class="flex items-center justify-between">
+            <label class="font-bold text-white text-xs flex items-center gap-2">
+              <i data-lucide="type" class="w-4 h-4 text-sky-400"></i>
+              <span>3. 端末・文字の大きさ（フォントサイズ）</span>
+            </label>
+            <span class="text-[11px] text-slate-400">スマホ・タブレット・PCに合わせて即時拡大</span>
+          </div>
+
+          <div class="grid grid-cols-5 gap-2">
+            <button type="button" onclick="setAppearanceOption('fontSize', 'small')" id="fontBtn-small" class="p-2.5 rounded-xl border border-slate-700 bg-slate-800 text-slate-300 text-center transition hover:border-slate-500">
+              <div class="text-[11px] font-bold">小 (90%)</div>
+              <div class="text-[10px] text-slate-500 mt-0.5">情報一覧</div>
+            </button>
+            <button type="button" onclick="setAppearanceOption('fontSize', 'normal')" id="fontBtn-normal" class="p-2.5 rounded-xl border-2 border-indigo-500 bg-indigo-500/15 text-indigo-300 text-center font-bold transition">
+              <div class="text-xs font-bold">標準 (100%)</div>
+              <div class="text-[10px] text-indigo-400/80 mt-0.5">デフォルト</div>
+            </button>
+            <button type="button" onclick="setAppearanceOption('fontSize', 'medium')" id="fontBtn-medium" class="p-2.5 rounded-xl border border-slate-700 bg-slate-800 text-slate-300 text-center transition hover:border-slate-500">
+              <div class="text-xs font-bold">中 (110%)</div>
+              <div class="text-[10px] text-slate-500 mt-0.5">タブレット</div>
+            </button>
+            <button type="button" onclick="setAppearanceOption('fontSize', 'large')" id="fontBtn-large" class="p-2.5 rounded-xl border border-slate-700 bg-slate-800 text-slate-300 text-center transition hover:border-slate-500">
+              <div class="text-sm font-bold">大 (120%)</div>
+              <div class="text-[10px] text-slate-500 mt-0.5">スマホ推奨</div>
+            </button>
+            <button type="button" onclick="setAppearanceOption('fontSize', 'xlarge')" id="fontBtn-xlarge" class="p-2.5 rounded-xl border border-slate-700 bg-slate-800 text-slate-300 text-center transition hover:border-slate-500">
+              <div class="text-base font-bold">特大 (130%)</div>
+              <div class="text-[10px] text-slate-500 mt-0.5">見やすさ最優先</div>
+            </button>
+          </div>
+        </div>
+
+        <!-- SECTION 4: 端末レイアウト ＆ カンバン表示調整 -->
+        <div class="space-y-4 pt-3 border-t border-slate-800">
+          <label class="font-bold text-white text-xs flex items-center gap-2">
+            <i data-lucide="layout" class="w-4 h-4 text-emerald-400"></i>
+            <span>4. 端末レイアウト ＆ カンバン表示調整</span>
+          </label>
+
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <!-- Density -->
+            <div class="bg-slate-800/60 border border-slate-700/80 p-3.5 rounded-2xl space-y-2">
+              <span class="font-bold text-slate-200 text-xs block">表示密度（カード余白）</span>
+              <div class="grid grid-cols-2 gap-2">
+                <button type="button" onclick="setAppearanceOption('density', 'comfortable')" id="densityBtn-comfortable" class="p-2 rounded-xl border-2 border-indigo-500 bg-indigo-500/15 text-indigo-300 font-bold text-xs text-center transition">
+                  ゆったり（快適）
+                </button>
+                <button type="button" onclick="setAppearanceOption('density', 'compact')" id="densityBtn-compact" class="p-2 rounded-xl border border-slate-700 bg-slate-800 text-slate-400 text-xs text-center transition hover:border-slate-500">
+                  コンパクト（高密度）
+                </button>
+              </div>
+            </div>
+
+            <!-- Column Width -->
+            <div class="bg-slate-800/60 border border-slate-700/80 p-3.5 rounded-2xl space-y-2">
+              <span class="font-bold text-slate-200 text-xs block">カンバン列幅 / 画面フィット</span>
+              <div class="grid grid-cols-3 gap-1.5">
+                <button type="button" onclick="setAppearanceOption('colWidth', 'narrow')" id="colWidthBtn-narrow" class="p-2 rounded-xl border border-slate-700 bg-slate-800 text-slate-400 text-[11px] text-center transition hover:border-slate-500">
+                  狭め (280px)
+                </button>
+                <button type="button" onclick="setAppearanceOption('colWidth', 'fixed')" id="colWidthBtn-fixed" class="p-2 rounded-xl border-2 border-indigo-500 bg-indigo-500/15 text-indigo-300 font-bold text-[11px] text-center transition">
+                  標準 (320px)
+                </button>
+                <button type="button" onclick="setAppearanceOption('colWidth', 'fit')" id="colWidthBtn-fit" class="p-2 rounded-xl border border-slate-700 bg-slate-800 text-slate-400 text-[11px] text-center transition hover:border-slate-500">
+                  画面均等フィット
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+
+      
+        </div>
+
+        <!-- CATEGORY 2: 自身の希望する条件 ＆ 評価基準 -->
+        <div id="setCatContent-conditions" class="space-y-6 hidden">
+          <!-- Sub-tabs for conditions/rubric -->
+          <div class="bg-slate-800/80 p-1 rounded-xl border border-slate-700/60 flex items-center gap-2 max-w-fit mb-4">
+            <button id="rubricTabBtnSim" onclick="switchRubricTab('sim')" class="px-3.5 py-1.5 rounded-lg bg-indigo-600 text-white font-bold text-xs shadow-sm transition">
+              ① 採点シミュレーター（電卓）
+            </button>
+            <button id="rubricTabBtnTable" onclick="switchRubricTab('table')" class="px-3.5 py-1.5 rounded-lg text-slate-400 hover:text-slate-200 font-semibold text-xs transition">
+              ② 優先順位・配点早見表
+            </button>
+            <button id="rubricTabBtnTiers" onclick="switchRubricTab('tiers')" class="px-3.5 py-1.5 rounded-lg text-slate-400 hover:text-slate-200 font-semibold text-xs transition">
+              ③ 10の軸 ＆ 4大必須条件
+            </button>
+          </div>
+
+          <!-- TAB 1: 対話型スコア計算シミュレーター -->
         <div id="rubricTabContentSim" class="space-y-6">
           
           <!-- Top Interactive Score Result Banner -->
@@ -1467,17 +1650,142 @@
           </div>
         </div>
 
+      
+        </div>
+
+        <!-- CATEGORY 3: データ管理・バックアップ -->
+        <div id="setCatContent-data" class="space-y-5 hidden">
+          <div class="bg-gradient-to-r from-indigo-950/40 via-slate-850 to-slate-850 border border-slate-800 p-4 rounded-2xl">
+            <h4 class="text-sm font-bold text-white flex items-center gap-2">
+              <i data-lucide="database" class="w-4 h-4 text-sky-400"></i>
+              <span>選考・オファーデータの一元管理 ＆ バックアップ</span>
+            </h4>
+            <p class="text-xs text-slate-400 mt-1 leading-relaxed">
+              ブラウザ（localStorage）に保存されている就活データの再読み込み、JSONファイルでの安全なバックアップ書き出し・取り込みを行えます。
+            </p>
+          </div>
+
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <!-- 1. Reload -->
+            <div class="bg-slate-800/50 border border-slate-700/80 p-4 rounded-2xl flex flex-col justify-between space-y-3">
+              <div>
+                <div class="font-bold text-white text-xs flex items-center gap-2">
+                  <span class="p-2 rounded-xl bg-emerald-500/15 text-emerald-300 border border-emerald-500/30"><i data-lucide="refresh-cw" class="w-4 h-4"></i></span>
+                  <span>最新データの再読み込み</span>
+                </div>
+                <p class="text-xs text-slate-400 mt-2 leading-relaxed">
+                  ログアウト（リログ）することなく、選考ステージやオファーの最新情報を画面に即時再描画します。
+                </p>
+              </div>
+              <button type="button" onclick="handleDataReload()" class="w-full py-2.5 rounded-xl bg-emerald-500/20 hover:bg-emerald-500/30 border border-emerald-500/40 text-emerald-300 font-bold text-xs transition flex items-center justify-center gap-2">
+                <i data-lucide="refresh-cw" class="w-3.5 h-3.5"></i>
+                <span>今すぐ再読み込み</span>
+              </button>
+            </div>
+
+            <!-- 2. Export -->
+            <div class="bg-slate-800/50 border border-slate-700/80 p-4 rounded-2xl flex flex-col justify-between space-y-3">
+              <div>
+                <div class="font-bold text-white text-xs flex items-center gap-2">
+                  <span class="p-2 rounded-xl bg-indigo-500/15 text-indigo-300 border border-indigo-500/30"><i data-lucide="download" class="w-4 h-4"></i></span>
+                  <span>データJSONエクスポート</span>
+                </div>
+                <p class="text-xs text-slate-400 mt-2 leading-relaxed">
+                  現在の全登録企業・選考履歴・オファー・メモを安全なJSONファイルとしてPCにダウンロード保存します。
+                </p>
+              </div>
+              <button type="button" onclick="exportData()" class="w-full py-2.5 rounded-xl bg-indigo-500/20 hover:bg-indigo-500/30 border border-indigo-500/40 text-indigo-300 font-bold text-xs transition flex items-center justify-center gap-2">
+                <i data-lucide="download" class="w-3.5 h-3.5"></i>
+                <span>JSONファイルを保存</span>
+              </button>
+            </div>
+
+            <!-- 3. Import -->
+            <div class="bg-slate-800/50 border border-slate-700/80 p-4 rounded-2xl flex flex-col justify-between space-y-3">
+              <div>
+                <div class="font-bold text-white text-xs flex items-center gap-2">
+                  <span class="p-2 rounded-xl bg-sky-500/15 text-sky-300 border border-sky-500/30"><i data-lucide="upload" class="w-4 h-4"></i></span>
+                  <span>データJSONインポート（復元）</span>
+                </div>
+                <p class="text-xs text-slate-400 mt-2 leading-relaxed">
+                  過去に保存したバックアップJSONファイルを選択して、登録データを丸ごと復元します。
+                </p>
+              </div>
+              <label class="w-full py-2.5 rounded-xl bg-sky-500/20 hover:bg-sky-500/30 border border-sky-500/40 text-sky-300 font-bold text-xs transition flex items-center justify-center gap-2 cursor-pointer text-center">
+                <i data-lucide="upload" class="w-3.5 h-3.5"></i>
+                <span>JSONファイルを選択して復元</span>
+                <input type="file" id="importFileInputModal" accept=".json" class="hidden" onchange="importData(event)">
+              </label>
+            </div>
+
+            <!-- 4. Reset to Demo Sample -->
+            <div class="bg-slate-800/50 border border-rose-900/40 p-4 rounded-2xl flex flex-col justify-between space-y-3">
+              <div>
+                <div class="font-bold text-rose-300 text-xs flex items-center gap-2">
+                  <span class="p-2 rounded-xl bg-rose-500/15 text-rose-300 border border-rose-500/30"><i data-lucide="rotate-ccw" class="w-4 h-4"></i></span>
+                  <span>【注意】デモ初期データへのリセット</span>
+                </div>
+                <p class="text-xs text-slate-400 mt-2 leading-relaxed">
+                  現在の登録データをすべて破棄し、初期のサンプルデータ（新評価基準サンプル）へ初期化します。
+                </p>
+              </div>
+              <button type="button" onclick="resetToSampleData()" class="w-full py-2.5 rounded-xl bg-rose-500/15 hover:bg-rose-500/25 border border-rose-500/30 text-rose-300 font-bold text-xs transition flex items-center justify-center gap-2">
+                <i data-lucide="alert-triangle" class="w-3.5 h-3.5 text-rose-400"></i>
+                <span>初期データにリセット</span>
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- CATEGORY 4: セキュリティ ＆ リログ -->
+        <div id="setCatContent-auth" class="space-y-5 hidden">
+          <div class="bg-gradient-to-r from-rose-950/30 via-slate-850 to-slate-850 border border-slate-800 p-4 rounded-2xl">
+            <h4 class="text-sm font-bold text-white flex items-center gap-2">
+              <i data-lucide="shield-check" class="w-4 h-4 text-emerald-400"></i>
+              <span>セキュリティ ＆ リログ（画面ロック）機能</span>
+            </h4>
+            <p class="text-xs text-slate-400 mt-1 leading-relaxed">
+              就活情報・個人プロファイル（田中壮さん専用データ）を第三者に見られないよう、ワンタッチで安全にログアウトして画面をロックできます。
+            </p>
+          </div>
+
+          <div class="bg-slate-800/60 border border-slate-700/80 p-5 rounded-2xl space-y-4">
+            <div class="flex items-center justify-between border-b border-slate-700/60 pb-3">
+              <div>
+                <div class="text-xs font-bold text-white">現在のログイン状態</div>
+                <div class="text-[11px] text-emerald-400 font-semibold mt-0.5 flex items-center gap-1.5">
+                  <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
+                  <span>田中壮さんとして認証・セッション有効中</span>
+                </div>
+              </div>
+              <span class="px-2.5 py-1 rounded-full bg-indigo-500/20 text-indigo-300 border border-indigo-500/40 text-[10px] font-bold">PWAローカル暗号化</span>
+            </div>
+
+            <div class="space-y-2">
+              <div class="text-xs text-slate-300 leading-relaxed">
+                パソコンやスマートフォンを他の人に渡す前や、作業を終了する際は以下のボタンを押してログアウト（リログ）してください。画面が即座にロックされ、パスワードを入力するまで一切の企業情報が表示されなくなります。
+              </div>
+            </div>
+
+            <!-- Big Logout / Relog Button -->
+            <button type="button" onclick="handleAuthLogout()" class="w-full py-3.5 rounded-2xl bg-gradient-to-r from-rose-600 to-amber-600 hover:from-rose-500 hover:to-amber-500 text-white font-bold text-sm shadow-xl shadow-rose-950/50 transition transform active:scale-98 flex items-center justify-center gap-2">
+              <i data-lucide="lock" class="w-4 h-4"></i>
+              <span>今すぐログアウトして画面をロック（リログ）</span>
+            </button>
+          </div>
+        </div>
+
       </div>
 
       <!-- Modal Footer -->
       <div class="bg-slate-850 px-6 py-3.5 border-t border-slate-800 flex items-center justify-between shrink-0">
         <button type="button" onclick="resetAppearanceToDefault()" class="flex items-center gap-1.5 text-xs text-slate-400 hover:text-amber-400 transition font-medium">
           <i data-lucide="rotate-ccw" class="w-3.5 h-3.5"></i>
-          <span>初期設定（デフォルト）に戻す</span>
+          <span>表示設定を初期値に戻す</span>
         </button>
 
-        <button type="button" onclick="closeModal('appearanceModal')" class="px-5 py-2 rounded-xl bg-gradient-to-r from-indigo-500 to-sky-500 text-white font-bold text-xs shadow-lg shadow-indigo-500/25 transition transform active:scale-95">
-          完了
+        <button type="button" onclick="closeModal('settingsModal')" class="px-6 py-2 rounded-xl bg-gradient-to-r from-indigo-500 to-sky-500 text-white font-bold text-xs shadow-lg shadow-indigo-500/25 transition transform active:scale-95">
+          設定を閉じる
         </button>
       </div>
 
@@ -3833,7 +4141,53 @@
       applyAppearance(current);
     }
 
+    
+    // ========================================================
+    // UNIFIED SETTINGS HUB (設定・明るさ・希望条件・データ・リログ総合管理)
+    // ========================================================
+    function openSettingsModal(defaultCategory = 'ui') {
+      switchSettingsCategory(defaultCategory);
+      openModal('settingsModal');
+    }
+
+    function switchSettingsCategory(category) {
+      const categories = ['ui', 'conditions', 'data', 'auth'];
+      categories.forEach(cat => {
+        const btn = document.getElementById('setCatBtn-' + cat);
+        const content = document.getElementById('setCatContent-' + cat);
+        if (btn) {
+          if (cat === category) {
+            btn.className = 'flex items-center gap-2 px-4 py-2.5 border-b-2 border-indigo-500 text-indigo-300 text-xs font-bold transition whitespace-nowrap';
+          } else {
+            btn.className = 'flex items-center gap-2 px-4 py-2.5 border-b-2 border-transparent text-slate-400 hover:text-slate-200 text-xs font-semibold transition whitespace-nowrap';
+          }
+        }
+        if (content) {
+          if (cat === category) {
+            content.classList.remove('hidden');
+          } else {
+            content.classList.add('hidden');
+          }
+        }
+      });
+
+      if (category === 'ui') {
+        updateAppearanceModalUI(loadAppearanceSettings());
+      }
+      lucide.createIcons();
+    }
+
+    // Backward compatibility redirects
     function openAppearanceModal() {
+      openSettingsModal('ui');
+    }
+
+    function openProfileModal() {
+      openSettingsModal('conditions');
+    }
+
+    // Original openAppearanceModal replaced by openSettingsModal
+    function legacyOpenAppearance() {
       const modal = document.getElementById('appearanceModal');
       if (!modal) {
         console.error('appearanceModal element not found');
