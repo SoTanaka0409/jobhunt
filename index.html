@@ -1,0 +1,3721 @@
+<!DOCTYPE html>
+<html lang="ja" class="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>就活ダッシュボード | 田中壮さん専用 オファー＆選考パイプライン管理</title>
+
+  <!-- PWA & Mobile Settings -->
+  <link rel="manifest" href="./manifest.json">
+  <link rel="icon" type="image/png" href="./icon-192.png">
+  <link rel="apple-touch-icon" href="./icon-192.png">
+  <meta name="theme-color" content="#4f46e5">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="就活管理">
+
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          colors: {
+            brand: {
+              50: '#eef2ff',
+              100: '#e0e7ff',
+              200: '#c7d2fe',
+              500: '#6366f1',
+              600: '#4f46e5',
+              700: '#4338ca',
+            },
+            darkBg: '#0f172a',
+            darkCard: '#1e293b',
+            darkBorder: '#334155',
+          }
+        }
+      }
+    }
+  </script>
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Noto+Sans+JP:wght@400;500;700&display=swap" rel="stylesheet">
+  <!-- Lucide Icons -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <style>
+    body {
+      font-family: 'Inter', 'Noto Sans JP', sans-serif;
+    }
+    .custom-scrollbar::-webkit-scrollbar {
+      width: 6px;
+      height: 6px;
+    }
+    .custom-scrollbar::-webkit-scrollbar-track {
+      background: transparent;
+    }
+    .custom-scrollbar::-webkit-scrollbar-thumb {
+      background-color: rgba(156, 163, 175, 0.4);
+      border-radius: 9999px;
+    }
+    .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+      background-color: rgba(156, 163, 175, 0.6);
+    }
+    .kanban-col {
+      min-width: 300px;
+      max-width: 330px;
+    }
+    .dragging {
+      opacity: 0.4;
+      transform: scale(0.98);
+    }
+    .drag-over {
+      border: 2px dashed #6366f1 !important;
+      background-color: rgba(99, 102, 241, 0.05);
+    }
+  </style>
+</head>
+<body class="bg-slate-900 text-slate-100 min-h-screen flex flex-col transition-colors duration-200">
+
+  <!-- ============================================== -->
+  <!-- 🔒 パスワード認証ロック画面 (Password: Sou180409ts) -->
+  <!-- ============================================== -->
+  <div id="authLockScreen" class="fixed inset-0 z-[100] bg-slate-950 flex items-center justify-center p-4 transition-opacity duration-300">
+    <div class="bg-slate-900 border border-slate-700/80 rounded-3xl p-6 sm:p-8 w-full max-w-md shadow-2xl shadow-indigo-950/50 flex flex-col items-center text-center">
+      
+      <!-- App Icon / Badge -->
+      <div class="w-16 h-16 rounded-2xl bg-gradient-to-tr from-indigo-600 to-sky-400 flex items-center justify-center shadow-lg shadow-indigo-500/30 mb-4">
+        <i data-lucide="shield-lock" class="w-8 h-8 text-white"></i>
+      </div>
+
+      <span class="text-xs px-3 py-1 rounded-full bg-indigo-500/15 text-indigo-300 border border-indigo-500/30 font-semibold mb-2">
+        田中 壮 様 専用 就活管理PWA
+      </span>
+      <h2 class="text-xl font-bold text-white mb-1">就活統合ダッシュボード</h2>
+      <p class="text-xs text-slate-400 mb-6 leading-relaxed">
+        安全のためパスワードで保護されています。<br>設定したパスワードを入力してログインしてください。
+      </p>
+
+      <!-- Password Form -->
+      <form id="authLoginForm" onsubmit="handleAuthLogin(event)" class="w-full space-y-4">
+        <div class="relative">
+          <input type="password" id="authPasswordInput" required placeholder="パスワードを入力" class="w-full text-sm rounded-xl bg-slate-800 border border-slate-700 px-4 py-3 text-white pr-11 focus:outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20 text-center tracking-wider font-mono">
+          <button type="button" onclick="togglePasswordVisibility()" class="absolute right-3 top-3 text-slate-400 hover:text-slate-200">
+            <i id="authEyeIcon" data-lucide="eye" class="w-5 h-5"></i>
+          </button>
+        </div>
+
+        <div id="authErrorMessage" class="text-xs text-rose-400 font-semibold hidden flex items-center justify-center gap-1.5">
+          <i data-lucide="alert-circle" class="w-4 h-4"></i>
+          <span>パスワードが正しくありません</span>
+        </div>
+
+        <div class="flex items-center justify-between text-xs text-slate-400 px-1">
+          <label class="flex items-center gap-2 cursor-pointer select-none">
+            <input type="checkbox" id="authRememberMe" checked class="rounded bg-slate-800 border-slate-700 text-indigo-600 focus:ring-0">
+            <span>この端末でログインを保持する</span>
+          </label>
+        </div>
+
+        <button type="submit" class="w-full py-3 rounded-xl bg-gradient-to-r from-indigo-500 to-sky-500 hover:from-indigo-600 hover:to-sky-600 text-white font-semibold text-sm shadow-lg shadow-indigo-500/30 transition-all transform active:scale-[0.98]">
+          ダッシュボードを開く
+        </button>
+      </form>
+
+      <div class="mt-6 pt-4 border-t border-slate-800 w-full text-[11px] text-slate-500 flex items-center justify-center gap-2">
+        <i data-lucide="smartphone" class="w-3.5 h-3.5"></i>
+        <span>PWA対応：スマホの「ホーム画面に追加」で即起動</span>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- Header Navigation -->
+  <header class="sticky top-0 z-30 bg-slate-900/95 backdrop-blur-md border-b border-slate-800 px-4 sm:px-8 py-3.5 flex flex-wrap items-center justify-between gap-4">
+    <div class="flex items-center gap-3">
+      <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-indigo-600 via-indigo-500 to-sky-400 flex items-center justify-center shadow-lg shadow-indigo-500/20">
+        <i data-lucide="shield-check" class="w-5 h-5 text-white"></i>
+      </div>
+      <div>
+        <div class="flex items-center gap-2">
+          <h1 class="text-lg font-bold tracking-tight text-white">就活統合ダッシュボード</h1>
+          <span class="text-xs px-2 py-0.5 rounded-full bg-indigo-500/20 text-indigo-300 border border-indigo-500/40 font-semibold flex items-center gap-1">
+            <i data-lucide="user-check" class="w-3 h-3"></i> 田中 壮 様 専用
+          </span>
+          <span class="text-[11px] px-2 py-0.5 rounded-full bg-slate-800 text-slate-400 border border-slate-700">新スコアリング基準適用済</span>
+        </div>
+        <p class="text-xs text-slate-400">「4大必須条件」＆「5段階スコアリング・ルーブリック」完全連動アナリストシステム</p>
+      </div>
+    </div>
+
+    <!-- Center Navigation Tabs -->
+    <nav class="flex items-center bg-slate-800/80 p-1 rounded-xl border border-slate-700/60 shadow-inner">
+      <button id="tabOffersBtn" onclick="switchTab('offers')" class="flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-semibold transition-all duration-150 text-slate-400 hover:text-slate-200">
+        <i data-lucide="mail-check" class="w-4 h-4"></i>
+        <span>オファー・スカウト管理</span>
+        <span id="offersBadgeCount" class="text-xs px-1.5 py-0.2 rounded-full bg-slate-700 text-slate-300">0</span>
+      </button>
+      <button id="tabPipelineBtn" onclick="switchTab('pipeline')" class="flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-semibold transition-all duration-150 bg-indigo-600 text-white shadow-sm">
+        <i data-lucide="kanban-square" class="w-4 h-4"></i>
+        <span>選考パイプライン (全日程反映済)</span>
+        <span id="pipelineBadgeCount" class="text-xs px-1.5 py-0.2 rounded-full bg-indigo-800/80 text-indigo-200">0</span>
+      </button>
+      <button id="tabArchivedBtn" onclick="switchTab('archived')" class="flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-semibold transition-all duration-150 text-slate-400 hover:text-slate-200">
+        <i data-lucide="archive" class="w-4 h-4"></i>
+        <span>選考除外・ゴミ箱 (保管庫)</span>
+        <span id="archivedBadgeCount" class="text-xs px-1.5 py-0.2 rounded-full bg-slate-700 text-slate-300">0</span>
+      </button>
+    </nav>
+
+    <!-- Right Controls -->
+    <div class="flex items-center gap-2.5">
+      <!-- Rubric & Profile Modal Quick Button -->
+      <button onclick="openProfileModal()" title="10段階評価基準 & 4大必須条件を確認" class="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-indigo-500/15 hover:bg-indigo-500/25 border border-indigo-500/30 text-indigo-300 text-xs font-semibold transition">
+        <i data-lucide="award" class="w-3.5 h-3.5 text-indigo-400"></i>
+        <span class="hidden sm:inline">評価ルーブリック (4大条件)</span>
+      </button>
+
+      <!-- Data action buttons -->
+      <button onclick="exportData()" title="データJSONエクスポート" class="p-2 rounded-lg bg-slate-800 hover:bg-slate-700 border border-slate-700 text-slate-300 hover:text-white transition">
+        <i data-lucide="download" class="w-4 h-4"></i>
+      </button>
+      <label title="データJSONインポート" class="p-2 rounded-lg bg-slate-800 hover:bg-slate-700 border border-slate-700 text-slate-300 hover:text-white transition cursor-pointer">
+        <i data-lucide="upload" class="w-4 h-4"></i>
+        <input type="file" id="importFileInput" accept=".json" class="hidden" onchange="importData(event)">
+      </label>
+      <button onclick="resetToSampleData()" title="新評価基準のデータに初期化" class="p-2 rounded-lg bg-slate-800 hover:bg-slate-700 border border-slate-700 text-slate-400 hover:text-amber-400 transition">
+        <i data-lucide="rotate-ccw" class="w-4 h-4"></i>
+      </button>
+
+      <!-- Logout Button -->
+      <button onclick="handleAuthLogout()" title="ログアウトして画面をロック" class="p-2 rounded-lg bg-slate-800 hover:bg-rose-500/20 border border-slate-700 text-slate-400 hover:text-rose-400 transition">
+        <i data-lucide="lock" class="w-4 h-4"></i>
+      </button>
+
+      <!-- New Item Button -->
+      <button onclick="openCreateModal()" class="flex items-center gap-2 px-3.5 py-2 rounded-xl bg-gradient-to-r from-indigo-500 to-sky-500 hover:from-indigo-600 hover:to-sky-600 text-white font-medium text-xs sm:text-sm shadow-lg shadow-indigo-500/25 transition-all transform active:scale-95">
+        <i data-lucide="plus-circle" class="w-4 h-4"></i>
+        <span>新規追加</span>
+      </button>
+    </div>
+  </header>
+
+  <!-- Main Container -->
+  <main class="flex-1 max-w-[1850px] w-full mx-auto p-4 sm:p-6 lg:p-8 flex flex-col">
+
+    <!-- ============================================== -->
+    <!-- VIEW 1: オファー・スカウト管理ビュー -->
+    <!-- ============================================== -->
+    <section id="viewOffers" class="flex-1 flex flex-col space-y-6 hidden">
+      <!-- Sub header & Filter Controls -->
+      <div class="flex flex-col md:flex-row items-start md:items-center justify-between gap-4 bg-slate-800/40 border border-slate-800 p-4 rounded-2xl">
+        <div>
+          <h2 class="text-lg font-bold text-white flex items-center gap-2">
+            <span>受信オファー・検討中リスト</span>
+            <span id="offersStatsCount" class="text-xs px-2.5 py-0.5 rounded-full bg-slate-800 text-slate-300 border border-slate-700">0件</span>
+          </h2>
+          <p class="text-xs text-slate-400 mt-0.5">届いたスカウトの返信期限とアピール内容を管理。「🎓 診断」で新スコアリング（7.5点以上の4大条件チェック）を即時確認できます</p>
+        </div>
+
+        <div class="flex flex-wrap items-center gap-3 w-full md:w-auto">
+          <!-- Filter: Media -->
+          <select id="offerFilterMedia" onchange="renderOffers()" class="text-xs bg-slate-800 border border-slate-700 text-slate-200 rounded-lg px-3 py-2 focus:outline-none focus:border-indigo-500">
+            <option value="ALL">全媒体</option>
+            <option value="OfferBox">OfferBox</option>
+            <option value="paiza新卒">paiza新卒</option>
+            <option value="Re就活キャンパス">Re就活キャンパス</option>
+            <option value="その他">その他</option>
+          </select>
+
+          <!-- Filter: Status -->
+          <select id="offerFilterStatus" onchange="renderOffers()" class="text-xs bg-slate-800 border border-slate-700 text-slate-200 rounded-lg px-3 py-2 focus:outline-none focus:border-indigo-500">
+            <option value="ALL">全ステータス</option>
+            <option value="検討中">検討中</option>
+            <option value="やり取り中">やり取り中</option>
+            <option value="辞退">辞退</option>
+            <option value="選考移行済">選考移行済</option>
+          </select>
+
+          <!-- Search Input -->
+          <div class="relative flex-1 md:w-56">
+            <i data-lucide="search" class="w-3.5 h-3.5 absolute left-3 top-2.5 text-slate-400"></i>
+            <input type="text" id="offerSearchQuery" oninput="renderOffers()" placeholder="企業名・評価点検索..." class="w-full text-xs pl-8 pr-3 py-2 rounded-lg bg-slate-800 border border-slate-700 text-slate-200 placeholder-slate-500 focus:outline-none focus:border-indigo-500">
+          </div>
+
+          <!-- View Switch (Grid / Table) -->
+          <div class="flex items-center bg-slate-800 border border-slate-700 rounded-lg p-0.5">
+            <button id="offersViewGridBtn" onclick="toggleOffersLayout('grid')" class="p-1.5 rounded text-indigo-400 bg-slate-700 transition" title="カードグリッド表示">
+              <i data-lucide="layout-grid" class="w-4 h-4"></i>
+            </button>
+            <button id="offersViewTableBtn" onclick="toggleOffersLayout('table')" class="p-1.5 rounded text-slate-400 hover:text-slate-200 transition" title="テーブル一覧表示">
+              <i data-lucide="list" class="w-4 h-4"></i>
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Quick Summary Cards for Offers -->
+      <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 sm:gap-4">
+        <div class="bg-slate-800/60 border border-slate-800/90 rounded-xl p-3.5 flex items-center gap-3">
+          <div class="p-2.5 rounded-lg bg-rose-500/10 border border-rose-500/20 text-rose-400">
+            <i data-lucide="alert-circle" class="w-5 h-5"></i>
+          </div>
+          <div>
+            <div class="text-xs text-slate-400">期限迫る (3日以内)</div>
+            <div id="statUrgentOffers" class="text-xl font-bold text-rose-400">0</div>
+          </div>
+        </div>
+        <div class="bg-slate-800/60 border border-slate-800/90 rounded-xl p-3.5 flex items-center gap-3">
+          <div class="p-2.5 rounded-lg bg-amber-500/10 border border-amber-500/20 text-amber-400">
+            <i data-lucide="clock" class="w-5 h-5"></i>
+          </div>
+          <div>
+            <div class="text-xs text-slate-400">検討中</div>
+            <div id="statReviewingOffers" class="text-xl font-bold text-amber-400">0</div>
+          </div>
+        </div>
+        <div class="bg-slate-800/60 border border-slate-800/90 rounded-xl p-3.5 flex items-center gap-3">
+          <div class="p-2.5 rounded-lg bg-indigo-500/10 border border-indigo-500/20 text-indigo-400">
+            <i data-lucide="sparkles" class="w-5 h-5"></i>
+          </div>
+          <div>
+            <div class="text-xs text-slate-400">特別オファー枠</div>
+            <div id="statSpecialOffers" class="text-xl font-bold text-indigo-300">0</div>
+          </div>
+        </div>
+        <div class="bg-slate-800/60 border border-slate-800/90 rounded-xl p-3.5 flex items-center gap-3">
+          <div class="p-2.5 rounded-lg bg-emerald-500/10 border border-emerald-500/20 text-emerald-400">
+            <i data-lucide="check-circle-2" class="w-5 h-5"></i>
+          </div>
+          <div>
+            <div class="text-xs text-slate-400">選考移行済</div>
+            <div id="statConvertedOffers" class="text-xl font-bold text-emerald-400">0</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Offers Content Container -->
+      <div id="offersContainer" class="flex-1">
+        <!-- Injected via JavaScript (Cards or Table) -->
+      </div>
+    </section>
+
+    <!-- ============================================== -->
+    <!-- VIEW 2: 選考パイプライン管理ビュー（カンバン） -->
+    <!-- ============================================== -->
+    <section id="viewPipeline" class="flex-1 flex flex-col space-y-4">
+      <!-- Pipeline Header & Filter -->
+      <div class="flex flex-col md:flex-row items-start md:items-center justify-between gap-4 bg-slate-800/40 border border-slate-800 p-4 rounded-2xl">
+        <div>
+          <h2 class="text-lg font-bold text-white flex items-center gap-2">
+            <span>田中壮さんの選考カンバンボード</span>
+            <span id="pipelineStatsTotal" class="text-xs px-2.5 py-0.5 rounded-full bg-slate-800 text-slate-300 border border-slate-700">0社</span>
+          </h2>
+          <p class="text-xs text-slate-400 mt-0.5">スコアリング基準（最高峰9.0〜 / 強力併願7.5〜 / 中位6.0〜 / 懸念4.5〜 / 地雷1.0〜）によるバッジ付与済</p>
+        </div>
+
+        <div class="flex flex-wrap items-center gap-3 w-full md:w-auto">
+          <!-- Filter: Score Tier -->
+          <select id="pipelineFilterScoreTier" onchange="renderPipeline()" class="text-xs bg-slate-800 border border-slate-700 text-slate-200 rounded-lg px-3 py-2 focus:outline-none focus:border-indigo-500">
+            <option value="ALL">全スコアランク</option>
+            <option value="TIER_TOP">【9.0〜10.0】最高峰・理想枠</option>
+            <option value="TIER_TARGET">【7.5〜8.5】強力な併願/滑り止め ★推奨</option>
+            <option value="TIER_MID">【6.0〜7.0】中位・条件付き検討</option>
+            <option value="TIER_WARN">【4.5〜5.5】注意・リスク大の懸念枠</option>
+          </select>
+
+          <!-- Filter: Priority -->
+          <select id="pipelineFilterPriority" onchange="renderPipeline()" class="text-xs bg-slate-800 border border-slate-700 text-slate-200 rounded-lg px-3 py-2 focus:outline-none focus:border-indigo-500">
+            <option value="ALL">全志望度</option>
+            <option value="高">志望度: 高</option>
+            <option value="中">志望度: 中</option>
+            <option value="低">志望度: 低</option>
+          </select>
+
+          <!-- Search Input -->
+          <div class="relative flex-1 md:w-60">
+            <i data-lucide="search" class="w-3.5 h-3.5 absolute left-3 top-2.5 text-slate-400"></i>
+            <input type="text" id="pipelineSearchQuery" oninput="renderPipeline()" placeholder="企業名・日程・説明会メモ..." class="w-full text-xs pl-8 pr-3 py-2 rounded-lg bg-slate-800 border border-slate-700 text-slate-200 placeholder-slate-500 focus:outline-none focus:border-indigo-500">
+          </div>
+        </div>
+      </div>
+
+      <!-- Kanban Board Container (Horizontal Scroll) -->
+      <div class="flex-1 overflow-x-auto pb-6 custom-scrollbar">
+        <div class="flex items-start gap-4 min-w-max pb-2" id="kanbanBoardWrapper">
+          <!-- 8 Kanban Columns will be generated here -->
+        </div>
+      </div>
+    </section>
+
+    <!-- ============================================== -->
+    <!-- VIEW 3: 選考除外・ゴミ箱（保管庫）ビュー -->
+    <!-- ============================================== -->
+    <section id="viewArchived" class="flex-1 flex flex-col space-y-5 hidden">
+      <!-- Header -->
+      <div class="flex flex-col md:flex-row items-start md:items-center justify-between gap-4 bg-slate-800/40 border border-slate-800 p-4 rounded-2xl">
+        <div class="space-y-1">
+          <div class="flex items-center gap-2">
+            <span class="w-2.5 h-2.5 rounded-full bg-slate-500"></span>
+            <h2 class="text-sm font-bold text-white uppercase tracking-wider flex items-center gap-2">
+              <i data-lucide="archive" class="w-4 h-4 text-slate-400"></i>
+              選考除外・ゴミ箱（情報保管庫）
+            </h2>
+            <span id="archivedStatsCount" class="text-xs px-2.5 py-0.5 rounded-full bg-slate-700 text-slate-300 font-bold">0件</span>
+          </div>
+          <p class="text-xs text-slate-400 leading-relaxed">
+            説明会不参加・選考辞退・見送りなどにより選考から外した企業の一時保管庫です。<strong class="text-slate-300">「最終的な選考位置」やアナリスト診断レポートなどの全企業情報はそのまま残っています。</strong>この企業への関心が完全にゼロになった場合は、右側の「完全に消去」ボタンで手動削除できます。
+          </p>
+        </div>
+
+        <div class="flex items-center gap-3 w-full md:w-auto">
+          <div class="relative flex-1 md:w-64">
+            <i data-lucide="search" class="w-3.5 h-3.5 absolute left-3 top-2.5 text-slate-400"></i>
+            <input type="text" id="archivedSearchQuery" oninput="renderArchived()" placeholder="除外企業を検索..." class="w-full text-xs pl-8 pr-3 py-2 rounded-lg bg-slate-800 border border-slate-700 text-slate-200 placeholder-slate-500 focus:outline-none focus:border-indigo-500">
+          </div>
+        </div>
+      </div>
+
+      <!-- Archived List Container -->
+      <div id="archivedCardsContainer" class="flex-1">
+        <!-- Injected via JS -->
+      </div>
+    </section>
+
+  </main>
+
+  <!-- ============================================== -->
+  <!-- MODAL: 評価基準・ルーブリック & 4大必須条件モーダル -->
+  <!-- ============================================== -->
+  <div id="profileModal" class="fixed inset-0 z-50 bg-black/75 backdrop-blur-sm hidden items-center justify-center p-4 overflow-y-auto">
+    <div class="bg-slate-900 border border-slate-700 rounded-2xl w-full max-w-4xl shadow-2xl overflow-hidden my-8">
+      <div class="bg-gradient-to-r from-slate-800 via-indigo-950 to-slate-800 px-6 py-4 border-b border-slate-700 flex items-center justify-between">
+        <div class="flex items-center gap-3">
+          <div class="p-2.5 rounded-xl bg-indigo-500/20 text-indigo-300 border border-indigo-500/30">
+            <i data-lucide="award" class="w-5 h-5"></i>
+          </div>
+          <div>
+            <h3 class="text-base font-bold text-white flex items-center gap-2">
+              田中壮さん専用：新スコアリング・ルーブリック ＆ 4大必須条件
+            </h3>
+            <p class="text-xs text-slate-300">10段階評価の明確な数値基準と、高評価（7.5点以上）を出すための絶対条件</p>
+          </div>
+        </div>
+        <button onclick="closeModal('profileModal')" class="text-slate-400 hover:text-white p-1 rounded-lg hover:bg-slate-700/50">
+          <i data-lucide="x" class="w-5 h-5"></i>
+        </button>
+      </div>
+
+      <div class="p-6 space-y-6 max-h-[75vh] overflow-y-auto custom-scrollbar text-xs">
+        
+        <!-- SECTION 1: 4大必須条件 -->
+        <div class="bg-gradient-to-br from-indigo-950/40 via-slate-800/80 to-slate-800/80 border border-indigo-500/40 rounded-2xl p-5 shadow-lg">
+          <div class="flex items-center justify-between mb-3 border-b border-indigo-500/30 pb-2">
+            <h4 class="text-sm font-bold text-white flex items-center gap-2">
+              <i data-lucide="check-check" class="w-4 h-4 text-emerald-400"></i>
+              高評価（7.5点以上）を出すための「4大必須条件」
+            </h4>
+            <span class="text-[11px] px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 font-bold">すべてまたは大半が合致必須</span>
+          </div>
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-3.5 pt-1">
+            <div class="bg-slate-900/70 border border-slate-700/80 p-3.5 rounded-xl">
+              <div class="font-bold text-indigo-300 flex items-center gap-1.5 mb-1 text-xs">
+                <span class="w-5 h-5 rounded-full bg-indigo-500/20 flex items-center justify-center text-[10px]">1</span>
+                基本給単体が「21万円以上」
+              </div>
+              <p class="text-slate-300 leading-relaxed">総額月給ではなく、一律手当や固定残業代を除いた純粋なベースが21万円を超えているか。</p>
+            </div>
+            <div class="bg-slate-900/70 border border-slate-700/80 p-3.5 rounded-xl">
+              <div class="font-bold text-indigo-300 flex items-center gap-1.5 mb-1 text-xs">
+                <span class="w-5 h-5 rounded-full bg-indigo-500/20 flex items-center justify-center text-[10px]">2</span>
+                商流：自社開発 または 直取引・自社内受託（6割以上）
+              </div>
+              <p class="text-slate-300 leading-relaxed">二次請け以降の多重下請けや、常時客先常駐となるSESモデルではないこと（案件ガチャ・下流工程リスクの排除）。</p>
+            </div>
+            <div class="bg-slate-900/70 border border-slate-700/80 p-3.5 rounded-xl">
+              <div class="font-bold text-indigo-300 flex items-center gap-1.5 mb-1 text-xs">
+                <span class="w-5 h-5 rounded-full bg-indigo-500/20 flex items-center justify-center text-[10px]">3</span>
+                給与・契約の透明性が高いこと
+              </div>
+              <p class="text-slate-300 leading-relaxed">固定残業代（みなし残業）が過剰でない、または完全になし（全額支給）であり、賞与が年2回しっかり還元される仕組み。</p>
+            </div>
+            <div class="bg-slate-900/70 border border-slate-700/80 p-3.5 rounded-xl">
+              <div class="font-bold text-indigo-300 flex items-center gap-1.5 mb-1 text-xs">
+                <span class="w-5 h-5 rounded-full bg-indigo-500/20 flex items-center justify-center text-[10px]">4</span>
+                年間休日「120日以上」＆ 残業「月20時間以内」
+              </div>
+              <p class="text-slate-300 leading-relaxed">労務管理がホワイトであり、長期的なキャリアと生活のバランスが維持できること。</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- SECTION 2: 10段階評価の数値基準（スコアリング・ルーブリック） -->
+        <div>
+          <h4 class="text-xs font-bold text-slate-300 uppercase tracking-wider mb-3 flex items-center gap-2">
+            <i data-lucide="layers" class="w-4 h-4 text-indigo-400"></i>
+            10段階評価の数値基準（スコアリング・ルーブリック）
+          </h4>
+          <div class="space-y-3">
+            
+            <!-- Tier 1: 9.0〜10.0 -->
+            <div class="bg-slate-800/40 border-l-4 border-l-purple-500 border border-slate-700/70 p-4 rounded-xl">
+              <div class="flex items-center justify-between gap-2 mb-1.5">
+                <span class="text-sm font-bold text-purple-300 flex items-center gap-2">
+                  <span class="px-2 py-0.5 rounded bg-purple-500/20 border border-purple-500/40">9.0 〜 10.0点</span>
+                  最高峰・理想枠 / トップティア
+                </span>
+                <span class="text-[11px] text-slate-400">例：ハル研究所、GO株式会社など</span>
+              </div>
+              <p class="text-slate-300 leading-relaxed">全ての就活軸を完璧にクリア。完全自社開発または一次請けプライム、基本給単体で23万〜25万円以上、みなし残業なし、年間休日125日、リモートワーク完備、賞与・福利厚生も文句なしの企業。</p>
+            </div>
+
+            <!-- Tier 2: 7.5〜8.5 -->
+            <div class="bg-slate-800/40 border-l-4 border-l-emerald-500 border border-slate-700/70 p-4 rounded-xl">
+              <div class="flex items-center justify-between gap-2 mb-1.5">
+                <span class="text-sm font-bold text-emerald-300 flex items-center gap-2">
+                  <span class="px-2 py-0.5 rounded bg-emerald-500/20 border border-emerald-500/40">7.5 〜 8.5点</span>
+                  高評価・強力な併願/滑り止め候補 ★ここを目指す
+                </span>
+                <span class="text-[11px] text-slate-400">例：NCD、アトミテック、サイバーアークなど</span>
+              </div>
+              <p class="text-slate-300 leading-relaxed">致命的なリスクがなく、主要な希望条件を高水準で満たしている企業。<br>
+              <strong>主な条件：</strong>基本給単体21万円以上クリア、自社内受託または直取引メイン（常駐リスク小）、賞与実績が豊富（4ヶ月分以上など）、年間休日120日以上。</p>
+            </div>
+
+            <!-- Tier 3: 6.0〜7.0 -->
+            <div class="bg-slate-800/40 border-l-4 border-l-indigo-400 border border-slate-700/70 p-4 rounded-xl">
+              <div class="flex items-center justify-between gap-2 mb-1.5">
+                <span class="text-sm font-bold text-indigo-300 flex items-center gap-2">
+                  <span class="px-2 py-0.5 rounded bg-indigo-500/20 border border-indigo-500/40">6.0 〜 7.0点</span>
+                  中位・条件付き検討枠
+                </span>
+                <span class="text-[11px] text-slate-400">例：国際ソフトウェア、コンピュータマインドなど</span>
+              </div>
+              <p class="text-slate-300 leading-relaxed">条件の一部に惜しい点や軽微な懸念があるものの、セーフティネットとして機能する企業。<br>
+              <strong>主な条件：</strong>基本給単体が20万〜21万円未満でわずかに届かない、または自社開発比率は高いがドメインがゲーム・ITからやや外れるなど。</p>
+            </div>
+
+            <!-- Tier 4: 4.5〜5.5 -->
+            <div class="bg-slate-800/40 border-l-4 border-l-amber-500 border border-slate-700/70 p-4 rounded-xl">
+              <div class="flex items-center justify-between gap-2 mb-1.5">
+                <span class="text-sm font-bold text-amber-300 flex items-center gap-2">
+                  <span class="px-2 py-0.5 rounded bg-amber-500/20 border border-amber-500/40">4.5 〜 5.5点</span>
+                  注意・リスク大の懸念枠
+                </span>
+                <span class="text-[11px] text-slate-400">例：パーソルクロステクノロジー、フューチャーWebなど</span>
+              </div>
+              <p class="text-slate-300 leading-relaxed">表面上の福利厚生は良くても、構造的なリスクが目立つ企業。<br>
+              <strong>主な条件：</strong>基本給単体が17万〜20万台前半で手当やみなし残業に依存している、客先常駐（SES）比率が6〜8割以上で「案件ガチャ」や下流工程リスクが高い。</p>
+            </div>
+
+            <!-- Tier 5: 1.0〜4.0 -->
+            <div class="bg-slate-800/40 border-l-4 border-l-rose-500 border border-slate-700/70 p-4 rounded-xl">
+              <div class="flex items-center justify-between gap-2 mb-1.5">
+                <span class="text-sm font-bold text-rose-300 flex items-center gap-2">
+                  <span class="px-2 py-0.5 rounded bg-rose-500/20 border border-rose-500/40">1.0 〜 4.0点</span>
+                  地雷・完全ミスマッチ枠
+                </span>
+                <span class="text-[11px] text-slate-400">例：フューチャーAIシステムズ（辞退済）</span>
+              </div>
+              <p class="text-slate-300 leading-relaxed">労働環境の悪さや、多重下請けの底辺構造、基本給の極端な低さが明確な企業。</p>
+            </div>
+
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+  <!-- ============================================== -->
+  <!-- MODAL: 新規作成モーダル -->
+  <!-- ============================================== -->
+  <div id="createModal" class="fixed inset-0 z-50 bg-black/70 backdrop-blur-sm hidden items-center justify-center p-4 overflow-y-auto">
+    <div class="bg-slate-900 border border-slate-700 rounded-2xl w-full max-w-2xl shadow-2xl overflow-hidden my-8">
+      <div class="bg-slate-800/80 px-6 py-4 border-b border-slate-700/80 flex items-center justify-between">
+        <div class="flex items-center gap-3">
+          <div class="p-2 rounded-lg bg-indigo-500/10 text-indigo-400 border border-indigo-500/20">
+            <i data-lucide="plus-circle" class="w-5 h-5"></i>
+          </div>
+          <div>
+            <h3 class="text-base font-bold text-white">新規データ登録</h3>
+            <p class="text-xs text-slate-400">オファーまたは選考パイプラインの企業を登録します</p>
+          </div>
+        </div>
+        <button onclick="closeModal('createModal')" class="text-slate-400 hover:text-white p-1 rounded-lg hover:bg-slate-700/50">
+          <i data-lucide="x" class="w-5 h-5"></i>
+        </button>
+      </div>
+
+      <!-- Form Mode Switcher Tab -->
+      <div class="flex border-b border-slate-800 px-6 pt-3 bg-slate-800/30">
+        <button type="button" id="createTypeOfferBtn" onclick="switchCreateType('offer')" class="pb-3 px-4 font-semibold text-sm border-b-2 border-indigo-500 text-indigo-400 flex items-center gap-2">
+          <i data-lucide="mail" class="w-4 h-4"></i>
+          オファー・スカウト
+        </button>
+        <button type="button" id="createTypePipelineBtn" onclick="switchCreateType('pipeline')" class="pb-3 px-4 font-semibold text-sm border-b-2 border-transparent text-slate-400 hover:text-slate-200 flex items-center gap-2">
+          <i data-lucide="kanban-square" class="w-4 h-4"></i>
+          選考パイプライン (説明会含む)
+        </button>
+      </div>
+
+      <!-- Form Body -->
+      <div class="p-6">
+        <!-- OFFER FORM -->
+        <form id="offerCreateForm" onsubmit="handleCreateOffer(event)" class="space-y-4">
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div>
+              <label class="block text-xs font-medium text-slate-300 mb-1">企業名 <span class="text-rose-400">*</span></label>
+              <input type="text" id="offerCompanyName" required placeholder="例: 株式会社テクノロジーソリューションズ" class="w-full text-xs rounded-lg bg-slate-800 border border-slate-700 px-3 py-2.5 text-white focus:outline-none focus:border-indigo-500">
+            </div>
+            <div>
+              <label class="block text-xs font-medium text-slate-300 mb-1">経由媒体 <span class="text-rose-400">*</span></label>
+              <select id="offerMedia" required class="w-full text-xs rounded-lg bg-slate-800 border border-slate-700 px-3 py-2.5 text-white focus:outline-none focus:border-indigo-500">
+                <option value="OfferBox">OfferBox</option>
+                <option value="paiza新卒">paiza新卒</option>
+                <option value="Re就活キャンパス">Re就活キャンパス</option>
+                <option value="マイナビ">マイナビ</option>
+                <option value="リクナビ">リクナビ</option>
+                <option value="Wantedly">Wantedly</option>
+                <option value="その他">その他</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+            <div>
+              <label class="block text-xs font-medium text-slate-300 mb-1">返信・承諾期限 <span class="text-rose-400">*</span></label>
+              <input type="date" id="offerDeadline" required class="w-full text-xs rounded-lg bg-slate-800 border border-slate-700 px-3 py-2.5 text-white focus:outline-none focus:border-indigo-500">
+            </div>
+            <div>
+              <label class="block text-xs font-medium text-slate-300 mb-1">オファー種別</label>
+              <select id="offerType" class="w-full text-xs rounded-lg bg-slate-800 border border-slate-700 px-3 py-2.5 text-white focus:outline-none focus:border-indigo-500">
+                <option value="特別選考/1次免除">特別選考 / 1次免除</option>
+                <option value="カジュアル面談確約">カジュアル面談確約</option>
+                <option value="会社説明会案内">会社説明会案内</option>
+                <option value="通常選考案内">通常選考案内</option>
+                <option value="インターン・説明会案内">インターン・説明会案内</option>
+              </select>
+            </div>
+            <div>
+              <label class="block text-xs font-medium text-slate-300 mb-1">興味度 (★1〜3)</label>
+              <select id="offerRating" class="w-full text-xs rounded-lg bg-slate-800 border border-slate-700 px-3 py-2.5 text-white focus:outline-none focus:border-indigo-500">
+                <option value="3">★★★ (高い)</option>
+                <option value="2" selected>★★☆ (中程度)</option>
+                <option value="1">★☆☆ (様子見)</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div>
+              <label class="block text-xs font-medium text-slate-300 mb-1">ステータス</label>
+              <select id="offerStatus" class="w-full text-xs rounded-lg bg-slate-800 border border-slate-700 px-3 py-2.5 text-white focus:outline-none focus:border-indigo-500">
+                <option value="検討中" selected>検討中</option>
+                <option value="やり取り中">やり取り中</option>
+                <option value="辞退">辞退</option>
+              </select>
+            </div>
+            <div>
+              <label class="block text-xs font-medium text-slate-300 mb-1">オファーURL / 媒体リンク</label>
+              <input type="url" id="offerUrl" placeholder="https://..." class="w-full text-xs rounded-lg bg-slate-800 border border-slate-700 px-3 py-2.5 text-white focus:outline-none focus:border-indigo-500">
+            </div>
+          </div>
+
+          <div>
+            <label class="block text-xs font-medium text-slate-300 mb-1">評価されたポイント・スカウト文メモ</label>
+            <textarea id="offerNotes" rows="3" placeholder="スカウト文で褒められた経験、GitHubの成果物、ポートフォリオへの言及など..." class="w-full text-xs rounded-lg bg-slate-800 border border-slate-700 p-2.5 text-white focus:outline-none focus:border-indigo-500"></textarea>
+          </div>
+
+          <div class="flex justify-end gap-3 pt-3 border-t border-slate-800">
+            <button type="button" onclick="closeModal('createModal')" class="px-4 py-2 rounded-lg text-xs font-medium bg-slate-800 hover:bg-slate-700 text-slate-300 transition">キャンセル</button>
+            <button type="submit" class="px-5 py-2 rounded-lg text-xs font-medium bg-indigo-600 hover:bg-indigo-500 text-white transition shadow-lg shadow-indigo-600/30">オファーを保存</button>
+          </div>
+        </form>
+
+        <!-- PIPELINE FORM -->
+        <form id="pipelineCreateForm" onsubmit="handleCreatePipeline(event)" class="space-y-4 hidden">
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div>
+              <label class="block text-xs font-medium text-slate-300 mb-1">企業名 <span class="text-rose-400">*</span></label>
+              <input type="text" id="pipeCompanyName" required placeholder="例: 株式会社ネクストイノベーション" class="w-full text-xs rounded-lg bg-slate-800 border border-slate-700 px-3 py-2.5 text-white focus:outline-none focus:border-indigo-500">
+            </div>
+            <div>
+              <label class="block text-xs font-medium text-slate-300 mb-1">経由媒体 <span class="text-rose-400">*</span></label>
+              <input type="text" id="pipeMedia" required placeholder="例: OfferBox承諾, paiza, マイナビ等" class="w-full text-xs rounded-lg bg-slate-800 border border-slate-700 px-3 py-2.5 text-white focus:outline-none focus:border-indigo-500">
+            </div>
+          </div>
+
+          <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+            <div>
+              <label class="block text-xs font-medium text-slate-300 mb-1">選考ステージ <span class="text-rose-400">*</span></label>
+              <select id="pipeStage" required class="w-full text-xs rounded-lg bg-slate-800 border border-slate-700 px-3 py-2.5 text-white focus:outline-none focus:border-indigo-500">
+                <option value="会社説明会 (参加予定)">1. 会社説明会 (参加予定)</option>
+                <option value="会社説明会 (参加済み)">2. 会社説明会 (参加済み)</option>
+                <option value="書類選考">3. 書類選考</option>
+                <option value="Webテスト / 課題">4. Webテスト / 課題</option>
+                <option value="一次面接" selected>5. 一次面接</option>
+                <option value="二次 / 三次面接">6. 二次 / 三次面接</option>
+                <option value="最終面接">7. 最終面接</option>
+                <option value="内定獲得">8. 内定獲得 🎉 (内定受諾・内諾企業のみ)</option>
+                <option value="選考終了 / 辞退">9. 選考終了 / 辞退 (お見送り・除外)</option>
+              </select>
+            </div>
+            <div>
+              <label class="block text-xs font-medium text-slate-300 mb-1">志望度</label>
+              <select id="pipePriority" class="w-full text-xs rounded-lg bg-slate-800 border border-slate-700 px-3 py-2.5 text-white focus:outline-none focus:border-indigo-500">
+                <option value="高" selected>高 (第一志望群)</option>
+                <option value="中">中 (検討中・業界上位)</option>
+                <option value="低">低 (練習・併願)</option>
+              </select>
+            </div>
+            <div>
+              <label class="block text-xs font-medium text-slate-300 mb-1">現在の必須アクション</label>
+              <input type="text" id="pipeAction" placeholder="例: 日程選択待ち, 説明会予約等" class="w-full text-xs rounded-lg bg-slate-800 border border-slate-700 px-3 py-2.5 text-white focus:outline-none focus:border-indigo-500">
+            </div>
+          </div>
+
+          <!-- 説明会関連入力 (任意) -->
+          <div class="bg-slate-800/40 border border-slate-800 p-3.5 rounded-xl space-y-3">
+            <div class="text-xs font-bold text-sky-300 flex items-center gap-1.5">
+              <i data-lucide="presentation" class="w-4 h-4"></i>
+              会社説明会 情報（説明会予定・受講企業の場合）
+            </div>
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              <div>
+                <label class="block text-[11px] text-slate-400 mb-1">説明会ステータス</label>
+                <select id="pipeInfoSessionStatus" class="w-full text-xs rounded-lg bg-slate-800 border border-slate-700 px-3 py-2 text-white">
+                  <option value="参加予定">参加予定（予約済み）</option>
+                  <option value="参加済み">参加済み（選考へ進む・検討中）</option>
+                  <option value="アーカイブ視聴">アーカイブ動画視聴</option>
+                  <option value="該当なし" selected>該当なし / スキップ</option>
+                </select>
+              </div>
+              <div>
+                <label class="block text-[11px] text-slate-400 mb-1">説明会日時・形式</label>
+                <input type="text" id="pipeInfoSessionDate" placeholder="例: 10/26 14:00 Zoomウェビナー" class="w-full text-xs rounded-lg bg-slate-800 border border-slate-700 px-3 py-2 text-white">
+              </div>
+            </div>
+          </div>
+
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div>
+              <label class="block text-xs font-medium text-slate-300 mb-1">次回日程 / 提出締切</label>
+              <input type="text" id="pipeNextSchedule" placeholder="例: 10/28 15:00 面接, 11/02 23:59 締切" class="w-full text-xs rounded-lg bg-slate-800 border border-slate-700 px-3 py-2.5 text-white focus:outline-none focus:border-indigo-500">
+            </div>
+            <div>
+              <label class="block text-xs font-medium text-slate-300 mb-1">Webテスト種別</label>
+              <input type="text" id="pipeWebTestType" placeholder="例: SPI(テストセンター), 玉手箱, TG-WEB, コーディング" class="w-full text-xs rounded-lg bg-slate-800 border border-slate-700 px-3 py-2.5 text-white focus:outline-none focus:border-indigo-500">
+            </div>
+          </div>
+
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div>
+              <label class="block text-xs font-medium text-slate-300 mb-1">採用マイページURL</label>
+              <input type="url" id="pipeMypageUrl" placeholder="https://job.axol.jp/..." class="w-full text-xs rounded-lg bg-slate-800 border border-slate-700 px-3 py-2.5 text-white focus:outline-none focus:border-indigo-500">
+            </div>
+            <div>
+              <label class="block text-xs font-medium text-slate-300 mb-1">ログインID / メモ</label>
+              <input type="text" id="pipeLoginId" placeholder="例: ID: user@example.com / パス共通" class="w-full text-xs rounded-lg bg-slate-800 border border-slate-700 px-3 py-2.5 text-white focus:outline-none focus:border-indigo-500">
+            </div>
+          </div>
+
+          <div>
+            <label class="block text-xs font-medium text-slate-300 mb-1">志望動機サマリー / 企業アピール要点</label>
+            <textarea id="pipeMotiveSummary" rows="2" placeholder="この企業を志望する最大の理由、アピールしたい自己PR軸など..." class="w-full text-xs rounded-lg bg-slate-800 border border-slate-700 p-2.5 text-white focus:outline-none focus:border-indigo-500"></textarea>
+          </div>
+
+          <div class="flex justify-end gap-3 pt-3 border-t border-slate-800">
+            <button type="button" onclick="closeModal('createModal')" class="px-4 py-2 rounded-lg text-xs font-medium bg-slate-800 hover:bg-slate-700 text-slate-300 transition">キャンセル</button>
+            <button type="submit" class="px-5 py-2 rounded-lg text-xs font-medium bg-indigo-600 hover:bg-indigo-500 text-white transition shadow-lg shadow-indigo-600/30">選考企業を保存</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============================================== -->
+  <!-- MODAL: オファー編集モーダル -->
+  <!-- ============================================== -->
+  <div id="offerEditModal" class="fixed inset-0 z-50 bg-black/70 backdrop-blur-sm hidden items-center justify-center p-4 overflow-y-auto">
+    <div class="bg-slate-900 border border-slate-700 rounded-2xl w-full max-w-xl shadow-2xl overflow-hidden my-8">
+      <div class="bg-slate-800/80 px-6 py-4 border-b border-slate-700 flex items-center justify-between">
+        <h3 class="text-base font-bold text-white flex items-center gap-2">
+          <i data-lucide="edit-3" class="w-4 h-4 text-indigo-400"></i>
+          オファー内容の編集
+        </h3>
+        <button onclick="closeModal('offerEditModal')" class="text-slate-400 hover:text-white p-1 rounded-lg hover:bg-slate-700/50">
+          <i data-lucide="x" class="w-5 h-5"></i>
+        </button>
+      </div>
+      <form id="offerEditForm" onsubmit="handleUpdateOffer(event)" class="p-6 space-y-4">
+        <input type="hidden" id="editOfferId">
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <div>
+            <label class="block text-xs font-medium text-slate-300 mb-1">企業名</label>
+            <input type="text" id="editOfferCompanyName" required class="w-full text-xs rounded-lg bg-slate-800 border border-slate-700 px-3 py-2 text-white">
+          </div>
+          <div>
+            <label class="block text-xs font-medium text-slate-300 mb-1">経由媒体</label>
+            <select id="editOfferMedia" required class="w-full text-xs rounded-lg bg-slate-800 border border-slate-700 px-3 py-2 text-white">
+              <option value="OfferBox">OfferBox</option>
+              <option value="paiza新卒">paiza新卒</option>
+              <option value="Re就活キャンパス">Re就活キャンパス</option>
+              <option value="マイナビ">マイナビ</option>
+              <option value="リクナビ">リクナビ</option>
+              <option value="Wantedly">Wantedly</option>
+              <option value="その他">その他</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+          <div>
+            <label class="block text-xs font-medium text-slate-300 mb-1">返信・承諾期限</label>
+            <input type="date" id="editOfferDeadline" required class="w-full text-xs rounded-lg bg-slate-800 border border-slate-700 px-3 py-2 text-white">
+          </div>
+          <div>
+            <label class="block text-xs font-medium text-slate-300 mb-1">オファー種別</label>
+            <select id="editOfferType" class="w-full text-xs rounded-lg bg-slate-800 border border-slate-700 px-3 py-2 text-white">
+              <option value="特別選考/1次免除">特別選考 / 1次免除</option>
+              <option value="カジュアル面談確約">カジュアル面談確約</option>
+              <option value="会社説明会案内">会社説明会案内</option>
+              <option value="通常選考案内">通常選考案内</option>
+              <option value="インターン・説明会案内">インターン・説明会案内</option>
+            </select>
+          </div>
+          <div>
+            <label class="block text-xs font-medium text-slate-300 mb-1">興味度</label>
+            <select id="editOfferRating" class="w-full text-xs rounded-lg bg-slate-800 border border-slate-700 px-3 py-2 text-white">
+              <option value="3">★★★ (高)</option>
+              <option value="2">★★☆ (中)</option>
+              <option value="1">★☆☆ (低)</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <div>
+            <label class="block text-xs font-medium text-slate-300 mb-1">ステータス</label>
+            <select id="editOfferStatus" class="w-full text-xs rounded-lg bg-slate-800 border border-slate-700 px-3 py-2 text-white">
+              <option value="検討中">検討中</option>
+              <option value="やり取り中">やり取り中</option>
+              <option value="辞退">辞退</option>
+              <option value="選考移行済">選考移行済</option>
+            </select>
+          </div>
+          <div>
+            <label class="block text-xs font-medium text-slate-300 mb-1">オファーURL</label>
+            <input type="url" id="editOfferUrl" class="w-full text-xs rounded-lg bg-slate-800 border border-slate-700 px-3 py-2 text-white">
+          </div>
+        </div>
+
+        <div>
+          <label class="block text-xs font-medium text-slate-300 mb-1">評価されたポイント・アピール要約</label>
+          <textarea id="editOfferNotes" rows="3" class="w-full text-xs rounded-lg bg-slate-800 border border-slate-700 p-2.5 text-white"></textarea>
+        </div>
+
+        <div class="flex justify-between items-center pt-3 border-t border-slate-800">
+          <button type="button" onclick="deleteCurrentOffer()" class="px-3 py-2 rounded-lg text-xs font-medium text-rose-400 hover:bg-rose-500/10 transition">削除する</button>
+          <div class="flex gap-2">
+            <button type="button" onclick="closeModal('offerEditModal')" class="px-4 py-2 rounded-lg text-xs font-medium bg-slate-800 hover:bg-slate-700 text-slate-300">キャンセル</button>
+            <button type="submit" class="px-5 py-2 rounded-lg text-xs font-medium bg-indigo-600 hover:bg-indigo-500 text-white shadow-lg shadow-indigo-600/30">保存する</button>
+          </div>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- ============================================== -->
+  <!-- MODAL: 企業詳細 ＆ アナリスト厳格フィルター診断モーダル -->
+  <!-- ============================================== -->
+  <div id="pipelineDetailModal" class="fixed inset-0 z-50 bg-black/80 backdrop-blur-md hidden items-center justify-center p-2 sm:p-4 overflow-y-auto">
+    <div class="bg-slate-900 border border-slate-700 rounded-2xl w-full max-w-4xl shadow-2xl overflow-hidden my-4 sm:my-6 flex flex-col max-h-[92vh]">
+      
+      <!-- Modal Header -->
+      <div class="bg-slate-800 px-6 py-4 border-b border-slate-700 flex items-center justify-between flex-shrink-0">
+        <div class="flex items-center gap-3">
+          <span id="detailPriorityBadge" class="text-xs px-2.5 py-1 rounded-full font-bold">志望度</span>
+          <div>
+            <h3 id="detailCompanyNameHeader" class="text-lg font-bold text-white leading-tight flex items-center gap-2">
+              <span>企業名</span>
+            </h3>
+            <span id="detailMediaBadge" class="text-xs text-slate-400">経由媒体</span>
+          </div>
+        </div>
+        <div class="flex items-center gap-2">
+          <!-- Revert to offer button -->
+          <button id="modalRevertBtn" type="button" onclick="revertActiveDetailToOffer()" title="オファー管理へ戻す（誤って選考に入れた場合）" class="px-3 py-1.5 rounded-lg bg-amber-500/15 hover:bg-amber-500/25 border border-amber-500/30 text-amber-300 text-xs font-medium flex items-center gap-1.5 transition">
+            <i data-lucide="undo-2" class="w-3.5 h-3.5"></i>
+            <span>オファーに戻す</span>
+          </button>
+          <button id="modalDeleteBtn" onclick="moveToTrashActiveDetail()" title="選考から外してゴミ箱（保管庫）へ退避" class="text-slate-400 hover:text-rose-400 p-1.5 rounded-lg hover:bg-slate-800 transition">
+            <i data-lucide="archive" class="w-4 h-4"></i>
+          </button>
+          <button onclick="closeModal('pipelineDetailModal')" class="text-slate-400 hover:text-white p-1.5 rounded-lg hover:bg-slate-800">
+            <i data-lucide="x" class="w-5 h-5"></i>
+          </button>
+        </div>
+      </div>
+
+      <!-- Navigation Tabs inside Modal -->
+      <div class="flex border-b border-slate-800 px-6 bg-slate-850/60 flex-shrink-0">
+        <button type="button" id="modalTabAnalystBtn" onclick="switchModalTab('analyst')" class="py-3 px-4 font-bold text-xs sm:text-sm border-b-2 border-indigo-500 text-indigo-400 flex items-center gap-2 transition">
+          <i data-lucide="shield-alert" class="w-4 h-4 text-indigo-400"></i>
+          <span>🎓 アナリスト厳格診断 (8大項目)</span>
+          <span id="modalScoreBadge" class="text-xs px-2 py-0.5 rounded-full bg-indigo-500/20 text-indigo-300 border border-indigo-500/30">スコア判定中</span>
+        </button>
+        <button type="button" id="modalTabProgressBtn" onclick="switchModalTab('progress')" class="py-3 px-4 font-bold text-xs sm:text-sm border-b-2 border-transparent text-slate-400 hover:text-slate-200 flex items-center gap-2 transition">
+          <i data-lucide="calendar-clock" class="w-4 h-4"></i>
+          <span>選考進捗・面接対策メモ</span>
+        </button>
+      </div>
+
+      <!-- Modal Body (Scrollable Container) -->
+      <div class="p-6 overflow-y-auto custom-scrollbar flex-1 space-y-6">
+
+        <!-- ============================================== -->
+        <!-- TAB 1: アナリスト厳格フィルター分析レポート -->
+        <!-- ============================================== -->
+        <div id="modalSecAnalyst" class="space-y-6">
+          
+          <!-- Top Analyst Score & Verdict Card -->
+          <div class="bg-gradient-to-r from-slate-800/90 via-slate-800/80 to-indigo-950/40 border border-indigo-500/30 rounded-2xl p-5 shadow-lg">
+            <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 pb-4 border-b border-slate-700/70">
+              <div class="flex items-center gap-3.5">
+                <div id="analystScoreBox" class="w-16 h-16 rounded-2xl border flex flex-col items-center justify-center flex-shrink-0 shadow-inner">
+                  <span class="text-[10px] font-bold uppercase tracking-wider text-slate-300">SCORE</span>
+                  <span id="analystScoreNum" class="text-2xl font-black text-white leading-tight">8.5</span>
+                  <span class="text-[9px] text-slate-400">/ 10</span>
+                </div>
+                <div>
+                  <div class="flex items-center gap-2 flex-wrap">
+                    <span id="analystVerdictTag" class="text-xs px-2.5 py-0.5 rounded-full font-bold">判定ランク</span>
+                    <span id="analystTierLabel" class="text-xs text-slate-300 font-medium"></span>
+                  </div>
+                  <h4 id="analystHeadline" class="text-sm sm:text-base font-bold text-white mt-1.5 leading-snug"></h4>
+                </div>
+              </div>
+              <div class="flex items-center gap-2 self-end md:self-center">
+                <button onclick="toggleEditAnalystReport()" class="px-3 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 border border-slate-700 text-slate-300 text-xs font-medium flex items-center gap-1.5 transition">
+                  <i data-lucide="edit-3" class="w-3.5 h-3.5"></i>
+                  <span id="analystEditBtnText">分析メモ編集</span>
+                </button>
+              </div>
+            </div>
+
+            <!-- 4大必須条件の適合チェックバー（NEW） -->
+            <div class="pt-4 border-b border-slate-800/80 pb-4">
+              <div class="flex items-center justify-between mb-2">
+                <span class="text-[11px] font-bold text-slate-300 flex items-center gap-1.5">
+                  <i data-lucide="check-check" class="w-3.5 h-3.5 text-emerald-400"></i>
+                  高評価（7.5点以上）の「4大必須条件」クリア検証
+                </span>
+                <span id="mustConditionsResultBadge" class="text-[10px] px-2 py-0.5 rounded font-bold"></span>
+              </div>
+              <div id="mustConditionsGrid" class="grid grid-cols-1 sm:grid-cols-4 gap-2 text-[11px]">
+                <!-- Injected via JS -->
+              </div>
+            </div>
+
+            <!-- 10 Axes Quick Check Pill Matrix -->
+            <div class="pt-3">
+              <span class="text-[11px] font-bold text-slate-400 block mb-2">
+                田中さんの「10の就活軸」詳細適合状況
+              </span>
+              <div id="analystAxisGrid" class="grid grid-cols-2 sm:grid-cols-5 gap-2 text-[11px]">
+                <!-- Injected via JS -->
+              </div>
+            </div>
+          </div>
+
+          <!-- Section: 8 Major Full-Spec Analysis Items -->
+          <div class="space-y-4">
+            <h4 class="text-xs font-bold text-slate-300 uppercase tracking-wider flex items-center gap-2">
+              <i data-lucide="clipboard-list" class="w-4 h-4 text-indigo-400"></i>
+              全8大項目 フルスペック詳細診断レポート
+            </h4>
+
+            <div class="grid grid-cols-1 gap-3.5" id="analyst8ItemsContainer">
+              <!-- Item 1: 企業概要と仕事内容 -->
+              <div class="bg-slate-800/40 border border-slate-800 rounded-xl p-4">
+                <div class="flex items-center gap-2 text-xs font-bold text-indigo-300 mb-2">
+                  <span class="w-5 h-5 rounded-md bg-indigo-500/20 flex items-center justify-center text-[10px]">1</span>
+                  <span>企業概要と仕事内容（開発形態・自社開発 vs 客先常駐の割合・商流チェック）</span>
+                </div>
+                <div id="analystItem1" class="text-xs text-slate-300 leading-relaxed space-y-1"></div>
+              </div>
+
+              <!-- Item 2: 働き方・契約条件の実態 -->
+              <div class="bg-slate-800/40 border border-slate-800 rounded-xl p-4">
+                <div class="flex items-center gap-2 text-xs font-bold text-indigo-300 mb-2">
+                  <span class="w-5 h-5 rounded-md bg-indigo-500/20 flex items-center justify-center text-[10px]">2</span>
+                  <span>働き方・契約条件の実態（給与の完全分解：①基本給 ②手当 ③固定残業代 / 賞与 / 年間休日）</span>
+                </div>
+                <div id="analystItem2" class="text-xs text-slate-300 leading-relaxed space-y-1"></div>
+              </div>
+
+              <!-- Item 3: リモートワーク制度 -->
+              <div class="bg-slate-800/40 border border-slate-800 rounded-xl p-4">
+                <div class="flex items-center gap-2 text-xs font-bold text-indigo-300 mb-2">
+                  <span class="w-5 h-5 rounded-md bg-indigo-500/20 flex items-center justify-center text-[10px]">3</span>
+                  <span>【重視軸】リモートワーク制度の有無と実際の活用実績・環境（配属先依存度の検証）</span>
+                </div>
+                <div id="analystItem3" class="text-xs text-slate-300 leading-relaxed space-y-1"></div>
+              </div>
+
+              <!-- Item 4: 担当工程・下流リスク -->
+              <div class="bg-slate-800/40 border border-slate-800 rounded-xl p-4">
+                <div class="flex items-center gap-2 text-xs font-bold text-rose-300 mb-2">
+                  <span class="w-5 h-5 rounded-md bg-rose-500/20 text-rose-300 flex items-center justify-center text-[10px]">4</span>
+                  <span>担当工程・下流リスクの検証（監視・マニュアルテスト・問い合わせ対応など下流偏重回避）</span>
+                </div>
+                <div id="analystItem4" class="text-xs text-slate-300 leading-relaxed space-y-1"></div>
+              </div>
+
+              <!-- Item 5: 開発設備・IT環境 -->
+              <div class="bg-slate-800/40 border border-slate-800 rounded-xl p-4">
+                <div class="flex items-center gap-2 text-xs font-bold text-indigo-300 mb-2">
+                  <span class="w-5 h-5 rounded-md bg-indigo-500/20 flex items-center justify-center text-[10px]">5</span>
+                  <span>開発設備・IT環境とサポート体制（PCスペック、外部ディスプレイ、開発ツール自由度）</span>
+                </div>
+                <div id="analystItem5" class="text-xs text-slate-300 leading-relaxed space-y-1"></div>
+              </div>
+
+              <!-- Item 6: 研修・育成体制と専門生の立ち位置 -->
+              <div class="bg-slate-800/40 border border-slate-800 rounded-xl p-4">
+                <div class="flex items-center gap-2 text-xs font-bold text-indigo-300 mb-2">
+                  <span class="w-5 h-5 rounded-md bg-indigo-500/20 flex items-center justify-center text-[10px]">6</span>
+                  <span>研修・育成体制と専門生の立ち位置（3年制高度クリエイター学科の扱い・C++適合）</span>
+                </div>
+                <div id="analystItem6" class="text-xs text-slate-300 leading-relaxed space-y-1"></div>
+              </div>
+
+              <!-- Item 7: paizaランク換算と求められる技術水準 -->
+              <div class="bg-slate-800/40 border border-slate-800 rounded-xl p-4">
+                <div class="flex items-center gap-2 text-xs font-bold text-indigo-300 mb-2">
+                  <span class="w-5 h-5 rounded-md bg-indigo-500/20 flex items-center justify-center text-[10px]">7</span>
+                  <span>paizaランク換算と求められる技術水準（田中さんのC〜Bランクとのギャップ検証）</span>
+                </div>
+                <div id="analystItem7" class="text-xs text-slate-300 leading-relaxed space-y-1"></div>
+              </div>
+
+              <!-- Item 8: 採用難易度・選考攻略法・Webテスト形式 -->
+              <div class="bg-slate-800/40 border border-slate-800 rounded-xl p-4">
+                <div class="flex items-center gap-2 text-xs font-bold text-indigo-300 mb-2">
+                  <span class="w-5 h-5 rounded-md bg-indigo-500/20 flex items-center justify-center text-[10px]">8</span>
+                  <span>採用難易度・選考攻略法・Webテスト形式（地雷検知・面接官が見るポイント）</span>
+                </div>
+                <div id="analystItem8" class="text-xs text-slate-300 leading-relaxed space-y-1"></div>
+              </div>
+
+              <!-- Item 9: 判定の理由・相性（メリットと隠れたリスクの総括） -->
+              <div class="bg-slate-800/40 border border-amber-500/30 rounded-xl p-4">
+                <div class="flex items-center gap-2 text-xs font-bold text-amber-300 mb-2">
+                  <span class="w-5 h-5 rounded-md bg-amber-500/20 text-amber-300 flex items-center justify-center text-[10px]">9</span>
+                  <span>総合判定の理由・相性総括（メリット vs 隠れたリスク・裏の顔）</span>
+                </div>
+                <div id="analystItem9" class="text-xs text-slate-300 leading-relaxed space-y-1"></div>
+              </div>
+            </div>
+
+            <!-- Analyst Edit Form (Hidden by default) -->
+            <div id="analystEditFormContainer" class="bg-slate-800/90 border border-indigo-500/40 rounded-xl p-5 space-y-4 hidden">
+              <h5 class="text-xs font-bold text-white flex items-center gap-2">
+                <i data-lucide="edit" class="w-4 h-4 text-indigo-400"></i>
+                アナリスト分析レポートの直接編集・追記
+              </h5>
+              <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <div>
+                  <label class="block text-[11px] text-slate-400 mb-1">おすすめ度 (1.0〜10.0)</label>
+                  <input type="number" step="0.1" min="1" max="10" id="editReportScore" class="w-full text-xs rounded-lg bg-slate-900 border border-slate-700 px-3 py-2 text-white">
+                </div>
+                <div>
+                  <label class="block text-[11px] text-slate-400 mb-1">判定ラベル</label>
+                  <input type="text" id="editReportVerdict" placeholder="例: 強力な併願/滑り止め候補 ★推奨" class="w-full text-xs rounded-lg bg-slate-900 border border-slate-700 px-3 py-2 text-white">
+                </div>
+              </div>
+              <div>
+                <label class="block text-[11px] text-slate-400 mb-1">見出しサマリー</label>
+                <input type="text" id="editReportHeadline" class="w-full text-xs rounded-lg bg-slate-900 border border-slate-700 px-3 py-2 text-white">
+              </div>
+              <div>
+                <label class="block text-[11px] text-slate-400 mb-1">分析全文または追記メモ（Markdown/テキスト）</label>
+                <textarea id="editReportFullText" rows="6" class="w-full text-xs rounded-lg bg-slate-900 border border-slate-700 p-2.5 text-white"></textarea>
+              </div>
+              <div class="flex justify-end gap-2">
+                <button type="button" onclick="cancelEditAnalystReport()" class="px-3 py-1.5 rounded-lg text-xs font-medium bg-slate-800 text-slate-300">キャンセル</button>
+                <button type="button" onclick="saveEditedAnalystReport()" class="px-4 py-1.5 rounded-lg text-xs font-medium bg-indigo-600 hover:bg-indigo-500 text-white">分析を保存</button>
+              </div>
+            </div>
+
+          </div>
+
+        </div>
+
+        <!-- ============================================== -->
+        <!-- TAB 2: 選考進捗・面接対策フォーム -->
+        <!-- ============================================== -->
+        <form id="pipelineDetailForm" onsubmit="handleUpdatePipeline(event)" class="space-y-5 hidden">
+          <input type="hidden" id="detailPipeId">
+
+          <!-- Stage & Priority Status Row -->
+          <div class="bg-slate-800/40 border border-slate-800 p-4 rounded-xl grid grid-cols-1 sm:grid-cols-3 gap-4">
+            <div>
+              <label class="block text-xs font-semibold text-indigo-300 mb-1">現在の選考ステージ</label>
+              <select id="detailStage" class="w-full text-xs rounded-lg bg-slate-800 border border-slate-700 px-3 py-2 text-white font-medium focus:border-indigo-500">
+                <option value="会社説明会 (参加予定)">1. 会社説明会 (参加予定)</option>
+                <option value="会社説明会 (参加済み)">2. 会社説明会 (参加済み)</option>
+                <option value="書類選考">3. 書類選考</option>
+                <option value="Webテスト / 課題">4. Webテスト / 課題</option>
+                <option value="一次面接">5. 一次面接</option>
+                <option value="二次 / 三次面接">6. 二次 / 三次面接</option>
+                <option value="最終面接">7. 最終面接</option>
+                <option value="内定獲得">8. 内定獲得 🎉 (内定受諾・内諾企業のみ)</option>
+                <option value="選考終了 / 辞退">9. 選考終了 / 辞退 (お見送り・除外)</option>
+              </select>
+            </div>
+            <div>
+              <label class="block text-xs font-semibold text-slate-300 mb-1">志望度</label>
+              <select id="detailPriority" class="w-full text-xs rounded-lg bg-slate-800 border border-slate-700 px-3 py-2 text-white focus:border-indigo-500">
+                <option value="高">高 (第一志望群)</option>
+                <option value="中">中 (検討中)</option>
+                <option value="低">低 (練習・併願)</option>
+              </select>
+            </div>
+            <div>
+              <label class="block text-xs font-semibold text-slate-300 mb-1">必須アクション</label>
+              <input type="text" id="detailAction" placeholder="例: 日程選択待ち, ES提出..." class="w-full text-xs rounded-lg bg-slate-800 border border-slate-700 px-3 py-2 text-white focus:border-indigo-500">
+            </div>
+          </div>
+
+          <!-- 会社説明会の詳細管理セクション -->
+          <div class="bg-slate-800/35 border border-sky-500/20 p-4 rounded-xl space-y-3">
+            <div class="flex items-center justify-between">
+              <h4 class="text-xs font-bold text-sky-300 flex items-center gap-1.5 uppercase tracking-wide">
+                <i data-lucide="presentation" class="w-4 h-4 text-sky-400"></i>
+                会社説明会 参加管理・受講状況
+              </h4>
+              <span class="text-[11px] text-slate-400">参加予定・受講後の感想メモ</span>
+            </div>
+
+            <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+              <div>
+                <label class="block text-[11px] text-slate-400 mb-1">説明会ステータス</label>
+                <select id="detailInfoSessionStatus" class="w-full text-xs rounded-lg bg-slate-800 border border-slate-700 px-3 py-2 text-white focus:border-sky-500">
+                  <option value="参加予定">参加予定（予約済み）</option>
+                  <option value="参加済み">参加済み（選考へ進む・検討中）</option>
+                  <option value="アーカイブ視聴">アーカイブ動画視聴</option>
+                  <option value="該当なし">該当なし / スキップ</option>
+                </select>
+              </div>
+              <div>
+                <label class="block text-[11px] text-slate-400 mb-1">説明会日時・実施形式</label>
+                <input type="text" id="detailInfoSessionDate" placeholder="例: 10/26 14:00 Zoomウェビナー" class="w-full text-xs rounded-lg bg-slate-800 border border-slate-700 px-3 py-2 text-white focus:border-sky-500">
+              </div>
+              <div>
+                <label class="block text-[11px] text-slate-400 mb-1">アンケート提出・選考申込締切</label>
+                <input type="text" id="detailInfoSessionDeadline" placeholder="例: 翌日17:00まで / 10/31締切" class="w-full text-xs rounded-lg bg-slate-800 border border-slate-700 px-3 py-2 text-white focus:border-sky-500">
+              </div>
+            </div>
+
+            <div>
+              <label class="block text-[11px] text-slate-400 mb-1">説明会の感想・登壇社員の印象・魅力に感じた点</label>
+              <textarea id="detailInfoSessionNotes" rows="2" placeholder="社員の雰囲気、事業の強み、説明会での逆質問回答メモなど..." class="w-full text-xs rounded-lg bg-slate-800 border border-slate-700 p-2.5 text-white focus:border-sky-500"></textarea>
+            </div>
+          </div>
+
+          <!-- Schedule & Web Test -->
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div>
+              <label class="block text-xs font-medium text-slate-300 mb-1 flex items-center gap-1.5">
+                <i data-lucide="calendar" class="w-3.5 h-3.5 text-indigo-400"></i>
+                次回日程 / 提出締切
+              </label>
+              <input type="text" id="detailNextSchedule" placeholder="例: 10/28 15:00 面接" class="w-full text-xs rounded-lg bg-slate-800 border border-slate-700 px-3 py-2 text-white focus:border-indigo-500">
+            </div>
+            <div>
+              <label class="block text-xs font-medium text-slate-300 mb-1 flex items-center gap-1.5">
+                <i data-lucide="file-code-2" class="w-3.5 h-3.5 text-sky-400"></i>
+                Webテスト種別 / 課題形式
+              </label>
+              <input type="text" id="detailWebTestType" placeholder="例: SPI(テスセン), 玉手箱, 自社コーディング" class="w-full text-xs rounded-lg bg-slate-800 border border-slate-700 px-3 py-2 text-white focus:border-indigo-500">
+            </div>
+          </div>
+
+          <!-- Portal & Credentials -->
+          <div class="bg-slate-800/30 border border-slate-800 p-4 rounded-xl space-y-3">
+            <div class="flex items-center justify-between">
+              <span class="text-xs font-bold text-slate-300 flex items-center gap-1.5">
+                <i data-lucide="key-round" class="w-3.5 h-3.5 text-amber-400"></i>
+                マイページ・ログイン情報
+              </span>
+              <a id="detailPortalDirectLink" href="#" target="_blank" rel="noopener noreferrer" class="text-xs text-indigo-400 hover:text-indigo-300 hover:underline flex items-center gap-1">
+                <span>マイページを開く</span>
+                <i data-lucide="external-link" class="w-3 h-3"></i>
+              </a>
+            </div>
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div>
+                <label class="block text-[11px] text-slate-400 mb-1">採用マイページ URL</label>
+                <input type="url" id="detailMypageUrl" placeholder="https://..." class="w-full text-xs rounded-lg bg-slate-800 border border-slate-700 px-3 py-2 text-white focus:border-indigo-500">
+              </div>
+              <div>
+                <label class="block text-[11px] text-slate-400 mb-1">ログインID / パスワード等のメモ</label>
+                <div class="flex gap-2">
+                  <input type="text" id="detailLoginId" placeholder="ID: user@example.com" class="flex-1 text-xs rounded-lg bg-slate-800 border border-slate-700 px-3 py-2 text-white focus:border-indigo-500">
+                  <button type="button" onclick="copyLoginId()" title="IDをコピー" class="p-2 bg-slate-800 hover:bg-slate-700 border border-slate-700 rounded-lg text-slate-300 hover:text-white">
+                    <i data-lucide="copy" class="w-3.5 h-3.5"></i>
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Submission link (Portfolio/Resume) -->
+          <div>
+            <label class="block text-xs font-medium text-slate-300 mb-1 flex items-center gap-1.5">
+              <i data-lucide="link" class="w-3.5 h-3.5 text-emerald-400"></i>
+              提出物リンク（提出したポートフォリオURL、履歴書・ESバージョンなど）
+            </label>
+            <input type="text" id="detailPortfolioUrl" placeholder="例: https://github.com/... または v2_エンジニア向け履歴書.pdf" class="w-full text-xs rounded-lg bg-slate-800 border border-slate-700 px-3 py-2 text-white focus:border-indigo-500">
+          </div>
+
+          <!-- Section: 面接・選考対策メモ -->
+          <div class="border-t border-slate-800 pt-4 space-y-4">
+            <h4 class="text-xs font-bold text-indigo-300 tracking-wider uppercase flex items-center gap-1.5">
+              <i data-lucide="book-open-check" class="w-4 h-4"></i>
+              面接・本選考対策ドキュメント
+            </h4>
+
+            <div>
+              <label class="block text-xs font-medium text-slate-300 mb-1">志望動機サマリー / 企業アピール軸</label>
+              <textarea id="detailMotiveSummary" rows="2" placeholder="企業の強み・技術スタックと自分のキャリアの一致点など..." class="w-full text-xs rounded-lg bg-slate-800 border border-slate-700 p-2.5 text-white focus:border-indigo-500"></textarea>
+            </div>
+
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div>
+                <label class="block text-xs font-medium text-slate-300 mb-1 flex items-center gap-1">
+                  <i data-lucide="help-circle" class="w-3.5 h-3.5 text-amber-400"></i>
+                  聞かれた質問の記録
+                </label>
+                <textarea id="detailQuestionsAsked" rows="3" placeholder="Q1: 学生時代に最も技術的に苦労した点&#10;Q2: チームでの意見衝突時の対処..." class="w-full text-xs rounded-lg bg-slate-800 border border-slate-700 p-2.5 text-white focus:border-indigo-500 font-mono text-[11px]"></textarea>
+              </div>
+              <div>
+                <label class="block text-xs font-medium text-slate-300 mb-1 flex items-center gap-1">
+                  <i data-lucide="message-square-plus" class="w-3.5 h-3.5 text-sky-400"></i>
+                  逆質問ストック
+                </label>
+                <textarea id="detailReverseQuestions" rows="3" placeholder="・新卒エンジニアのコードレビュー体制&#10;・現在プロダクトで直面している技術的課題&#10;・活躍している若手エンジニアの共通点" class="w-full text-xs rounded-lg bg-slate-800 border border-slate-700 p-2.5 text-white focus:border-indigo-500 text-[11px]"></textarea>
+              </div>
+            </div>
+
+            <div>
+              <label class="block text-xs font-medium text-slate-300 mb-1 flex items-center gap-1">
+                <i data-lucide="check-square" class="w-3.5 h-3.5 text-emerald-400"></i>
+                面接後の振り返り / 結果連絡予定日メモ
+              </label>
+              <textarea id="detailInterviewReview" rows="2" placeholder="手応え: ○○の深掘りにうまく答えられた。結果は1週間以内にメール連絡予定。" class="w-full text-xs rounded-lg bg-slate-800 border border-slate-700 p-2.5 text-white focus:border-indigo-500"></textarea>
+            </div>
+          </div>
+
+          <!-- Footer Actions inside Form -->
+          <div class="flex justify-end gap-3 pt-3 border-t border-slate-800">
+            <button type="submit" class="px-5 py-2 rounded-lg text-xs font-medium bg-indigo-600 hover:bg-indigo-500 text-white transition shadow-lg shadow-indigo-600/30">選考進捗・面接メモを保存</button>
+          </div>
+        </form>
+
+      </div>
+    </div>
+  </div>
+
+  <!-- Toast Notification -->
+  <div id="toastContainer" class="fixed bottom-5 right-5 z-50 flex flex-col gap-2 pointer-events-none"></div>
+
+  <!-- Application Logic -->
+  <script>
+    // ==========================================
+    // Constants & Storage Keys
+    // ==========================================
+    const STORAGE_KEY_OFFERS = 'job_hunt_offers_v10';
+    const STORAGE_KEY_PIPELINE = 'job_hunt_pipeline_v10';
+    const STORAGE_KEY_ARCHIVED = 'job_hunt_archived_v10';
+
+    const PIPELINE_STAGES = [
+      '会社説明会 (参加予定)',
+      '会社説明会 (参加済み)',
+      '書類選考',
+      'Webテスト / 課題',
+      '一次面接',
+      '二次 / 三次面接',
+      '最終面接',
+      '内定獲得'
+    ];
+
+    // ==========================================
+    // 新スコアリング基準（5段階ルーブリック ＆ 4大必須条件）
+    // ==========================================
+    const ANALYST_REPORTS = {
+      // TIER 1: 【9.0〜10.0】最高峰・理想枠
+      '株式会社アトラス': {
+        score: 9.2,
+        tier: 'TIER_TOP',
+        verdict: '【9.2】最高峰・理想枠 / トップティア',
+        headline: '『ペルソナ』『真・女神転生』等で知られる世界的RPG開発メーカー（セガサミー傘下）。自社開発100%。基本給23.5万〜24万、固定残業なし、年休125日。4大条件を完全クリア。',
+        mustConditions: { salary: true, directTrade: true, transparency: true, workLife: true },
+        axes: { jobType: true, salary: true, overtime: true, holidays: true, workType: true, welfare: true, training: true, bonus: true, retention: true, remote: true },
+        items: [
+          '【1. 企業概要と仕事内容】自社IPの家庭用・マルチプラットフォームRPG制作100%。客先常駐SESは一切なし。独自の世界観とUI/ゲーム性で世界的評価。',
+          '【2. 働き方・契約条件】①基本給：235,000円〜240,000円（※基本給単体で21万以上をクリア） / ②諸手当支給 / ③固定残業代：なし（全額実績支給）。賞与年2回。年間休日125日以上。',
+          '【3. リモートワーク制度】ハイブリッド勤務（プロジェクト進捗や機密保持要件に応じた出社・在宅の併用体制）。',
+          '【4. 担当工程・下流リスク】ゲームプログラマーとしてバトルシステム、イベント演出、UI挙動、グラフィックス最適化等の中核実装を担当。下流リスク皆無。',
+          '【5. 開発設備・IT環境】開発専用ハイエンドPC、コンソール開発実機機材、内製エディタ・ツール群が充実。',
+          '【6. 研修・専門生の立ち位置】高度クリエイター学科（3年制）のC++・3D数学・自作ゲームエンジン知見は最も評価される領域。',
+          '【7. paizaランク換算】paiza Aランク相当のプログラミング力と、ゲームアーキテクチャの深い理解が必須。',
+          '【8. 採用難易度・選考攻略法】最難関枠。自作C++ゲームやシェーダー・演出のこだわりを言語化することが重要。※9/16説明会は不参加だったが、今後の本選考エントリーや中途採用の動向を要チェック。',
+          '【9. 総合判定総括】4大条件（基本給21万↑・自社100%・みなし無・年休120日↑）を満たす最高峰枠。ゲームプログラマーとしての理想郷。'
+        ]
+      },
+      '株式会社ハル研究所': {
+        score: 9.3,
+        tier: 'TIER_TOP',
+        verdict: '【9.3】最高峰・理想枠 / トップティア',
+        headline: '『星のカービィ』『スマブラ』の世界的名門。自社内開発100%。基本給24万、みなし残業なし、年休125日。4大条件を完全クリア。',
+        mustConditions: { salary: true, directTrade: true, transparency: true, workLife: true },
+        axes: { jobType: true, salary: true, overtime: true, holidays: true, workType: true, welfare: true, training: true, bonus: true, retention: true, remote: true },
+        items: [
+          '【1. 企業概要と仕事内容】自社ゲーム開発100%（山梨・東京）。客先常駐SESはゼロ。任天堂との強固な信頼関係によるプライム直接開発。',
+          '【2. 働き方・契約条件】①基本給：240,000円（※基本給単体で21万以上を大きくクリア） / ②一律手当：なし / ③固定残業代：完全なし（1分単位全額支給）。賞与年2回（実績高水準）。年間休日125日以上。有給消化率極めて高。',
+          '【3. リモートワーク制度】ハイブリッド勤務体制あり。機密保持ゲーム開発のためオフィス出社も重視されるが、働きやすさは業界トップクラス。',
+          '【4. 担当工程・下流リスク】新卒からコアゲームプログラミング（プレイヤー制御・アクション・物理・ツール制作）を担当。下流リスク皆無。',
+          '【5. 開発設備・IT環境】最高水準のワークステーション、Switch/新世代機開発キット、デュアルディスプレイ完備。自社内開発環境・内製ライブラリ多数。',
+          '【6. 研修・専門生の立ち位置】高度クリエイター学科（3年制）のC++・3D数学・DxLibでの低レイヤ理解は最大のアドバンテージ。大卒と対等以上の技術評価。',
+          '【7. paizaランク換算】paiza A〜Sランク相当のアルゴリズム能力と、ゲームの「手触り・触感」への情熱が問われる。',
+          '【8. 採用難易度・選考攻略法】難易度：最難関。自作ゲームエンジンのアーキテクチャ解説、C++でのパフォーマンスチューニング、制作したゲームの面白さを徹底プレゼンすることが必須。',
+          '【9. 総合判定総括】全ての就活軸を完璧にクリアした最高峰枠。客先常駐排除・高待遇・定着率のすべてを満たす。選考応募は絶対に行うべき本命企業。'
+        ]
+      },
+
+      // TIER 2: 【7.5〜8.5】高評価・強力な併願/滑り止め候補 ★ここを目指す
+      '株式会社エムスリーインテック': {
+        score: 8.8,
+        tier: 'TIER_TARGET',
+        verdict: '【8.8】高評価・強力な併願候補 ★最有力ホワイト',
+        headline: '医療DX基盤自社開発80%+直請け20%。基本給22.8万＋住宅手当2万、固定残業なし、賞与4.5ヶ月。4大必須条件をすべて高水準でクリア。',
+        mustConditions: { salary: true, directTrade: true, transparency: true, workLife: true },
+        axes: { jobType: true, salary: true, overtime: true, holidays: true, workType: true, welfare: true, training: true, bonus: true, retention: true, remote: true },
+        items: [
+          '【1. 企業概要と仕事内容】自社SaaS開発80%、大手医療法人からの直接受託20%。客先常駐（SES）は一切なし。',
+          '【2. 働き方・契約条件】①基本給：228,000円（※21万クリア） / ②一律住宅手当：20,000円 / ③固定残業代：なし（全額実績支給）。賞与年2回（計4.5ヶ月分）。年間休日124日。有給消化率82%。',
+          '【3. リモートワーク制度】フルリモート・ハイブリッド可。在宅勤務手当月額5,000円。',
+          '【4. 担当工程・下流リスク】要件定義からGo/TypeScriptによるAPI開発・マイクロサービス設計。下流塩漬けリスク皆無。',
+          '【5. 開発設備・IT環境】MacBook Pro (M3 Pro/32GB) ＋ 4K外部ディスプレイ2台。AWS/GCP検証環境無償提供。',
+          '【6. 研修・専門生の立ち位置】3年制専門卒大卒扱い。入社後3ヶ月研修＋3ヶ月OJT。田中さんの低レイヤ・計算量知見が高評価。',
+          '【7. paizaランク換算】paiza Bランク以上必須。',
+          '【8. 採用難易度・選考攻略法】paiza経由コーディング免除。「なぜ医療DXか」「C++知見をGo/Webにどう活かすか」を語ること。',
+          '【9. 総合判定総括】4大必須条件を完璧にクリア。安全併願先として最高水準であり、確実に内定を確保すべき最重要企業。'
+        ]
+      },
+      'サイバーアークゲームズ株式会社': {
+        score: 8.4,
+        tier: 'TIER_TARGET',
+        verdict: '【8.4】高評価・強力な併願候補 ★夢枠推奨',
+        headline: '自社開発100%。基本給23.5万、固定残業なし、年休125日。4大必須条件を完全クリア。特別選考オファー面談は最優先推奨。',
+        mustConditions: { salary: true, directTrade: true, transparency: true, workLife: true },
+        axes: { jobType: true, salary: true, overtime: true, holidays: true, workType: true, welfare: true, training: true, bonus: true, retention: true, remote: true },
+        items: [
+          '【1. 企業概要と仕事内容】3Dアクションゲーム自社開発100%。客先常駐SESなし。元請け直接開発または自社IP。',
+          '【2. 働き方・契約条件】①基本給：235,000円（※21万以上クリア） / ③固定残業代：完全なし（1分単位全額支給）。賞与年2回（4.0ヶ月）。年間休日125日。',
+          '【3. リモートワーク制度】週2日リモートのハイブリッド勤務。コアタイム11:00〜16:00フレックス。',
+          '【4. 担当工程・下流リスク】コアゲーム実装（物理衝突、敵AI、エフェクト）。下流リスクなし。',
+          '【5. 開発設備・IT環境】Core i9 / RTX 4080 / メモリ64GB / デュアル4Kディスプレイ貸与。',
+          '【6. 研修・専門生の立ち位置】高度クリエイター学科（3年制）は大卒と同額基本給の即戦力待遇。',
+          '【7. paizaランク換算】paiza B〜Aランク相当。',
+          '【8. 採用難易度・選考攻略法】特別オファーにより1次免除。自作ゲームエンジンのメモリ効率をアピール。',
+          '【9. 総合判定総括】4大条件を全クリア。ゲーム業界特有のマスターアップ前の残業管理に注意すれば、夢と待遇を両立できる最有力企業。'
+        ]
+      },
+      'NCD株式会社': {
+        score: 7.8,
+        tier: 'TIER_TARGET',
+        verdict: '【7.8】高評価・強力な併願/滑り止め候補 ★推奨',
+        headline: '東証スタンダード上場、自社内受託・直取引比率6割以上。基本給21.8万、賞与4ヶ月、年休123日。4大必須条件をしっかりクリア！',
+        mustConditions: { salary: true, directTrade: true, transparency: true, workLife: true },
+        axes: { jobType: true, salary: true, overtime: true, holidays: true, workType: true, welfare: true, training: true, bonus: true, retention: true, remote: true },
+        items: [
+          '【1. 企業概要と仕事内容】東証スタンダード上場独立系SIer。直取引・プライム案件多数。自社内受託チーム比率高い。',
+          '【2. 働き方・契約条件】①基本給：218,000円（※21万クリア） / ③固定残業代：なし（全額支給）。賞与年2回（約4.0ヶ月分）。年間休日123日。',
+          '【3. リモートワーク制度】週2〜3日のハイブリッド勤務実績あり。',
+          '【4. 担当工程・下流リスク】要件定義〜設計〜製造まで一貫。開発部門志望を明確にすることで下流固定を回避可能。',
+          '【5. 開発設備・IT環境】社内開発環境整備、デュアルディスプレイ、資格取得祝金制度。',
+          '【6. 研修・専門生の立ち位置】入社後3ヶ月研修。3年制専門卒大卒に準ずる好待遇。',
+          '【7. paizaランク換算】paiza B〜Cランク相当。11/4に「プログラミング仕事体験」あり。',
+          '【8. 採用難易度・選考攻略法】10/23座談会、11/4仕事体験に参加して早期選考ルートを確定させる。',
+          '【9. 総合判定総括】高評価（7.5点以上）の4大必須条件（基本給21万以上・直取引6割以上・固定残業なし・年休120日以上）をすべてクリア。安全併願の最有力枠。'
+        ]
+      },
+      '株式会社アトミテック': {
+        score: 7.9,
+        tier: 'TIER_TARGET',
+        verdict: '【7.9】高評価・強力な併願候補（自社製品Hinemos）',
+        headline: 'OSS統合運用管理「Hinemos」の自社開発元。基本給22万、みなし残業なし、年休124日。4大必須条件をクリア。3Dayインターン重要。',
+        mustConditions: { salary: true, directTrade: true, transparency: true, workLife: true },
+        axes: { jobType: true, salary: true, overtime: true, holidays: true, workType: true, welfare: true, training: true, bonus: true, retention: true, remote: true },
+        items: [
+          '【1. 企業概要と仕事内容】自社製品Hinemosのコア開発およびクラウド自動化。自社製品開発比率大。',
+          '【2. 働き方・契約条件】①基本給：220,000円（※21万クリア） / ③固定残業代：なし。賞与年2回。年間休日124日。',
+          '【3. リモートワーク制度】リモートワーク導入済み。在宅・出社バランス良。',
+          '【4. 担当工程・下流リスク】自社製品開発のため下流オペレーター塩漬けリスク極めて低。',
+          '【5. 開発設備・IT環境】GitHub、ハイスペックPC、Linuxサーバー検証環境自由利用。',
+          '【6. 研修・専門生の立ち位置】技術志向。田中さんの低レイヤ・C++の素養が高く評価される。',
+          '【7. paizaランク換算】paiza Bランク以上推奨。',
+          '【8. 採用難易度・選考攻略法】11/16〜18の3Dayインターンでの積極的発言が鍵。',
+          '【9. 総合判定総括】自社製品開発×基本給22万×客先常駐排除と4大必須条件を満たす高評価企業。'
+        ]
+      },
+      '日本NonStopイノベーション株式会社': {
+        score: 7.6,
+        tier: 'TIER_TARGET',
+        verdict: '【7.6】高評価・強力な併願候補（無停止基盤）',
+        headline: '金融・決済の無停止サーバー（HPE NonStop）専門SIer。基本給21.5万〜22.5万、年休122日。低レイヤC言語が直結する優良企業。',
+        mustConditions: { salary: true, directTrade: true, transparency: true, workLife: true },
+        axes: { jobType: true, salary: true, overtime: true, holidays: true, workType: true, welfare: true, training: true, bonus: true, retention: true, remote: true },
+        items: [
+          '【1. 企業概要と仕事内容】金融決済インフラのHPE NonStopサーバー専門SIer。高可用性技術に特化。',
+          '【2. 働き方・契約条件】①基本給：215,000円〜225,000円（※21万クリア） / ③固定残業代：なし。賞与年2回。年間休日122日。',
+          '【3. リモートワーク制度】金融案件のため自社開発室または検証センターでの勤務が中心。',
+          '【4. 担当工程・下流リスク】C言語による超低遅延トランザクション開発。深い低レイヤ技術が身につく。',
+          '【5. 開発設備・IT環境】NonStop高可用性検証サーバー、Linux環境。',
+          '【6. 研修・専門生の立ち位置】C/C++・OS・メモリ・並行処理を理解する専門生は大歓迎。',
+          '【7. paizaランク換算】paiza Bランク以上。',
+          '【8. 採用難易度・選考攻略法】11/9 10:00〜セミナー。金融決済の止まらない仕組みへの関心をアピール。',
+          '【9. 総合判定総括】4大必須条件をクリア。C言語による超低遅延・高信頼性プログラミングができる隠れた良質企業。'
+        ]
+      },
+      '4samurai': {
+        score: 7.5,
+        tier: 'TIER_TARGET',
+        verdict: '【7.5】高評価・強力な併願候補（ゲーム開発・夢枠）',
+        headline: 'モバイル・オンラインゲーム自社開発。基本給22万前後、年休120日。田中さんのゲーム開発意欲と合致。',
+        mustConditions: { salary: true, directTrade: true, transparency: true, workLife: true },
+        axes: { jobType: true, salary: true, overtime: true, holidays: true, workType: true, welfare: true, training: true, bonus: true, retention: true, remote: true },
+        items: [
+          '【1. 企業概要と仕事内容】スマートフォン・ブラウザゲーム開発。自社内開発中心。',
+          '【2. 働き方・契約条件】①基本給：220,000円〜225,000円（※21万クリア） / 固定残業の有無は面接で確認。賞与年2回。年間休日120日。',
+          '【3. リモートワーク制度】ハイブリッド勤務。',
+          '【4. 担当工程・下流リスク】クライアント（Unity/C#）またはサーバー開発。下流リスクなし。',
+          '【5. 開発設備・IT環境】ゲーム開発用ハイスペックPC、実機検証端末。',
+          '【6. 研修・専門生の立ち位置】ゲーム専門学生歓迎。自作ゲーム作品重視。',
+          '【7. paizaランク換算】paiza Bランク相当。',
+          '【8. 採用難易度・選考攻略法】自作ゲーム作品とUnity/C++コード提出が鍵。',
+          '【9. 総合判定総括】ゲーム制作コースのスキルが活かせる自社開発ゲーム会社。作品選考を前進させる価値あり。'
+        ]
+      },
+
+      // TIER 3: 【6.0〜7.0】中位・条件付き検討枠
+      '株式会社エイエイエス': {
+        score: 7.1,
+        tier: 'TIER_MID',
+        verdict: '【7.1】中位・条件付き検討枠（制御・組込系）',
+        headline: '制御・通信に強みを持つ独立系。基本給21万クリアだが、客先常駐案件が一部混在するため商流の事前確認が必要。',
+        mustConditions: { salary: true, directTrade: false, transparency: true, workLife: true },
+        axes: { jobType: true, salary: true, overtime: true, holidays: true, workType: false, welfare: true, training: true, bonus: true, retention: true, remote: true },
+        items: [
+          '【1. 企業概要と仕事内容】通信・制御・車載システム開発。直請けと客先常駐が混在。',
+          '【2. 働き方・契約条件】①基本給：210,000円クリア / ③固定残業代：なし。賞与年2回。年間休日120日。',
+          '【3. リモートワーク制度】一部リモート。ハードウェア検証案件は出社多め。',
+          '【4. 担当工程・下流リスク】実装工程は多いが検証・テストが長期化する現場もあるため要確認。',
+          '【5. 開発設備・IT環境】組込ボード、開発用PC。',
+          '【6. 研修・専門生の立ち位置】C/C++を学んでいる田中さんは優位。',
+          '【7. paizaランク換算】paiza C〜Bランク相当。',
+          '【8. 採用難易度・選考攻略法】10/22説明会で自社内開発と客先常駐の比率を質問。',
+          '【9. 総合判定総括】基本給21万はクリアしているが、客先常駐比率の懸念があるため「中位・条件付き検討枠（7.1点）」。'
+        ]
+      },
+      '国際ソフトウェア株式会社': {
+        score: 7.0,
+        tier: 'TIER_MID',
+        verdict: '【7.0】中位・条件付き検討枠（独立系中堅SIer）',
+        headline: '独立系として歴史あるSIer。基本給21.2万・年休120日だが、客先常駐案件が混在。セーフティネット併願枠。',
+        mustConditions: { salary: true, directTrade: false, transparency: true, workLife: true },
+        axes: { jobType: true, salary: true, overtime: true, holidays: true, workType: false, welfare: true, training: true, bonus: true, retention: true, remote: true },
+        items: [
+          '【1. 企業概要と仕事内容】金融・産業系システム受託。プライムと大手協業が半々。客先常駐あり。',
+          '【2. 働き方・契約条件】①基本給：212,000円 / 固定残業なし。賞与年2回。年間休日120日。',
+          '【3. リモートワーク制度】クライアント要件準拠。',
+          '【4. 担当工程・下流リスク】設計から製造まで。',
+          '【5. 開発設備・IT環境】標準的開発環境。',
+          '【6. 研修・専門生の立ち位置】新卒研修カリキュラム体系化。',
+          '【7. paizaランク換算】paiza Cランク相当。',
+          '【8. 採用難易度・選考攻略法】10/28体験ワーク、11/6セミナー。',
+          '【9. 総合判定総括】客先常駐が一定割合あるため7.0点。堅実なセーフティネット候補。'
+        ]
+      },
+      '株式会社コンピュータマインド社': {
+        score: 6.7,
+        tier: 'TIER_MID',
+        verdict: '【6.7】中位・条件付き検討枠（制御ソフトウェア）',
+        headline: '半導体・医療・産業ロボット制御。C/C++技術が活きるが、常駐比率の精査が必要。',
+        mustConditions: { salary: true, directTrade: false, transparency: true, workLife: true },
+        axes: { jobType: true, salary: true, overtime: true, holidays: true, workType: false, welfare: true, training: true, bonus: true, retention: true, remote: false },
+        items: [
+          '【1. 企業概要と仕事内容】制御ソフトウェア開発。一次請けと二次請け混在。',
+          '【2. 働き方・契約条件】①基本給：210,000円前後 / 固定残業なし。年間休日120日。',
+          '【3. リモートワーク制度】実機検証のため出社多め。',
+          '【4. 担当工程・下流リスク】C/C++制御実装。コード実装中心。',
+          '【5. 開発設備・IT環境】制御シミュレータ、ワークステーション。',
+          '【6. 研修・専門生の立ち位置】C++のポインタ・メモリ管理知識が高評価。',
+          '【7. paizaランク換算】paiza C〜Bランク。',
+          '【8. 採用難易度・選考攻略法】実機制御への興味をアピール。',
+          '【9. 総合判定総括】技術軸は合致するが商流の確認が必要なため中位枠。'
+        ]
+      },
+      'シーエスエスグループ': {
+        score: 6.8,
+        tier: 'TIER_MID',
+        verdict: '【6.8】中位・条件付き検討枠（金融・公共SIer）',
+        headline: '9/17体験済。金融・官公庁システム受託。基本給21.2万だが客先常駐あり。',
+        mustConditions: { salary: true, directTrade: false, transparency: true, workLife: true },
+        axes: { jobType: true, salary: true, overtime: true, holidays: true, workType: false, welfare: true, training: true, bonus: true, retention: true, remote: false },
+        items: [
+          '【1. 企業概要と仕事内容】金融・公共インフラ系システム受託。客先常駐あり。',
+          '【2. 働き方・契約条件】①基本給：212,000円 / 固定残業なし。年間休日121日。',
+          '【3. リモートワーク制度】金融案件のため出社比率高め。',
+          '【4. 担当工程・下流リスク】開発からテストまで。',
+          '【5. 開発設備・IT環境】堅牢セキュリティ環境。',
+          '【6. 研修・専門生の立ち位置】研修手厚い。',
+          '【7. paizaランク換算】paiza Cランク。',
+          '【8. 採用難易度・選考攻略法】本選考エントリー検討。',
+          '【9. 総合判定総括】セーフティネット併願枠。'
+        ]
+      },
+      '株式会社ウィルウェイ': {
+        score: 6.6,
+        tier: 'TIER_MID',
+        verdict: '【6.6】中位・条件付き検討枠',
+        headline: '10/20説明会参加済。業務系システム開発。客先常駐比率要確認。',
+        mustConditions: { salary: true, directTrade: false, transparency: true, workLife: true },
+        axes: { jobType: true, salary: true, overtime: true, holidays: true, workType: false, welfare: true, training: true, bonus: true, retention: true, remote: true },
+        items: [
+          '【1. 企業概要と仕事内容】業務系システムインテグレーション。',
+          '【2. 働き方・契約条件】①基本給：210,000円前後 / 固定残業なし。年間休日120日。',
+          '【3. リモートワーク制度】案件による。',
+          '【4. 担当工程・下流リスク】オープン系開発。',
+          '【5. 開発設備・IT環境】標準的PC。',
+          '【6. 研修・専門生の立ち位置】専門卒歓迎。',
+          '【7. paizaランク換算】paiza Cランク。',
+          '【8. 採用難易度・選考攻略法】案内待ち。',
+          '【9. 総合判定総括】併願キープ枠。'
+        ]
+      },
+      '株式会社エスユーエス': {
+        score: 6.4,
+        tier: 'TIER_MID',
+        verdict: '【6.4】中位・条件付き検討枠（VR体験は魅力）',
+        headline: '11/20 VR仕事体験。自社VRラボは魅力だが、本質は【技術系SES/派遣】。配属確約が得られない場合は入社非推奨。',
+        mustConditions: { salary: true, directTrade: false, transparency: true, workLife: true },
+        axes: { jobType: true, salary: true, overtime: true, holidays: true, workType: false, welfare: true, training: true, bonus: true, retention: false, remote: true },
+        items: [
+          '【1. 企業概要と仕事内容】技術系SESおよびVR/AR自社開発。新卒の多くは社外派遣。',
+          '【2. 働き方・契約条件】①基本給：210,000円前後 / 固定残業なし。年間休日125日。',
+          '【3. リモートワーク制度】配属先依存。',
+          '【4. 担当工程・下流リスク】VRラボならUnity/Unreal。常駐に回されると一般ITテストのリスクあり。',
+          '【5. 開発設備・IT環境】VR機器完備。',
+          '【6. 研修・専門生の立ち位置】3D数学・ゲームスキルは大歓迎。',
+          '【7. paizaランク換算】paiza C〜Bランク。',
+          '【8. 採用難易度・選考攻略法】11/20仕事体験で「VR自社チーム限定」での選考が可能か打診。',
+          '【9. 総合判定総括】商流の第2条件（自社比率6割以上）を満たせない懸念があり中位枠（6.4点）。'
+        ]
+      },
+
+      // TIER 4: 【4.5〜5.5】注意・リスク大の懸念枠
+      'パーソルクロステクノロジー株式会社': {
+        score: 5.0,
+        tier: 'TIER_WARN',
+        verdict: '【5.0】注意・リスク大の懸念枠（客先常駐SES警戒）',
+        headline: '11/6一次面接確定だが、客先常駐比率8割以上のSESモデル。案件ガチャ・下流工程（監視・テスト）リスク大。',
+        mustConditions: { salary: false, directTrade: false, transparency: true, workLife: true },
+        axes: { jobType: true, salary: false, overtime: true, holidays: true, workType: false, welfare: true, training: true, bonus: true, retention: false, remote: false },
+        items: [
+          '【1. 企業概要と仕事内容】技術系エンジニア派遣・SES企業。客先常駐比率80%以上。「案件ガチャ」リスク大。',
+          '【2. 働き方・契約条件】①基本給：205,000円前後（※純粋な基本給は21万未満の可能性あり要確認） / 固定残業なし。年間休日120日。',
+          '【3. リモートワーク制度】常駐先クライアントに100%依存。現場判断で完全出社になる可能性大。',
+          '【4. 担当工程・下流リスク】極めて高い警戒要。「開発・インフラ」名目でテスト実施や運用監視などの下流作業に回される実例多数。',
+          '【5. 開発設備・IT環境】客先貸与PC中心。',
+          '【6. 研修・専門生の立ち位置】C++自作エンジンの高度スキルが活かせる現場に配属される確率は低い。',
+          '【7. paizaランク換算】paiza D〜Cランク。',
+          '【8. 採用難易度・選考攻略法】10/26インターン、11/6一次面接。「自社受託案件の割合」を厳しく質問すること。',
+          '【9. 総合判定総括】4大必須条件の「基本給21万以上」「直取引6割以上」を大幅に外すため【5.0点】。面接練習用として割り切るべき。'
+        ]
+      },
+      'フューチャー・ウェブ・イノベーション': {
+        score: 5.4,
+        tier: 'TIER_WARN',
+        verdict: '【5.4】注意・リスク大の懸念枠（給与カラクリあり）',
+        headline: '基本給19.5万＋固定残業20h（3.5万）で見かけ月給23万。基本給21万未満で賞与算出も不利。',
+        mustConditions: { salary: false, directTrade: true, transparency: false, workLife: true },
+        axes: { jobType: true, salary: false, overtime: true, holidays: true, workType: true, welfare: false, training: true, bonus: false, retention: false, remote: true },
+        items: [
+          '【1. 企業概要と仕事内容】Web受託80%、自社SaaS20%。',
+          '【2. 働き方・契約条件】①基本給：195,000円（※21万未満・NG） / ③固定残業代：35,000円（20時間分）。賞与が基本給ベースで低額。',
+          '【3. リモートワーク制度】フルリモート可。',
+          '【4. 担当工程・下流リスク】フロントエンド制作中心。',
+          '【5. 開発設備・IT環境】MacBook Air。',
+          '【6. 研修・専門生の立ち位置】専門卒歓迎だがC++技術は活きない。',
+          '【7. paizaランク換算】paiza Cランク。',
+          '【8. 採用難易度・選考攻略法】Webデモで容易に内定可能。',
+          '【9. 総合判定総括】第1必須条件「基本給21万以上」を満たさないため懸念枠（5.4点）。'
+        ]
+      },
+      '株式会社テクノエージェント': {
+        score: 5.2,
+        tier: 'TIER_WARN',
+        verdict: '【5.2】注意・リスク大の懸念枠（人材・派遣SES要素）',
+        headline: '11/2カジュアル面談。ITエンジニア人材サービス企業。客先常駐依存度と基本給単体の確認が必須。',
+        mustConditions: { salary: false, directTrade: false, transparency: false, workLife: true },
+        axes: { jobType: true, salary: false, overtime: true, holidays: true, workType: false, welfare: true, training: true, bonus: false, retention: false, remote: true },
+        items: [
+          '【1. 企業概要と仕事内容】ITエンジニア人材派遣・SES主力。',
+          '【2. 働き方・契約条件】基本給20万前後の疑いあり。固定残業代の有無を面談で質問。',
+          '【3. リモートワーク制度】常駐先依存。',
+          '【4. 担当工程・下流リスク】テスト・サポートデスク・運用監視リスク要警戒。',
+          '【5. 開発設備・IT環境】派遣先依存。',
+          '【6. 研修・専門生の立ち位置】高単価で現場に派遣される構造に注意。',
+          '【7. paizaランク換算】paiza D〜Cランク。',
+          '【8. 採用難易度・選考攻略法】11/2 11:00面談で商流を徹底ヒアリング。',
+          '【9. 総合判定総括】商流と基本給の4大条件を満たさないリスクが高いため注意枠（5.2点）。'
+        ]
+      },
+
+      // TIER 5: 【1.0〜4.0】地雷・完全ミスマッチ枠
+      'フューチャーAIシステムズ': {
+        score: 3.5,
+        tier: 'TIER_DANGER',
+        verdict: '【3.5】地雷・完全ミスマッチ枠（辞退済）',
+        headline: '【地雷】AIを謳うが実態は客先常駐75%以上。基本給19万＋固定残業30h。データアノテーション下流固定リスク。',
+        mustConditions: { salary: false, directTrade: false, transparency: false, workLife: false },
+        axes: { jobType: false, salary: false, overtime: false, holidays: true, workType: false, welfare: false, training: false, bonus: false, retention: false, remote: false },
+        items: [
+          '【1. 企業概要と仕事内容】実態は三次請け客先常駐SES。',
+          '【2. 働き方・契約条件】基本給19万、固定残業30h（4.2万）。賞与寸志。',
+          '【3. リモートワーク制度】現場指示で完全出社。',
+          '【4. 担当工程・下流リスク】データアノテーション（タグ付け単純作業）固定。',
+          '【5. 開発設備・IT環境】客先PC。',
+          '【6. 研修・専門生の立ち位置】専門卒の技術が完全に腐る。',
+          '【7. paizaランク換算】paiza Dランク誰でも合格。',
+          '【8. 採用難易度・選考攻略法】オファー辞退済。',
+          '【9. 総合判定総括】4大必須条件が全滅の地雷企業。オファー辞退は完全正解。'
+        ]
+      }
+    };
+
+    // ==========================================
+    // 田中壮さんの実際の全選考パイプライン初期データ
+    // ==========================================
+    const SAMPLE_PIPELINE = [
+      {
+        id: 'pipe-aas-1',
+        originalOfferId: null,
+        companyName: '株式会社エイエイエス',
+        media: 'マイナビ',
+        stage: '会社説明会 (参加予定)',
+        priority: '中',
+        nextSchedule: '10/22 14:30〜15:30 (Zoom)',
+        action: 'オープンカンパニー・WEB説明会 参加 & 質問準備',
+        infoSessionStatus: '参加予定',
+        infoSessionDate: '10/22 14:30〜15:30 WEB説明会',
+        infoSessionDeadline: '当日アンケート提出',
+        infoSessionNotes: '制御・通信・インフラに強みを持つ独立系SIer。C/C++技術の活かしどころを確認予定。',
+        webTestType: '説明会後案内',
+        mypageUrl: '',
+        loginId: '',
+        portfolioUrl: 'https://github.com/my-account/custom-engine-cplusplus',
+        motiveSummary: '制御・通信分野でのC/C++を用いた高品質なシステム開発に興味がある。',
+        questionsAsked: '',
+        reverseQuestions: '・新卒エンジニアがC/C++での開発案件に配属される割合\n・自社内開発と客先常駐の比率',
+        interviewReview: '',
+        analystReport: null
+      },
+      {
+        id: 'pipe-ncd-1',
+        originalOfferId: null,
+        companyName: 'NCD株式会社',
+        media: 'マイナビ',
+        stage: '会社説明会 (参加予定)',
+        priority: '高',
+        nextSchedule: '10/23 10:00〜12:00 (座談会)',
+        action: '10/23オープンカンパニー参加 → 11/4仕事体験参加',
+        infoSessionStatus: '参加予定',
+        infoSessionDate: '10/23 10:00〜12:00 (次回11/04 10:00〜16:00)',
+        infoSessionDeadline: '11/04 プログラミング仕事体験予約済',
+        infoSessionNotes: '【高評価7.8点・4大条件クリア】東証スタンダード上場、独立系SIer。自社内受託比率高くプライム比率良好。11/4仕事体験も予約中。',
+        webTestType: '適性検査・SPI予定',
+        mypageUrl: '',
+        loginId: '',
+        portfolioUrl: 'https://github.com/my-account/custom-engine-cplusplus',
+        motiveSummary: '独立系上場SIerとして自社内受託比率が高く、手厚い教育体制と安定した環境で長くスキルを伸ばせるため。',
+        questionsAsked: '',
+        reverseQuestions: '・配属後のOJT体制と若手へのコードレビュー文化\n・自社ソリューション開発と受託開発のキャリアパス',
+        interviewReview: '',
+        analystReport: null
+      },
+      {
+        id: 'pipe-persol-1',
+        originalOfferId: null,
+        companyName: 'パーソルクロステクノロジー株式会社',
+        media: 'マイナビ / Re就活',
+        stage: '一次面接',
+        priority: '中',
+        nextSchedule: '10/26 13:00 1day → 11/06 10:00 一次面接',
+        action: '10/26インターン受講 & 11/6一次面接（客先常駐・下流リスク逆質問準備）',
+        infoSessionStatus: '参加済み',
+        infoSessionDate: '10/09 会社説明会参加済',
+        infoSessionDeadline: '11/06 10:00〜10:45 一次面接（開発・インフラ）確定',
+        infoSessionNotes: '【注意枠5.0点】常用型派遣・SES比率高いため下流塩漬けリスク要警戒。面接で受託比率を確認。',
+        webTestType: '適性検査実施予定',
+        mypageUrl: '',
+        loginId: '',
+        portfolioUrl: 'https://github.com/my-account/custom-engine-cplusplus',
+        motiveSummary: 'パーソルグループの広範な案件規模とIT開発プロジェクトへの参画。',
+        questionsAsked: '',
+        reverseQuestions: '・配属先における客先常駐と受託開発の比率\n・初期配属でプログラミング以外のテスターや運用監視に回される可能性はあるか',
+        interviewReview: '',
+        analystReport: null
+      },
+      {
+        id: 'pipe-kokusai-1',
+        originalOfferId: null,
+        companyName: '国際ソフトウェア株式会社',
+        media: 'マイナビ',
+        stage: '会社説明会 (参加予定)',
+        priority: '中',
+        nextSchedule: '10/28 09:30〜16:30 (ワークショップ)',
+        action: '10/28 1day体験ワークショップ参加 & 11/6セミナー準備',
+        infoSessionStatus: '参加予定',
+        infoSessionDate: '10/28 09:30〜16:30 (次回11/06 15:30〜16:30)',
+        infoSessionDeadline: '11/06 15:30 業界研究＆会社説明セミナー予約済',
+        infoSessionNotes: '10/28 1dayIT業界理解UP体験型ワークショップ、11/6業界研究＆会社説明セミナー予約中。',
+        webTestType: '適性検査予定',
+        mypageUrl: '',
+        loginId: '',
+        portfolioUrl: 'https://github.com/my-account/custom-engine-cplusplus',
+        motiveSummary: '独立系SIerとして長い歴史を持ち、安定した基盤で幅広いシステム開発に携われる点。',
+        questionsAsked: '',
+        reverseQuestions: '・体験ワークショップで学んだ設計力を実務でどう活かせるか',
+        interviewReview: '',
+        analystReport: null
+      },
+      {
+        id: 'pipe-techno-1',
+        originalOfferId: null,
+        companyName: '株式会社テクノエージェント',
+        media: '就活サイト',
+        stage: '一次面接',
+        priority: '中',
+        nextSchedule: '11/02 11:00〜11:30 (面談)',
+        action: 'カジュアル面談参加（基本給・商流・常駐比率の確認）',
+        infoSessionStatus: '参加予定',
+        infoSessionDate: '11/02 11:00〜11:30 カジュアル面談',
+        infoSessionDeadline: '',
+        infoSessionNotes: '【注意枠5.2点】IT人材・派遣SESの側面が強いため、雇用形態・自社受託割合・担当工程を面談で慎重に確認すること。',
+        webTestType: '面談後案内',
+        mypageUrl: '',
+        loginId: '',
+        portfolioUrl: 'https://github.com/my-account/custom-engine-cplusplus',
+        motiveSummary: '自社の開発案件およびキャリア形成サポートへの興味。',
+        questionsAsked: '',
+        reverseQuestions: '・入社後にアサインされる案件の商流（自社受託か客先常駐か）\n・基本給の内訳と固定残業代の有無',
+        interviewReview: '',
+        analystReport: null
+      },
+      {
+        id: 'pipe-nonstop-1',
+        originalOfferId: null,
+        companyName: '日本NonStopイノベーション株式会社',
+        media: 'マイナビ',
+        stage: '会社説明会 (参加予定)',
+        priority: '高',
+        nextSchedule: '11/09 10:00〜11:30 (セミナー)',
+        action: 'IT業界研究セミナー参加（無停止サーバー基盤の事前リサーチ）',
+        infoSessionStatus: '参加予定',
+        infoSessionDate: '11/09 10:00〜11:30 セミナー',
+        infoSessionDeadline: '',
+        infoSessionNotes: '【高評価7.6点】金融・決済で24時間365日無停止を誇るHPE NonStopサーバーの専門SIer。C言語低レイヤ技術が活きる。',
+        webTestType: 'セミナー後案内',
+        mypageUrl: '',
+        loginId: '',
+        portfolioUrl: 'https://github.com/my-account/custom-engine-cplusplus',
+        motiveSummary: '金融インフラを支える24時間365日無停止サーバー技術と、C言語による高信頼性プログラミングに強い関心がある。',
+        questionsAsked: '',
+        reverseQuestions: '・ミッションクリティカルな開発における品質保証とコードレビュー体制',
+        interviewReview: '',
+        analystReport: null
+      },
+      {
+        id: 'pipe-atomitech-1',
+        originalOfferId: null,
+        companyName: '株式会社アトミテック',
+        media: 'マイナビ',
+        stage: '会社説明会 (参加予定)',
+        priority: '高',
+        nextSchedule: '11/16〜11/18 13:00〜17:00 (3Day)',
+        action: '3Dayインターン参加（Hinemosの製品仕様・アーキテクチャ予習）',
+        infoSessionStatus: '参加予定',
+        infoSessionDate: '11/16〜11/18 各日13:00〜17:00 3Dayインターン',
+        infoSessionDeadline: '',
+        infoSessionNotes: '【高評価7.9点・4大条件クリア】OSS統合運用管理ツール「Hinemos」の自社開発元。自社開発比率が高くインターン高評価を狙う。',
+        webTestType: 'インターン後選考案内',
+        mypageUrl: '',
+        loginId: '',
+        portfolioUrl: 'https://github.com/my-account/custom-engine-cplusplus',
+        motiveSummary: '自社開発ソフトウェア「Hinemos」の開発に携わり、オープンソースとクラウド自動化の最先端で技術力を発揮したいため。',
+        questionsAsked: '',
+        reverseQuestions: '・Hinemosコアエンジンのアーキテクチャ設計で重視されている点',
+        interviewReview: '',
+        analystReport: null
+      },
+      {
+        id: 'pipe-sus-1',
+        originalOfferId: null,
+        companyName: '株式会社エスユーエス',
+        media: 'マイナビ',
+        stage: '会社説明会 (参加予定)',
+        priority: '中',
+        nextSchedule: '11/20 13:30〜17:30 (VR制作体験)',
+        action: '1day仕事体験（VRコンテンツ制作）参加 & 3D技術アピール',
+        infoSessionStatus: '参加予定',
+        infoSessionDate: '11/20 13:30〜17:30 1day仕事体験',
+        infoSessionDeadline: '',
+        infoSessionNotes: '【中位6.4点】VRコンテンツ制作の仕事体験。自社VRチームへの配属可能性を確認すること。',
+        webTestType: '仕事体験後案内',
+        mypageUrl: '',
+        loginId: '',
+        portfolioUrl: 'https://github.com/my-account/custom-engine-cplusplus',
+        motiveSummary: 'VR/AR技術を用いた没入型コンテンツ制作と3Dインタラクティブ技術の実装。',
+        questionsAsked: '',
+        reverseQuestions: '・自社VRラボ配属と他社プロジェクト派遣の配属決定基準',
+        interviewReview: '',
+        analystReport: null
+      },
+      {
+        id: 'pipe-hal-1',
+        originalOfferId: null,
+        companyName: '株式会社ハル研究所',
+        media: '採用HP直接応募',
+        stage: '会社説明会 (参加済み)',
+        priority: '高',
+        nextSchedule: '作品応募・ES提出準備中',
+        action: '【最高峰9.3点・超本命】C++自作ゲームエンジン作品 & ポートフォリオES提出',
+        infoSessionStatus: '参加済み',
+        infoSessionDate: '09/18 会社説明会参加済',
+        infoSessionDeadline: '秋採用・作品選考締切確認要',
+        infoSessionNotes: '【最高峰9.3点・4大条件完全合致】『星のカービィ』『スマブラ』の自社開発100%。C++自作エンジン作品選考の準備を最優先で推進。',
+        webTestType: '自作ゲーム作品選考・C++実技',
+        mypageUrl: 'https://www.hallab.co.jp/recruit/',
+        loginId: '',
+        portfolioUrl: 'https://github.com/my-account/custom-engine-cplusplus',
+        motiveSummary: '手触りと楽しさを極限まで追求したアクションゲームのコアプログラミングに生涯携わりたいため。自作ゲームエンジン開発で培ったC++・衝突判定・最適化技術をフルに活かしたい。',
+        questionsAsked: '',
+        reverseQuestions: '・自社製ゲームエンジンと新世代ハードウェアへの最適化アプローチ',
+        interviewReview: '説明会での社員座談会で、妥協のないモノづくり精神に強く共感。作品提出を急ぐ。',
+        analystReport: null
+      },
+      {
+        id: 'pipe-4samurai-1',
+        originalOfferId: null,
+        companyName: '4samurai',
+        media: '採用HP / 就活媒体',
+        stage: '会社説明会 (参加済み)',
+        priority: '高',
+        nextSchedule: '本選考エントリー検討中',
+        action: 'ゲーム作品選考・ES提出準備',
+        infoSessionStatus: '参加済み',
+        infoSessionDate: '09/29 会社説明会参加済',
+        infoSessionDeadline: '',
+        infoSessionNotes: '【高評価7.5点】モバイルゲーム開発。自社開発中心でゲーム制作コースのスキルと合致。',
+        webTestType: '作品審査・適性検査',
+        mypageUrl: '',
+        loginId: '',
+        portfolioUrl: 'https://github.com/my-account/custom-engine-cplusplus',
+        motiveSummary: 'プレイヤーを熱狂させるオンラインゲームのクライアント・サーバー開発に携わりたいため。',
+        questionsAsked: '',
+        reverseQuestions: '・ゲームの描画最適化とフレームレート維持における課題',
+        interviewReview: '',
+        analystReport: null
+      },
+      {
+        id: 'pipe-compmind-1',
+        originalOfferId: null,
+        companyName: '株式会社コンピュータマインド社',
+        media: 'Re就活キャンパス',
+        stage: '会社説明会 (参加済み)',
+        priority: '中',
+        nextSchedule: '適性検査案内確認中',
+        action: '選考アンケート提出 & 客先常駐比率の調査',
+        infoSessionStatus: '参加済み',
+        infoSessionDate: '10/19 会社説明会参加済',
+        infoSessionDeadline: '',
+        infoSessionNotes: '【中位6.7点】半導体・産業ロボットの制御ソフトウェア開発。C/C++技術が活きる。',
+        webTestType: '適性検査',
+        mypageUrl: '',
+        loginId: '',
+        portfolioUrl: 'https://github.com/my-account/custom-engine-cplusplus',
+        motiveSummary: '高信頼性が求められる産業機器の組み込み・制御プログラミングに関心がある。',
+        questionsAsked: '',
+        reverseQuestions: '・自社内開発と客先常駐の比率',
+        interviewReview: '',
+        analystReport: null
+      },
+      {
+        id: 'pipe-willway-1',
+        originalOfferId: null,
+        companyName: '株式会社ウィルウェイ',
+        media: 'マイナビ',
+        stage: '会社説明会 (参加済み)',
+        priority: '中',
+        nextSchedule: '次回選考案内待ち',
+        action: '選考案内確認 & 併願検討',
+        infoSessionStatus: '参加済み',
+        infoSessionDate: '10/20 会社説明会参加済',
+        infoSessionDeadline: '',
+        infoSessionNotes: '【中位6.6点】業務系システムインテグレーション。説明会受講完了。',
+        webTestType: '適性検査',
+        mypageUrl: '',
+        loginId: '',
+        portfolioUrl: 'https://github.com/my-account/custom-engine-cplusplus',
+        motiveSummary: 'クライアント企業の課題を解決するITソリューション開発。',
+        questionsAsked: '',
+        reverseQuestions: '',
+        interviewReview: '',
+        analystReport: null
+      },
+      {
+        id: 'pipe-css-1',
+        originalOfferId: null,
+        companyName: 'シーエスエスグループ',
+        media: 'マイナビ',
+        stage: '会社説明会 (参加済み)',
+        priority: '中',
+        nextSchedule: '本選考エントリー検討中',
+        action: '金融系受託の選考応募判断',
+        infoSessionStatus: '参加済み',
+        infoSessionDate: '09/17 説明会・体験型1day参加済',
+        infoSessionDeadline: '',
+        infoSessionNotes: '【中位6.8点】金融・公共インフラ系システム開発。1day体験完了。',
+        webTestType: '適性検査',
+        mypageUrl: '',
+        loginId: '',
+        portfolioUrl: '',
+        motiveSummary: '社会インフラを支える金融系大規模システムの堅牢な開発。',
+        questionsAsked: '',
+        reverseQuestions: '',
+        interviewReview: '',
+        analystReport: null
+      },
+      {
+        id: 'pipe-re-forum-1',
+        originalOfferId: null,
+        companyName: 'ゲーム×IT業界フォーラム【東京】（Re就活キャンパス）',
+        media: 'Re就活キャンパス',
+        stage: '会社説明会 (参加済み)',
+        priority: '中',
+        nextSchedule: '出展企業からのスカウト・案内確認',
+        action: '合同説明会ブース訪問完了。接触企業からのオファー確認',
+        infoSessionStatus: '参加済み',
+        infoSessionDate: '10/12 合同業界フォーラム参加済',
+        infoSessionDeadline: '',
+        infoSessionNotes: '10/12（月）東京開催のゲーム×IT特化合同企業説明会。複数社のブースで情報収集およびスカウト獲得のアクションを実施。',
+        webTestType: '',
+        mypageUrl: 'https://service.gakujo.ne.jp/',
+        loginId: '',
+        portfolioUrl: 'https://github.com/my-account/custom-engine-cplusplus',
+        motiveSummary: 'ゲーム業界およびIT業界の企業研究・比較検討。',
+        questionsAsked: '',
+        reverseQuestions: '',
+        interviewReview: 'ゲーム制作コースでのC++自作エンジン開発の経験が、ブース人事担当者に好感触だった。',
+        analystReport: null
+      }
+    ];
+
+    // ==========================================
+    // 選考から外した企業の一時保管庫（ゴミ箱）初期データ
+    // ==========================================
+    const SAMPLE_ARCHIVED = [
+      {
+        id: 'arch-atlus-1',
+        originalOfferId: null,
+        companyName: '株式会社アトラス',
+        media: '採用HP / 就活媒体',
+        lastStage: '会社説明会 (参加予定)',
+        archivedReason: '9/16 会社説明会 不参加のため除外',
+        archivedAt: '2026-09-16',
+        priority: '高',
+        nextSchedule: '選考終了（保管庫保存）',
+        action: '【最高峰9.2点】※9/16説明会不参加。企業情報・診断レポートは保持。関心0になったら手動消去',
+        infoSessionStatus: '不参加',
+        infoSessionDate: '09/16 会社説明会（※不参加）',
+        infoSessionDeadline: '',
+        infoSessionNotes: '【最高峰9.2点・保管庫】ペルソナ・真女神転生シリーズ。9/16の説明会は不参加となったため選考パイプラインからゴミ箱（保管庫）へ退避。全診断・企業データ保持。',
+        webTestType: '作品審査・適性検査',
+        mypageUrl: 'https://www.atlus.co.jp/recruit/',
+        loginId: '',
+        portfolioUrl: 'https://github.com/my-account/custom-engine-cplusplus',
+        motiveSummary: '独自の世界観と洗練されたゲームシステムを持つRPGのプログラミングに携わりたい。',
+        questionsAsked: '',
+        reverseQuestions: '',
+        interviewReview: '9/16説明会は不参加。企業データ・診断レポートは保管中。',
+        analystReport: null
+      }
+    ];
+
+    // ==========================================
+    // 受信オファー初期データ（実データのみを管理するためダミーは完全削除済）
+    // ==========================================
+    const SAMPLE_OFFERS = [];
+
+    function getOffsetDateString(daysOffset) {
+      const d = new Date();
+      d.setDate(d.getDate() + daysOffset);
+      return d.toISOString().split('T')[0];
+    }
+
+    // ==========================================
+    // State Management
+    // ==========================================
+    let offers = [];
+    let pipeline = [];
+    let archivedPipeline = [];
+    let currentOffersLayout = 'grid';
+    let activeDetailItem = null;
+    let activeDetailType = 'pipeline';
+
+    function loadState() {
+      let storedOffers = localStorage.getItem(STORAGE_KEY_OFFERS);
+      let storedPipeline = localStorage.getItem(STORAGE_KEY_PIPELINE);
+      let storedArchived = localStorage.getItem(STORAGE_KEY_ARCHIVED);
+
+      if (!storedOffers || !storedPipeline || !storedArchived) {
+        offers = JSON.parse(JSON.stringify(SAMPLE_OFFERS));
+        pipeline = JSON.parse(JSON.stringify(SAMPLE_PIPELINE));
+        archivedPipeline = JSON.parse(JSON.stringify(SAMPLE_ARCHIVED));
+        saveState();
+      } else {
+        try {
+          offers = JSON.parse(storedOffers);
+          pipeline = JSON.parse(storedPipeline);
+          archivedPipeline = JSON.parse(storedArchived);
+        } catch(e) {
+          console.error("Failed to parse storage data", e);
+          offers = SAMPLE_OFFERS;
+          pipeline = SAMPLE_PIPELINE;
+          archivedPipeline = SAMPLE_ARCHIVED;
+          saveState();
+        }
+      }
+
+      attachAnalystReports();
+    }
+
+    function attachAnalystReports() {
+      offers.forEach(o => {
+        if (!o.analystReport && ANALYST_REPORTS[o.companyName]) {
+          o.analystReport = JSON.parse(JSON.stringify(ANALYST_REPORTS[o.companyName]));
+        }
+      });
+      pipeline.forEach(p => {
+        if (!p.analystReport && ANALYST_REPORTS[p.companyName]) {
+          p.analystReport = JSON.parse(JSON.stringify(ANALYST_REPORTS[p.companyName]));
+        }
+      });
+      archivedPipeline.forEach(a => {
+        if (!a.analystReport && ANALYST_REPORTS[a.companyName]) {
+          a.analystReport = JSON.parse(JSON.stringify(ANALYST_REPORTS[a.companyName]));
+        }
+      });
+    }
+
+    function saveState() {
+      localStorage.setItem(STORAGE_KEY_OFFERS, JSON.stringify(offers));
+      localStorage.setItem(STORAGE_KEY_PIPELINE, JSON.stringify(pipeline));
+      localStorage.setItem(STORAGE_KEY_ARCHIVED, JSON.stringify(archivedPipeline));
+      updateBadges();
+    }
+
+    function updateBadges() {
+      const activeOffersCount = offers.filter(o => o.status !== '辞退').length;
+      document.getElementById('offersBadgeCount').innerText = activeOffersCount;
+      document.getElementById('pipelineBadgeCount').innerText = pipeline.length;
+      const archBadge = document.getElementById('archivedBadgeCount');
+      if (archBadge) archBadge.innerText = archivedPipeline.length;
+    }
+
+    // ==========================================
+    // Tab Navigation
+    // ==========================================
+    function switchTab(tab) {
+      const tabOffersBtn = document.getElementById('tabOffersBtn');
+      const tabPipelineBtn = document.getElementById('tabPipelineBtn');
+      const tabArchivedBtn = document.getElementById('tabArchivedBtn');
+      const viewOffers = document.getElementById('viewOffers');
+      const viewPipeline = document.getElementById('viewPipeline');
+      const viewArchived = document.getElementById('viewArchived');
+
+      // Reset tabs
+      tabOffersBtn.className = 'flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-semibold text-slate-400 hover:text-slate-200 transition-all duration-150';
+      tabPipelineBtn.className = 'flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-semibold text-slate-400 hover:text-slate-200 transition-all duration-150';
+      if (tabArchivedBtn) tabArchivedBtn.className = 'flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-semibold text-slate-400 hover:text-slate-200 transition-all duration-150';
+
+      viewOffers.classList.add('hidden');
+      viewPipeline.classList.add('hidden');
+      if (viewArchived) viewArchived.classList.add('hidden');
+
+      if (tab === 'offers') {
+        tabOffersBtn.className = 'flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-semibold transition-all duration-150 bg-indigo-600 text-white shadow-sm';
+        viewOffers.classList.remove('hidden');
+        renderOffers();
+      } else if (tab === 'pipeline') {
+        tabPipelineBtn.className = 'flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-semibold transition-all duration-150 bg-indigo-600 text-white shadow-sm';
+        viewPipeline.classList.remove('hidden');
+        renderPipeline();
+      } else if (tab === 'archived') {
+        if (tabArchivedBtn) tabArchivedBtn.className = 'flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-semibold transition-all duration-150 bg-slate-700 text-white shadow-sm';
+        if (viewArchived) viewArchived.classList.remove('hidden');
+        renderArchived();
+      }
+    }
+
+    function toggleOffersLayout(layout) {
+      currentOffersLayout = layout;
+      const gridBtn = document.getElementById('offersViewGridBtn');
+      const tableBtn = document.getElementById('offersViewTableBtn');
+
+      if (layout === 'grid') {
+        gridBtn.className = 'p-1.5 rounded text-indigo-400 bg-slate-700 transition';
+        tableBtn.className = 'p-1.5 rounded text-slate-400 hover:text-slate-200 transition';
+      } else {
+        gridBtn.className = 'p-1.5 rounded text-slate-400 hover:text-slate-200 transition';
+        tableBtn.className = 'p-1.5 rounded text-indigo-400 bg-slate-700 transition';
+      }
+      renderOffers();
+    }
+
+    // ==========================================
+    // Badges & Labels (New Tier Color Scheme)
+    // ==========================================
+    function getMediaBadgeHtml(media) {
+      let colorClass = 'bg-slate-700/70 text-slate-300 border-slate-600';
+      const m = (media || '').toLowerCase();
+
+      if (m.includes('offerbox')) {
+        colorClass = 'bg-sky-500/10 text-sky-400 border-sky-500/30';
+      } else if (m.includes('paiza')) {
+        colorClass = 'bg-emerald-500/10 text-emerald-400 border-emerald-500/30';
+      } else if (m.includes('re就活') || m.includes('就活')) {
+        colorClass = 'bg-amber-500/10 text-amber-400 border-amber-500/30';
+      } else if (m.includes('マイナビ') || m.includes('リクナビ')) {
+        colorClass = 'bg-blue-500/10 text-blue-400 border-blue-500/30';
+      } else if (m.includes('直接') || m.includes('hp')) {
+        colorClass = 'bg-purple-500/15 text-purple-300 border-purple-500/30 font-semibold';
+      }
+
+      return `<span class="inline-flex items-center text-[11px] font-medium px-2 py-0.5 rounded-full border ${colorClass}">${escapeHtml(media)}</span>`;
+    }
+
+    function getPriorityBadgeHtml(priority) {
+      let colorClass = 'bg-slate-700/60 text-slate-300 border-slate-600';
+      if (priority === '高') {
+        colorClass = 'bg-rose-500/15 text-rose-400 border-rose-500/30 font-semibold';
+      } else if (priority === '中') {
+        colorClass = 'bg-amber-500/15 text-amber-400 border-amber-500/30 font-medium';
+      }
+      return `<span class="inline-flex items-center text-[10px] px-2 py-0.5 rounded-full border ${colorClass}">志望度: ${priority}</span>`;
+    }
+
+    function getInfoSessionBadgeHtml(status) {
+      if (!status || status === '該当なし') return '';
+      let cls = 'bg-sky-500/15 text-sky-300 border-sky-500/30';
+      let icon = 'presentation';
+      if (status === '参加済み') {
+        cls = 'bg-emerald-500/15 text-emerald-300 border-emerald-500/30';
+        icon = 'check-circle';
+      } else if (status === 'アーカイブ視聴') {
+        cls = 'bg-purple-500/15 text-purple-300 border-purple-500/30';
+        icon = 'play-circle';
+      }
+      return `<span class="inline-flex items-center gap-1 text-[10px] px-1.5 py-0.5 rounded-md border ${cls}"><i data-lucide="${icon}" class="w-3 h-3"></i>${status}</span>`;
+    }
+
+    function getScoreBadgeSmallHtml(companyName) {
+      const rep = ANALYST_REPORTS[companyName];
+      if (!rep) return `<span class="text-[10px] px-1.5 py-0.5 rounded bg-slate-800 text-slate-400 border border-slate-700">診断可</span>`;
+      
+      let colorCls = 'bg-indigo-500/20 text-indigo-300 border-indigo-500/30';
+      let label = `${rep.score}`;
+
+      if (rep.score >= 9.0) {
+        colorCls = 'bg-purple-500/25 text-purple-300 border-purple-500/40 font-black shadow-sm';
+        label = `★ ${rep.score} 理想`;
+      } else if (rep.score >= 7.5) {
+        colorCls = 'bg-emerald-500/20 text-emerald-300 border-emerald-500/40 font-bold';
+        label = `★ ${rep.score} 推奨`;
+      } else if (rep.score >= 6.0) {
+        colorCls = 'bg-indigo-500/20 text-indigo-300 border-indigo-500/30 font-medium';
+        label = `${rep.score} 中位`;
+      } else if (rep.score >= 4.5) {
+        colorCls = 'bg-amber-500/20 text-amber-300 border-amber-500/40 font-bold';
+        label = `⚠ ${rep.score} 懸念`;
+      } else {
+        colorCls = 'bg-rose-500/20 text-rose-300 border-rose-500/40 font-bold';
+        label = `✕ ${rep.score} 地雷`;
+      }
+
+      return `<span class="inline-flex items-center gap-1 text-[10px] px-2 py-0.5 rounded border ${colorCls}">${label}</span>`;
+    }
+
+    function getDeadlineBadgeHtml(deadlineDate) {
+      if (!deadlineDate) return `<span class="text-xs text-slate-500">期限設定なし</span>`;
+
+      const today = new Date();
+      today.setHours(0,0,0,0);
+      const target = new Date(deadlineDate);
+      target.setHours(0,0,0,0);
+
+      const diffTime = target - today;
+      const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+
+      if (diffDays < 0) {
+        return `<span class="inline-flex items-center gap-1 text-[11px] font-semibold px-2 py-0.5 rounded-full bg-slate-800 text-slate-400 border border-slate-700"><i data-lucide="x" class="w-3 h-3"></i> 期限切れ (${Math.abs(diffDays)}日経過)</span>`;
+      } else if (diffDays === 0) {
+        return `<span class="inline-flex items-center gap-1 text-[11px] font-bold px-2.5 py-0.5 rounded-full bg-rose-500/20 text-rose-300 border border-rose-500/40 animate-pulse"><i data-lucide="alert-triangle" class="w-3 h-3"></i> 本日締切</span>`;
+      } else if (diffDays <= 3) {
+        return `<span class="inline-flex items-center gap-1 text-[11px] font-bold px-2.5 py-0.5 rounded-full bg-rose-500/20 text-rose-300 border border-rose-500/40"><i data-lucide="clock" class="w-3 h-3"></i> あと ${diffDays} 日 (要注意)</span>`;
+      } else if (diffDays <= 7) {
+        return `<span class="inline-flex items-center gap-1 text-[11px] font-medium px-2 py-0.5 rounded-full bg-amber-500/20 text-amber-300 border border-amber-500/40"><i data-lucide="clock" class="w-3 h-3"></i> あと ${diffDays} 日</span>`;
+      } else {
+        return `<span class="inline-flex items-center gap-1 text-[11px] font-medium px-2 py-0.5 rounded-full bg-emerald-500/15 text-emerald-300 border border-emerald-500/30"><i data-lucide="clock" class="w-3 h-3"></i> あと ${diffDays} 日</span>`;
+      }
+    }
+
+    function getStarsHtml(rating) {
+      let stars = '';
+      const r = Number(rating) || 1;
+      for (let i = 1; i <= 3; i++) {
+        if (i <= r) {
+          stars += `<i data-lucide="star" class="w-3.5 h-3.5 fill-amber-400 text-amber-400 inline"></i>`;
+        } else {
+          stars += `<i data-lucide="star" class="w-3.5 h-3.5 text-slate-600 inline"></i>`;
+        }
+      }
+      return `<span class="inline-flex items-center gap-0.5" title="興味度 ★${r}">${stars}</span>`;
+    }
+
+    function getOfferStatusBadgeHtml(status) {
+      let cls = 'bg-slate-700 text-slate-300';
+      if (status === '検討中') cls = 'bg-sky-500/20 text-sky-300 border border-sky-500/30';
+      if (status === 'やり取り中') cls = 'bg-amber-500/20 text-amber-300 border border-amber-500/30';
+      if (status === '辞退') cls = 'bg-slate-800 text-slate-500 border border-slate-700';
+      if (status === '選考移行済') cls = 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/30';
+      return `<span class="text-[11px] font-medium px-2 py-0.5 rounded-md ${cls}">${escapeHtml(status)}</span>`;
+    }
+
+    // ==========================================
+    // Render Offers View
+    // ==========================================
+    function renderOffers() {
+      const container = document.getElementById('offersContainer');
+      const mediaFilter = document.getElementById('offerFilterMedia').value;
+      const statusFilter = document.getElementById('offerFilterStatus').value;
+      const search = document.getElementById('offerSearchQuery').value.toLowerCase().trim();
+
+      const today = new Date();
+      today.setHours(0,0,0,0);
+
+      let urgentCount = 0;
+      let reviewingCount = 0;
+      let specialCount = 0;
+      let convertedCount = 0;
+
+      offers.forEach(o => {
+        if (o.status === '検討中') reviewingCount++;
+        if (o.status === '選考移行済') convertedCount++;
+        if (o.offerType && (o.offerType.includes('特別') || o.offerType.includes('面談確約'))) specialCount++;
+
+        if (o.deadline && o.status !== '辞退' && o.status !== '選考移行済') {
+          const t = new Date(o.deadline);
+          t.setHours(0,0,0,0);
+          const diffDays = Math.ceil((t - today) / (1000 * 60 * 60 * 24));
+          if (diffDays >= 0 && diffDays <= 3) urgentCount++;
+        }
+      });
+
+      document.getElementById('statUrgentOffers').innerText = urgentCount;
+      document.getElementById('statReviewingOffers').innerText = reviewingCount;
+      document.getElementById('statSpecialOffers').innerText = specialCount;
+      document.getElementById('statConvertedOffers').innerText = convertedCount;
+
+      const filtered = offers.filter(o => {
+        if (mediaFilter !== 'ALL' && o.media !== mediaFilter) return false;
+        if (statusFilter !== 'ALL' && o.status !== statusFilter) return false;
+        if (search) {
+          const queryMatch = (o.companyName || '').toLowerCase().includes(search) ||
+                             (o.notes || '').toLowerCase().includes(search) ||
+                             (o.offerType || '').toLowerCase().includes(search);
+          if (!queryMatch) return false;
+        }
+        return true;
+      });
+
+      document.getElementById('offersStatsCount').innerText = `${filtered.length}件`;
+
+      if (filtered.length === 0) {
+        container.innerHTML = `
+          <div class="py-16 text-center bg-slate-800/20 border border-dashed border-slate-800 rounded-2xl">
+            <i data-lucide="inbox" class="w-12 h-12 text-slate-600 mx-auto mb-3"></i>
+            <p class="text-slate-300 font-semibold text-sm">現在登録されているオファーはありません</p>
+            <p class="text-slate-500 text-xs mt-1.5">OfferBox、paiza新卒、Re就活等からオファーが届いた際は、右上の「+ 新規追加」から登録してください</p>
+          </div>
+        `;
+        lucide.createIcons();
+        return;
+      }
+
+      if (currentOffersLayout === 'grid') {
+        let cardsHtml = `<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">`;
+        filtered.forEach(item => {
+          cardsHtml += `
+            <div class="bg-slate-800/70 hover:bg-slate-800 border border-slate-700/70 hover:border-indigo-500/50 rounded-2xl p-5 flex flex-col justify-between transition-all duration-200 shadow-lg shadow-black/20 group">
+              <div>
+                <!-- Top Badges Row -->
+                <div class="flex items-center justify-between gap-2 mb-3">
+                  <div class="flex items-center gap-1.5 flex-wrap">
+                    ${getMediaBadgeHtml(item.media)}
+                    ${getOfferStatusBadgeHtml(item.status)}
+                    ${getScoreBadgeSmallHtml(item.companyName)}
+                  </div>
+                  <div>
+                    ${getStarsHtml(item.rating)}
+                  </div>
+                </div>
+
+                <!-- Company & Offer Type -->
+                <h3 class="text-base font-bold text-white group-hover:text-indigo-300 transition-colors tracking-tight mb-1 cursor-pointer" onclick="openOfferAsDetailModal('${item.id}')">
+                  ${escapeHtml(item.companyName)}
+                </h3>
+
+                <div class="flex items-center gap-2 mb-3">
+                  <span class="text-xs font-semibold px-2 py-0.5 rounded bg-indigo-500/15 text-indigo-300 border border-indigo-500/25">
+                    ${escapeHtml(item.offerType || '通常選考')}
+                  </span>
+                </div>
+
+                <!-- Deadline Badge -->
+                <div class="mb-3.5 flex items-center gap-2">
+                  <span class="text-[11px] text-slate-400 font-medium">返信期限:</span>
+                  ${getDeadlineBadgeHtml(item.deadline)}
+                </div>
+
+                <!-- Evaluated Points / Notes -->
+                <div class="bg-slate-900/60 rounded-xl p-3 border border-slate-800/80 mb-4">
+                  <div class="text-[11px] font-semibold text-slate-400 flex items-center gap-1 mb-1">
+                    <i data-lucide="sparkle" class="w-3 h-3 text-amber-400"></i>
+                    評価されたポイント・スカウト文
+                  </div>
+                  <p class="text-xs text-slate-300 line-clamp-3 leading-relaxed">
+                    ${escapeHtml(item.notes || 'アピールポイントのメモはありません。')}
+                  </p>
+                </div>
+              </div>
+
+              <!-- Card Action Footer -->
+              <div class="pt-3 border-t border-slate-700/60 flex items-center justify-between gap-2">
+                <div class="flex items-center gap-1">
+                  <!-- Analyst View Button -->
+                  <button onclick="openOfferAsDetailModal('${item.id}')" title="専門アナリスト厳格診断を開く" class="px-2.5 py-1.5 rounded-lg bg-indigo-500/15 hover:bg-indigo-500/25 border border-indigo-500/30 text-indigo-300 text-xs font-semibold flex items-center gap-1 transition">
+                    <i data-lucide="shield-alert" class="w-3.5 h-3.5"></i>
+                    <span>🎓 診断</span>
+                  </button>
+                  <button onclick="openOfferEditModal('${item.id}')" title="編集" class="p-2 rounded-lg bg-slate-700/50 hover:bg-slate-700 text-slate-300 hover:text-white transition">
+                    <i data-lucide="edit" class="w-4 h-4"></i>
+                  </button>
+                  ${item.url ? `
+                    <a href="${escapeHtml(item.url)}" target="_blank" rel="noopener noreferrer" title="オファーリンクを開く" class="p-2 rounded-lg bg-slate-700/50 hover:bg-slate-700 text-slate-300 hover:text-white transition">
+                      <i data-lucide="external-link" class="w-4 h-4"></i>
+                    </a>
+                  ` : ''}
+                </div>
+
+                <!-- Transition / Revert buttons -->
+                ${item.status !== '選考移行済' ? `
+                  <button onclick="convertOfferToPipeline('${item.id}')" class="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold bg-emerald-600 hover:bg-emerald-500 text-white shadow-md shadow-emerald-600/20 transition-transform active:scale-95">
+                    <i data-lucide="arrow-right-circle" class="w-4 h-4"></i>
+                    <span>選考へ移行</span>
+                  </button>
+                ` : `
+                  <div class="flex items-center gap-2">
+                    <span class="text-xs text-emerald-400 flex items-center gap-1 font-medium">
+                      <i data-lucide="check" class="w-3.5 h-3.5"></i> 移行済
+                    </span>
+                    <button onclick="revertOfferFromPipeline('${item.id}')" title="選考から削除してオファーに戻します" class="text-xs px-2.5 py-1 rounded-md bg-amber-500/15 hover:bg-amber-500/25 border border-amber-500/30 text-amber-300 font-medium transition flex items-center gap-1">
+                      <i data-lucide="undo-2" class="w-3 h-3"></i>
+                      <span>取消</span>
+                    </button>
+                  </div>
+                `}
+              </div>
+            </div>
+          `;
+        });
+        cardsHtml += `</div>`;
+        container.innerHTML = cardsHtml;
+      } else {
+        // Table view
+        let tableHtml = `
+          <div class="bg-slate-800/70 border border-slate-700/80 rounded-2xl overflow-hidden shadow-lg">
+            <div class="overflow-x-auto">
+              <table class="w-full text-left text-xs text-slate-300">
+                <thead class="bg-slate-900/80 text-slate-400 uppercase text-[11px] font-semibold border-b border-slate-700">
+                  <tr>
+                    <th class="px-4 py-3.5">企業名</th>
+                    <th class="px-3 py-3.5">スコア判定</th>
+                    <th class="px-3 py-3.5">媒体</th>
+                    <th class="px-3 py-3.5">オファー種別</th>
+                    <th class="px-3 py-3.5">返信期限</th>
+                    <th class="px-4 py-3.5">評価されたポイント</th>
+                    <th class="px-3 py-3.5 text-center">興味度</th>
+                    <th class="px-3 py-3.5">ステータス</th>
+                    <th class="px-4 py-3.5 text-right">アクション</th>
+                  </tr>
+                </thead>
+                <tbody class="divide-y divide-slate-700/50">
+        `;
+        filtered.forEach(item => {
+          tableHtml += `
+            <tr class="hover:bg-slate-700/30 transition-colors">
+              <td class="px-4 py-3 font-bold text-white whitespace-nowrap cursor-pointer hover:text-indigo-300" onclick="openOfferAsDetailModal('${item.id}')">
+                ${escapeHtml(item.companyName)}
+              </td>
+              <td class="px-3 py-3 whitespace-nowrap">
+                ${getScoreBadgeSmallHtml(item.companyName)}
+              </td>
+              <td class="px-3 py-3 whitespace-nowrap">
+                ${getMediaBadgeHtml(item.media)}
+              </td>
+              <td class="px-3 py-3 whitespace-nowrap">
+                <span class="px-2 py-0.5 rounded bg-indigo-500/15 text-indigo-300 border border-indigo-500/25 font-medium text-[11px]">
+                  ${escapeHtml(item.offerType || '通常')}
+                </span>
+              </td>
+              <td class="px-3 py-3 whitespace-nowrap">
+                ${getDeadlineBadgeHtml(item.deadline)}
+              </td>
+              <td class="px-4 py-3 max-w-xs truncate text-slate-400" title="${escapeHtml(item.notes || '')}">
+                ${escapeHtml(item.notes || '—')}
+              </td>
+              <td class="px-3 py-3 text-center whitespace-nowrap">
+                ${getStarsHtml(item.rating)}
+              </td>
+              <td class="px-3 py-3 whitespace-nowrap">
+                ${getOfferStatusBadgeHtml(item.status)}
+              </td>
+              <td class="px-4 py-3 text-right whitespace-nowrap">
+                <div class="flex items-center justify-end gap-2">
+                  <button onclick="openOfferAsDetailModal('${item.id}')" class="px-2 py-1 rounded bg-indigo-500/20 text-indigo-300 hover:bg-indigo-500/30 border border-indigo-500/30 text-[11px] font-bold">
+                    🎓 診断
+                  </button>
+                  <button onclick="openOfferEditModal('${item.id}')" class="p-1.5 rounded hover:bg-slate-700 text-slate-300 hover:text-white" title="編集">
+                    <i data-lucide="edit" class="w-4 h-4"></i>
+                  </button>
+                  ${item.status !== '選考移行済' ? `
+                    <button onclick="convertOfferToPipeline('${item.id}')" class="px-2.5 py-1 rounded-md text-[11px] font-semibold bg-emerald-600 hover:bg-emerald-500 text-white flex items-center gap-1 shadow-sm">
+                      <i data-lucide="arrow-right-circle" class="w-3.5 h-3.5"></i>
+                      移行
+                    </button>
+                  ` : `
+                    <button onclick="revertOfferFromPipeline('${item.id}')" class="px-2 py-1 rounded-md text-[10px] font-semibold bg-amber-500/20 hover:bg-amber-500/30 text-amber-300 border border-amber-500/30 flex items-center gap-1" title="選考からオファーへ戻す">
+                      <i data-lucide="undo-2" class="w-3 h-3"></i>
+                      取消
+                    </button>
+                  `}
+                </div>
+              </td>
+            </tr>
+          `;
+        });
+        tableHtml += `
+                </tbody>
+              </table>
+            </div>
+          </div>
+        `;
+        container.innerHTML = tableHtml;
+      }
+
+      lucide.createIcons();
+    }
+
+    // ==========================================
+    // Render Kanban Pipeline View
+    // ==========================================
+    function renderPipeline() {
+      const wrapper = document.getElementById('kanbanBoardWrapper');
+      const priorityFilter = document.getElementById('pipelineFilterPriority').value;
+      const scoreTierFilter = document.getElementById('pipelineFilterScoreTier').value;
+      const search = document.getElementById('pipelineSearchQuery').value.toLowerCase().trim();
+
+      const filtered = pipeline.filter(item => {
+        if (priorityFilter !== 'ALL' && item.priority !== priorityFilter) return false;
+        
+        // Filter by Score Tier
+        if (scoreTierFilter !== 'ALL') {
+          const rep = (item.analystReport || ANALYST_REPORTS[item.companyName]);
+          if (!rep) return false;
+          const sc = rep.score;
+          if (scoreTierFilter === 'TIER_TOP' && sc < 9.0) return false;
+          if (scoreTierFilter === 'TIER_TARGET' && (sc < 7.5 || sc >= 9.0)) return false;
+          if (scoreTierFilter === 'TIER_MID' && (sc < 6.0 || sc >= 7.5)) return false;
+          if (scoreTierFilter === 'TIER_WARN' && (sc < 4.5 || sc >= 6.0)) return false;
+        }
+
+        if (search) {
+          const match = (item.companyName || '').toLowerCase().includes(search) ||
+                        (item.nextSchedule || '').toLowerCase().includes(search) ||
+                        (item.action || '').toLowerCase().includes(search) ||
+                        (item.infoSessionNotes || '').toLowerCase().includes(search) ||
+                        (item.infoSessionStatus || '').toLowerCase().includes(search) ||
+                        (item.webTestType || '').toLowerCase().includes(search);
+          if (!match) return false;
+        }
+        return true;
+      });
+
+      document.getElementById('pipelineStatsTotal').innerText = `${filtered.length}社（新基準反映済）`;
+
+      let columnsHtml = '';
+      PIPELINE_STAGES.forEach((stage) => {
+        const stageItems = filtered.filter(i => i.stage === stage);
+
+        let headerColorClass = 'text-indigo-400';
+        let stagePillClass = 'bg-indigo-500/10 text-indigo-300 border-indigo-500/30';
+        let colDotColor = 'bg-indigo-500';
+
+        if (stage.includes('説明会 (参加予定)')) {
+          headerColorClass = 'text-sky-400';
+          stagePillClass = 'bg-sky-500/15 text-sky-300 border-sky-500/40';
+          colDotColor = 'bg-sky-400';
+        } else if (stage.includes('説明会 (参加済')) {
+          headerColorClass = 'text-cyan-400';
+          stagePillClass = 'bg-cyan-500/15 text-cyan-300 border-cyan-500/40';
+          colDotColor = 'bg-cyan-400';
+        } else if (stage.includes('内定')) {
+          headerColorClass = 'text-emerald-400 font-black';
+          stagePillClass = 'bg-emerald-500/25 text-emerald-300 border-emerald-500/50 font-black animate-pulse';
+          colDotColor = 'bg-emerald-400';
+        } else if (stage.includes('終了') || stage.includes('辞退')) {
+          headerColorClass = 'text-slate-400';
+          stagePillClass = 'bg-slate-800 text-slate-400 border-slate-700 font-medium';
+          colDotColor = 'bg-slate-500';
+        } else if (stage.includes('最終')) {
+          headerColorClass = 'text-amber-400';
+          stagePillClass = 'bg-amber-500/15 text-amber-300 border-amber-500/40';
+          colDotColor = 'bg-amber-400';
+        }
+
+        columnsHtml += `
+          <div class="kanban-col flex-1 bg-slate-800/40 border border-slate-800/90 rounded-2xl p-3.5 flex flex-col min-h-[660px] max-h-[840px] transition-all"
+               ondragover="handleKanbanDragOver(event)"
+               ondragleave="handleKanbanDragLeave(event)"
+               ondrop="handleKanbanDrop(event, '${stage}')">
+            
+            <!-- Column Header -->
+            <div class="flex items-center justify-between pb-3 mb-3 border-b border-slate-800">
+              <div class="flex items-center gap-2">
+                <span class="w-2 h-2 rounded-full ${colDotColor}"></span>
+                <h3 class="text-xs font-bold ${headerColorClass} uppercase tracking-wider">${stage}</h3>
+              </div>
+              <span class="text-xs font-bold px-2 py-0.5 rounded-full ${stagePillClass}">${stageItems.length}</span>
+            </div>
+
+            <!-- Card List Container -->
+            <div class="flex-1 overflow-y-auto space-y-3 custom-scrollbar pr-1">
+              ${stageItems.length === 0 ? `
+                <div class="h-32 flex flex-col items-center justify-center text-slate-600 border border-dashed border-slate-800/80 rounded-xl">
+                  <span class="text-[11px]">企業カードなし</span>
+                </div>
+              ` : ''}
+
+              ${stageItems.map(item => `
+                <div id="card-${item.id}"
+                     draggable="true"
+                     ondragstart="handleCardDragStart(event, '${item.id}')"
+                     ondragend="handleCardDragEnd(event)"
+                     onclick="openPipelineDetailModal('${item.id}')"
+                     class="bg-slate-800/80 hover:bg-slate-750 border border-slate-700/80 hover:border-indigo-500/70 rounded-xl p-3.5 shadow-md shadow-black/20 cursor-pointer transition-all duration-150 transform hover:-translate-y-0.5 group">
+                  
+                  <!-- Top Badges -->
+                  <div class="flex items-center justify-between gap-1.5 mb-2 flex-wrap">
+                    <div class="flex items-center gap-1 flex-wrap">
+                      ${getMediaBadgeHtml(item.media)}
+                      ${getInfoSessionBadgeHtml(item.infoSessionStatus)}
+                      ${getScoreBadgeSmallHtml(item.companyName)}
+                    </div>
+                    ${getPriorityBadgeHtml(item.priority)}
+                  </div>
+
+                  <!-- Company Name -->
+                  <h4 class="text-sm font-bold text-white group-hover:text-indigo-300 transition-colors tracking-tight line-clamp-1 mb-2">
+                    ${escapeHtml(item.companyName)}
+                  </h4>
+
+                  <!-- Next Schedule / Info Session Schedule -->
+                  ${item.nextSchedule ? `
+                    <div class="flex items-start gap-1.5 text-xs text-amber-300/90 font-medium bg-amber-500/10 border border-amber-500/20 px-2.5 py-1.5 rounded-lg mb-2">
+                      <i data-lucide="calendar" class="w-3.5 h-3.5 flex-shrink-0 mt-0.5"></i>
+                      <span class="leading-snug break-all">${escapeHtml(item.nextSchedule)}</span>
+                    </div>
+                  ` : ''}
+
+                  <!-- Required Action -->
+                  ${item.action ? `
+                    <div class="flex items-center gap-1.5 text-[11px] text-slate-300 mb-2">
+                      <i data-lucide="check-circle" class="w-3 h-3 text-sky-400 flex-shrink-0"></i>
+                      <span class="font-medium truncate">${escapeHtml(item.action)}</span>
+                    </div>
+                  ` : ''}
+
+                  <!-- Footer: Actions & Links -->
+                  <div class="pt-2 border-t border-slate-700/50 flex items-center justify-between text-[11px] text-slate-400">
+                    <span class="truncate max-w-[150px]" title="${escapeHtml(item.infoSessionNotes || item.webTestType || '')}">
+                      ${item.infoSessionNotes ? `<i data-lucide="file-text" class="w-3 h-3 inline mr-1 text-sky-400"></i>メモ有` : (item.webTestType ? `<i data-lucide="file-code" class="w-3 h-3 inline mr-1 text-slate-400"></i>${escapeHtml(item.webTestType)}` : '詳細あり')}
+                    </span>
+                    
+                    <div class="flex items-center gap-1" onclick="event.stopPropagation()">
+                      <button onclick="revertPipelineToOffer('${item.id}')" title="オファー管理へ戻す" class="p-1 rounded hover:bg-amber-500/20 text-slate-400 hover:text-amber-300 transition">
+                        <i data-lucide="undo-2" class="w-3.5 h-3.5"></i>
+                      </button>
+                      <button onclick="moveToTrash('${item.id}')" title="選考から外してゴミ箱（保管庫）へ退避" class="p-1 rounded hover:bg-rose-500/20 text-slate-400 hover:text-rose-400 transition">
+                        <i data-lucide="archive" class="w-3.5 h-3.5"></i>
+                      </button>
+
+                      ${item.mypageUrl ? `
+                        <a href="${escapeHtml(item.mypageUrl)}" target="_blank" rel="noopener noreferrer" title="マイページへ直行" class="p-1 rounded hover:bg-slate-700 text-indigo-400 hover:text-indigo-300 transition">
+                          <i data-lucide="external-link" class="w-3.5 h-3.5"></i>
+                        </a>
+                      ` : ''}
+                      <button onclick="openPipelineDetailModal('${item.id}')" title="詳細・アナリスト診断" class="p-1 rounded hover:bg-slate-700 text-slate-400 hover:text-white transition">
+                        <i data-lucide="more-horizontal" class="w-3.5 h-3.5"></i>
+                      </button>
+                    </div>
+                  </div>
+
+                </div>
+              `).join('')}
+            </div>
+
+          </div>
+        `;
+      });
+
+      wrapper.innerHTML = columnsHtml;
+      lucide.createIcons();
+    }
+
+    // ==========================================
+    // Kanban Drag & Drop
+    // ==========================================
+    let draggedItemId = null;
+
+    function handleCardDragStart(e, id) {
+      draggedItemId = id;
+      e.dataTransfer.setData('text/plain', id);
+      e.dataTransfer.effectAllowed = 'move';
+      setTimeout(() => {
+        const el = document.getElementById(`card-${id}`);
+        if (el) el.classList.add('dragging');
+      }, 0);
+    }
+
+    function handleCardDragEnd(e) {
+      if (draggedItemId) {
+        const el = document.getElementById(`card-${draggedItemId}`);
+        if (el) el.classList.remove('dragging');
+      }
+      document.querySelectorAll('.kanban-col').forEach(col => {
+        col.classList.remove('drag-over');
+      });
+      draggedItemId = null;
+    }
+
+    function handleKanbanDragOver(e) {
+      e.preventDefault();
+      e.dataTransfer.dropEffect = 'move';
+      e.currentTarget.classList.add('drag-over');
+    }
+
+    function handleKanbanDragLeave(e) {
+      e.currentTarget.classList.remove('drag-over');
+    }
+
+    function handleKanbanDrop(e, targetStage) {
+      e.preventDefault();
+      e.currentTarget.classList.remove('drag-over');
+      const id = e.dataTransfer.getData('text/plain') || draggedItemId;
+      if (!id) return;
+
+      const item = pipeline.find(p => p.id === id);
+      if (item && item.stage !== targetStage) {
+        item.stage = targetStage;
+
+        if (targetStage === '会社説明会 (参加済み)' && (!item.infoSessionStatus || item.infoSessionStatus === '参加予定')) {
+          item.infoSessionStatus = '参加済み';
+        } else if (targetStage === '会社説明会 (参加予定)' && (!item.infoSessionStatus || item.infoSessionStatus === '該当なし')) {
+          item.infoSessionStatus = '参加予定';
+        }
+
+        saveState();
+        renderPipeline();
+        showToast(`「${item.companyName}」を「${targetStage}」へ移動しました`, 'success');
+      }
+    }
+
+    // ==========================================
+    // Action: Convert / Revert
+    // ==========================================
+    function convertOfferToPipeline(offerId) {
+      const offer = offers.find(o => o.id === offerId);
+      if (!offer) return;
+
+      let initialStage = '書類選考';
+      let infoStatus = '該当なし';
+
+      if (offer.offerType && (offer.offerType.includes('説明会') || offer.offerType.includes('セミナー'))) {
+        initialStage = '会社説明会 (参加予定)';
+        infoStatus = '参加予定';
+      } else if (offer.offerType && offer.offerType.includes('1次免除')) {
+        initialStage = '二次 / 三次面接';
+      } else if (offer.offerType && offer.offerType.includes('面談')) {
+        initialStage = '一次面接';
+      }
+
+      const newPipelineItem = {
+        id: 'pipe-' + Date.now(),
+        originalOfferId: offer.id,
+        companyName: offer.companyName,
+        media: `${offer.media}承諾`,
+        stage: initialStage,
+        priority: offer.rating >= 3 ? '高' : (offer.rating === 2 ? '中' : '低'),
+        nextSchedule: '日程調整中',
+        action: initialStage.includes('説明会') ? '説明会日程の確認・予約' : 'メッセージ返信 / 日程候補送付',
+        infoSessionStatus: infoStatus,
+        infoSessionDate: '',
+        infoSessionDeadline: '',
+        infoSessionNotes: '',
+        webTestType: offer.offerType || '',
+        mypageUrl: offer.url || '',
+        loginId: '',
+        portfolioUrl: '',
+        motiveSummary: offer.notes ? `【スカウト評価点引き継ぎ】\n${offer.notes}` : '',
+        questionsAsked: '',
+        reverseQuestions: '',
+        interviewReview: '',
+        analystReport: offer.analystReport ? JSON.parse(JSON.stringify(offer.analystReport)) : null
+      };
+
+      offer.status = '選考移行済';
+      pipeline.unshift(newPipelineItem);
+      saveState();
+
+      showToast(`「${offer.companyName}」を選考パイプラインに追加しました！`, 'success');
+      switchTab('pipeline');
+    }
+
+    function revertPipelineToOffer(pipelineId) {
+      const pIndex = pipeline.findIndex(p => p.id === pipelineId);
+      if (pIndex === -1) return;
+      const pipeItem = pipeline[pIndex];
+
+      if (!confirm(`「${pipeItem.companyName}」を選考パイプラインから取り消し、オファー管理（検討中）に戻しますか？`)) {
+        return;
+      }
+
+      let matchedOffer = null;
+      if (pipeItem.originalOfferId) {
+        matchedOffer = offers.find(o => o.id === pipeItem.originalOfferId);
+      }
+      if (!matchedOffer) {
+        matchedOffer = offers.find(o => o.companyName.trim() === pipeItem.companyName.trim());
+      }
+
+      if (matchedOffer) {
+        matchedOffer.status = '検討中';
+      } else {
+        const restoredOffer = {
+          id: 'offer-restored-' + Date.now(),
+          companyName: pipeItem.companyName,
+          media: pipeItem.media.replace('承諾', '').trim() || 'その他',
+          deadline: getOffsetDateString(7),
+          offerType: pipeItem.webTestType || '通常選考案内',
+          rating: pipeItem.priority === '高' ? 3 : (pipeItem.priority === '中' ? 2 : 1),
+          status: '検討中',
+          url: pipeItem.mypageUrl || '',
+          notes: pipeItem.motiveSummary || '',
+          analystReport: pipeItem.analystReport ? JSON.parse(JSON.stringify(pipeItem.analystReport)) : null
+        };
+        offers.unshift(restoredOffer);
+      }
+
+      pipeline.splice(pIndex, 1);
+      saveState();
+      closeModal('pipelineDetailModal');
+
+      renderPipeline();
+      renderOffers();
+      showToast(`「${pipeItem.companyName}」をオファー管理へ差し戻しました`, 'success');
+    }
+
+    function revertActiveDetailToOffer() {
+      if (!activeDetailItem) return;
+      revertPipelineToOffer(activeDetailItem.id);
+    }
+
+    function revertOfferFromPipeline(offerId) {
+      const offer = offers.find(o => o.id === offerId);
+      if (!offer) return;
+
+      if (!confirm(`「${offer.companyName}」の選考移行を取り消し、オファー検討中に戻しますか？`)) {
+        return;
+      }
+
+      pipeline = pipeline.filter(p => p.originalOfferId !== offer.id && p.companyName.trim() !== offer.companyName.trim());
+      offer.status = '検討中';
+
+      saveState();
+      renderOffers();
+      renderPipeline();
+      showToast(`「${offer.companyName}」の選考移行を取り消しました`, 'info');
+    }
+
+    // ==========================================
+    // Render Archived (Trash / Storage) View
+    // ==========================================
+    function renderArchived() {
+      const container = document.getElementById('archivedCardsContainer');
+      if (!container) return;
+      const search = (document.getElementById('archivedSearchQuery')?.value || '').toLowerCase().trim();
+
+      const filtered = archivedPipeline.filter(item => {
+        if (search) {
+          const match = (item.companyName || '').toLowerCase().includes(search) ||
+                        (item.lastStage || '').toLowerCase().includes(search) ||
+                        (item.archivedReason || '').toLowerCase().includes(search) ||
+                        (item.infoSessionNotes || '').toLowerCase().includes(search);
+          if (!match) return false;
+        }
+        return true;
+      });
+
+      const countBadge = document.getElementById('archivedStatsCount');
+      if (countBadge) countBadge.innerText = `${filtered.length}件`;
+
+      if (filtered.length === 0) {
+        container.innerHTML = `
+          <div class="py-16 text-center bg-slate-800/20 border border-dashed border-slate-800 rounded-2xl">
+            <i data-lucide="archive" class="w-12 h-12 text-slate-600 mx-auto mb-3"></i>
+            <p class="text-slate-400 font-medium text-sm">ゴミ箱（保管庫）に除外された企業はありません</p>
+            <p class="text-xs text-slate-500 mt-1">選考から外した企業はここに退避され、最終位置や全情報が安全に保持されます</p>
+          </div>
+        `;
+        lucide.createIcons();
+        return;
+      }
+
+      let html = `<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">`;
+      filtered.forEach(item => {
+        html += `
+          <div class="bg-slate-800/60 hover:bg-slate-800 border border-slate-700/60 hover:border-slate-600 rounded-2xl p-5 flex flex-col justify-between transition-all duration-200 shadow-md">
+            <div>
+              <!-- Top Row Badges -->
+              <div class="flex items-center justify-between gap-2 mb-3">
+                <div class="flex items-center gap-1.5 flex-wrap">
+                  ${getMediaBadgeHtml(item.media)}
+                  ${getScoreBadgeSmallHtml(item.companyName)}
+                  <span class="inline-flex items-center gap-1 text-[10px] font-bold px-2 py-0.5 rounded bg-slate-700 text-slate-300 border border-slate-600">
+                    <i data-lucide="map-pin" class="w-3 h-3 text-amber-400"></i>
+                    最終位置: ${escapeHtml(item.lastStage || item.stage || '会社説明会')}
+                  </span>
+                </div>
+                <span class="text-[10px] text-slate-500">${escapeHtml(item.archivedAt || '除外')}</span>
+              </div>
+
+              <!-- Company Name -->
+              <h3 class="text-base font-bold text-white mb-2 cursor-pointer hover:text-indigo-300 transition-colors" onclick="openArchivedDetailModal('${item.id}')">
+                ${escapeHtml(item.companyName)}
+              </h3>
+
+              <!-- Reason & Action Info -->
+              <div class="space-y-2 mb-4">
+                <div class="text-xs text-rose-300/90 bg-rose-500/10 border border-rose-500/20 px-2.5 py-1.5 rounded-lg flex items-center gap-1.5">
+                  <i data-lucide="info" class="w-3.5 h-3.5 flex-shrink-0"></i>
+                  <span class="font-medium">${escapeHtml(item.archivedReason || '選考対象外・一時退避')}</span>
+                </div>
+
+                ${item.infoSessionNotes ? `
+                  <div class="text-xs text-slate-400 bg-slate-900/60 p-2.5 rounded-lg border border-slate-800 leading-relaxed">
+                    ${escapeHtml(item.infoSessionNotes)}
+                  </div>
+                ` : ''}
+              </div>
+            </div>
+
+            <!-- Card Actions -->
+            <div class="pt-3 border-t border-slate-700/60 flex items-center justify-between gap-2">
+              <button onclick="openArchivedDetailModal('${item.id}')" class="px-3 py-1.5 rounded-lg bg-indigo-500/20 hover:bg-indigo-500/30 text-indigo-300 text-xs font-bold border border-indigo-500/30 flex items-center gap-1.5 transition">
+                <i data-lucide="clipboard-list" class="w-3.5 h-3.5"></i>
+                <span>企業情報・診断確認</span>
+              </button>
+
+              <div class="flex items-center gap-1.5">
+                <button onclick="restoreFromTrash('${item.id}')" title="選考パイプラインへ復帰させる" class="px-2.5 py-1.5 rounded-lg bg-emerald-500/15 hover:bg-emerald-500/25 border border-emerald-500/30 text-emerald-300 text-xs font-semibold flex items-center gap-1 transition">
+                  <i data-lucide="rotate-ccw" class="w-3.5 h-3.5"></i>
+                  <span>選考へ復帰</span>
+                </button>
+                <button onclick="permanentlyDeleteFromTrash('${item.id}')" title="関心がゼロになったため完全に消去" class="px-2.5 py-1.5 rounded-lg bg-rose-500/15 hover:bg-rose-500/25 border border-rose-500/30 text-rose-300 text-xs font-semibold flex items-center gap-1 transition">
+                  <i data-lucide="trash-2" class="w-3.5 h-3.5"></i>
+                  <span>完全消去</span>
+                </button>
+              </div>
+            </div>
+
+          </div>
+        `;
+      });
+      html += `</div>`;
+      container.innerHTML = html;
+      lucide.createIcons();
+    }
+
+    // ==========================================
+    // Trash / Storage Actions
+    // ==========================================
+    function moveToTrash(id) {
+      const item = pipeline.find(p => p.id === id);
+      if (!item) return;
+      if (!confirm(`「${item.companyName}」を選考パイプラインから外して、ゴミ箱（保管庫）へ退避しますか？\n\n・最終的な選考位置（${item.stage}）はそのまま記録されます\n・企業情報やアナリスト診断レポートは完全に保持されます\n・関心がゼロになったらゴミ箱から手動で完全消去できます`)) return;
+
+      item.lastStage = item.stage;
+      item.archivedAt = new Date().toLocaleDateString('ja-JP');
+      item.archivedReason = `${item.stage} 時点で選考除外（一時退避）`;
+      archivedPipeline.push(item);
+      pipeline = pipeline.filter(p => p.id !== id);
+
+      saveState();
+      renderPipeline();
+      renderArchived();
+      updateBadges();
+      showToast(`「${item.companyName}」をゴミ箱（保管庫）へ退避しました`, 'info');
+    }
+
+    function restoreFromTrash(id) {
+      const item = archivedPipeline.find(p => p.id === id);
+      if (!item) return;
+
+      const destStage = item.lastStage || '会社説明会 (参加予定)';
+      item.stage = destStage;
+      pipeline.push(item);
+      archivedPipeline = archivedPipeline.filter(p => p.id !== id);
+
+      saveState();
+      renderArchived();
+      renderPipeline();
+      updateBadges();
+      showToast(`「${item.companyName}」を選考パイプライン（${destStage}）へ復帰させました`, 'success');
+    }
+
+    function permanentlyDeleteFromTrash(id) {
+      const item = archivedPipeline.find(p => p.id === id);
+      if (!item) return;
+      if (!confirm(`「${item.companyName}」の全情報を完全に消去しますか？\n\n※この企業への関心がゼロになった場合のみ実行してください。\n※この操作は取り消せません。`)) return;
+
+      archivedPipeline = archivedPipeline.filter(p => p.id !== id);
+      saveState();
+      renderArchived();
+      updateBadges();
+      showToast(`「${item.companyName}」を完全に消去しました`, 'success');
+    }
+
+    function openArchivedDetailModal(id) {
+      const item = archivedPipeline.find(p => p.id === id);
+      if (!item) return;
+      activeDetailItem = item;
+      activeDetailType = 'pipeline';
+      populatePipelineDetailModal(item);
+      document.getElementById('pipelineDetailModal').classList.remove('hidden');
+      document.getElementById('pipelineDetailModal').classList.add('flex');
+    }
+
+    function moveToTrashActiveDetail() {
+      if (!activeDetailItem) return;
+      closeModal('pipelineDetailModal');
+      moveToTrash(activeDetailItem.id);
+    }
+
+    // ==========================================
+    // Detail Modal with Analyst Report & Progress
+    // ==========================================
+    function switchModalTab(tab) {
+      const analystBtn = document.getElementById('modalTabAnalystBtn');
+      const progressBtn = document.getElementById('modalTabProgressBtn');
+      const secAnalyst = document.getElementById('modalSecAnalyst');
+      const formProgress = document.getElementById('pipelineDetailForm');
+
+      if (tab === 'analyst') {
+        analystBtn.className = 'py-3 px-4 font-bold text-xs sm:text-sm border-b-2 border-indigo-500 text-indigo-400 flex items-center gap-2 transition';
+        progressBtn.className = 'py-3 px-4 font-bold text-xs sm:text-sm border-b-2 border-transparent text-slate-400 hover:text-slate-200 flex items-center gap-2 transition';
+        secAnalyst.classList.remove('hidden');
+        formProgress.classList.add('hidden');
+      } else {
+        progressBtn.className = 'py-3 px-4 font-bold text-xs sm:text-sm border-b-2 border-indigo-500 text-indigo-400 flex items-center gap-2 transition';
+        analystBtn.className = 'py-3 px-4 font-bold text-xs sm:text-sm border-b-2 border-transparent text-slate-400 hover:text-slate-200 flex items-center gap-2 transition';
+        formProgress.classList.remove('hidden');
+        secAnalyst.classList.add('hidden');
+      }
+    }
+
+    function openPipelineDetailModal(id) {
+      const item = pipeline.find(p => p.id === id);
+      if (!item) return;
+      activeDetailItem = item;
+      activeDetailType = 'pipeline';
+
+      populateModalHeaders(item.companyName, `経由: ${item.media}`, item.priority);
+      populateProgressForm(item);
+      populateAnalystSection(item.companyName, item.analystReport);
+
+      document.getElementById('modalRevertBtn').classList.remove('hidden');
+      document.getElementById('modalDeleteBtn').classList.remove('hidden');
+
+      switchModalTab('analyst');
+
+      document.getElementById('pipelineDetailModal').classList.remove('hidden');
+      document.getElementById('pipelineDetailModal').classList.add('flex');
+      lucide.createIcons();
+    }
+
+    function openOfferAsDetailModal(id) {
+      const offer = offers.find(o => o.id === id);
+      if (!offer) return;
+      activeDetailItem = offer;
+      activeDetailType = 'offer';
+
+      const priority = offer.rating >= 3 ? '高' : (offer.rating === 2 ? '中' : '低');
+      populateModalHeaders(offer.companyName, `経由: ${offer.media} (オファー)`, priority);
+      
+      const dummyPipe = {
+        id: offer.id,
+        stage: '会社説明会 (参加予定)',
+        priority: priority,
+        action: 'オファー検討・メッセージ返信',
+        nextSchedule: offer.deadline ? `${offer.deadline} 返信期限` : '',
+        infoSessionStatus: '該当なし',
+        infoSessionDate: '',
+        infoSessionDeadline: '',
+        infoSessionNotes: offer.notes || '',
+        webTestType: offer.offerType || '',
+        mypageUrl: offer.url || '',
+        loginId: '',
+        portfolioUrl: '',
+        motiveSummary: offer.notes || '',
+        questionsAsked: '',
+        reverseQuestions: '',
+        interviewReview: ''
+      };
+      populateProgressForm(dummyPipe);
+      populateAnalystSection(offer.companyName, offer.analystReport);
+
+      document.getElementById('modalRevertBtn').classList.add('hidden');
+      document.getElementById('modalDeleteBtn').classList.add('hidden');
+
+      switchModalTab('analyst');
+
+      document.getElementById('pipelineDetailModal').classList.remove('hidden');
+      document.getElementById('pipelineDetailModal').classList.add('flex');
+      lucide.createIcons();
+    }
+
+    function populateModalHeaders(companyName, mediaText, priority) {
+      document.getElementById('detailCompanyNameHeader').innerText = companyName;
+      document.getElementById('detailMediaBadge').innerText = mediaText;
+      
+      const pBadge = document.getElementById('detailPriorityBadge');
+      pBadge.innerText = `志望度: ${priority}`;
+      if (priority === '高') {
+        pBadge.className = 'text-xs px-2.5 py-1 rounded-full font-bold bg-rose-500/20 text-rose-300 border border-rose-500/30';
+      } else if (priority === '中') {
+        pBadge.className = 'text-xs px-2.5 py-1 rounded-full font-bold bg-amber-500/20 text-amber-300 border border-amber-500/30';
+      } else {
+        pBadge.className = 'text-xs px-2.5 py-1 rounded-full font-bold bg-slate-700 text-slate-300 border border-slate-600';
+      }
+    }
+
+    function populateProgressForm(item) {
+      document.getElementById('detailPipeId').value = item.id;
+      document.getElementById('detailStage').value = item.stage || '書類選考';
+      document.getElementById('detailPriority').value = item.priority || '中';
+      document.getElementById('detailAction').value = item.action || '';
+      document.getElementById('detailNextSchedule').value = item.nextSchedule || '';
+
+      document.getElementById('detailInfoSessionStatus').value = item.infoSessionStatus || '該当なし';
+      document.getElementById('detailInfoSessionDate').value = item.infoSessionDate || '';
+      document.getElementById('detailInfoSessionDeadline').value = item.infoSessionDeadline || '';
+      document.getElementById('detailInfoSessionNotes').value = item.infoSessionNotes || '';
+
+      document.getElementById('detailWebTestType').value = item.webTestType || '';
+      document.getElementById('detailMypageUrl').value = item.mypageUrl || '';
+      document.getElementById('detailLoginId').value = item.loginId || '';
+      document.getElementById('detailPortfolioUrl').value = item.portfolioUrl || '';
+      document.getElementById('detailMotiveSummary').value = item.motiveSummary || '';
+      document.getElementById('detailQuestionsAsked').value = item.questionsAsked || '';
+      document.getElementById('detailReverseQuestions').value = item.reverseQuestions || '';
+      document.getElementById('detailInterviewReview').value = item.interviewReview || '';
+
+      const portalBtn = document.getElementById('detailPortalDirectLink');
+      if (item.mypageUrl) {
+        portalBtn.href = item.mypageUrl;
+        portalBtn.classList.remove('hidden');
+      } else {
+        portalBtn.classList.add('hidden');
+      }
+    }
+
+    // Populate Analyst Section with New 4 Must-Conditions and Tier Styling
+    function populateAnalystSection(companyName, savedReport) {
+      let report = savedReport || ANALYST_REPORTS[companyName];
+
+      if (!report) {
+        report = {
+          score: 6.8,
+          tier: 'TIER_MID',
+          verdict: '【6.8】中位・条件付き検討枠',
+          headline: `「${companyName}」の基本給（21万以上か）および商流（自社比率6割以上か）の確認を推奨。`,
+          mustConditions: { salary: true, directTrade: false, transparency: true, workLife: true },
+          axes: { jobType: true, salary: true, overtime: true, holidays: true, workType: false, welfare: true, training: true, bonus: true, retention: true, remote: true },
+          items: [
+            '【1. 企業概要と仕事内容】開発形態・直取引比率は面接で確認が必要です。',
+            '【2. 働き方・契約条件】基本給単体で21万円以上あるか求人票の完全分解要。固定残業代有無を要チェック。',
+            '【3. リモートワーク制度】制度の有無と配属先依存度を確認してください。',
+            '【4. 担当工程・下流リスク】監視やテストばかりの下流に回されないか配属チームを確認してください。',
+            '【5. 開発設備・IT環境】貸与PCスペックや開発ツール自由度。',
+            '【6. 研修・専門生の立ち位置】3年制ゲーム制作科のC++技術力の評価。',
+            '【7. paizaランク換算】paiza Bランク水準。',
+            '【8. 採用難易度・選考攻略】Webテスト形式と面接対策。',
+            '【9. 総合判定総括】4大必須条件と照らし合わせ、基本給と商流のクリア状況を確認の上で選考に臨んでください。'
+          ]
+        };
+      }
+
+      // Fill Top Score Card
+      document.getElementById('analystScoreNum').innerText = report.score.toFixed(1);
+      document.getElementById('modalScoreBadge').innerText = `スコア: ${report.score.toFixed(1)} / 10`;
+      document.getElementById('analystVerdictTag').innerText = report.verdict;
+      document.getElementById('analystHeadline').innerText = report.headline;
+
+      // Color code by New 5-Tier Rubric
+      const scoreBox = document.getElementById('analystScoreBox');
+      const vTag = document.getElementById('analystVerdictTag');
+      const tierLabel = document.getElementById('analystTierLabel');
+
+      if (report.score >= 9.0) {
+        scoreBox.className = 'w-16 h-16 rounded-2xl border border-purple-500/50 bg-purple-600/25 flex flex-col items-center justify-center flex-shrink-0 shadow-lg';
+        vTag.className = 'text-xs px-2.5 py-0.5 rounded-full font-black bg-purple-500/25 text-purple-200 border border-purple-500/50';
+        tierLabel.innerText = '最高峰・理想枠 / トップティア';
+      } else if (report.score >= 7.5) {
+        scoreBox.className = 'w-16 h-16 rounded-2xl border border-emerald-500/50 bg-emerald-600/20 flex flex-col items-center justify-center flex-shrink-0 shadow-lg';
+        vTag.className = 'text-xs px-2.5 py-0.5 rounded-full font-bold bg-emerald-500/20 text-emerald-300 border border-emerald-500/40';
+        tierLabel.innerText = '高評価・強力な併願/滑り止め候補 ★推奨';
+      } else if (report.score >= 6.0) {
+        scoreBox.className = 'w-16 h-16 rounded-2xl border border-indigo-500/40 bg-indigo-600/20 flex flex-col items-center justify-center flex-shrink-0 shadow-md';
+        vTag.className = 'text-xs px-2.5 py-0.5 rounded-full font-medium bg-indigo-500/20 text-indigo-300 border border-indigo-500/30';
+        tierLabel.innerText = '中位・条件付き検討枠';
+      } else if (report.score >= 4.5) {
+        scoreBox.className = 'w-16 h-16 rounded-2xl border border-amber-500/50 bg-amber-600/20 flex flex-col items-center justify-center flex-shrink-0 shadow-md';
+        vTag.className = 'text-xs px-2.5 py-0.5 rounded-full font-bold bg-amber-500/20 text-amber-300 border border-amber-500/40';
+        tierLabel.innerText = '注意・リスク大の懸念枠';
+      } else {
+        scoreBox.className = 'w-16 h-16 rounded-2xl border border-rose-500/50 bg-rose-600/20 flex flex-col items-center justify-center flex-shrink-0 shadow-md';
+        vTag.className = 'text-xs px-2.5 py-0.5 rounded-full font-bold bg-rose-500/20 text-rose-300 border border-rose-500/40';
+        tierLabel.innerText = '地雷・完全ミスマッチ枠';
+      }
+
+      // Render 4 Must-Conditions
+      const mc = report.mustConditions || {
+        salary: (report.axes && report.axes.salary),
+        directTrade: (report.axes && report.axes.workType),
+        transparency: (report.axes && report.axes.salary),
+        workLife: (report.axes && report.axes.overtime && report.axes.holidays)
+      };
+
+      const mustList = [
+        { title: '① 基本給単体21万↑', pass: mc.salary !== false },
+        { title: '② 自社/直取引6割↑', pass: mc.directTrade !== false },
+        { title: '③ 固定残業過剰なし', pass: mc.transparency !== false },
+        { title: '④ 年休120日/残業20h内', pass: mc.workLife !== false }
+      ];
+
+      const passCount = mustList.filter(m => m.pass).length;
+      const resBadge = document.getElementById('mustConditionsResultBadge');
+      if (passCount === 4) {
+        resBadge.className = 'text-[10px] px-2 py-0.5 rounded font-bold bg-emerald-500/20 text-emerald-300 border border-emerald-500/30';
+        resBadge.innerText = '4大条件すべて合致 (高評価基準適合)';
+      } else if (passCount === 3) {
+        resBadge.className = 'text-[10px] px-2 py-0.5 rounded font-bold bg-indigo-500/20 text-indigo-300 border border-indigo-500/30';
+        resBadge.innerText = '3項目合致 (概ね良好)';
+      } else {
+        resBadge.className = 'text-[10px] px-2 py-0.5 rounded font-bold bg-amber-500/20 text-amber-300 border border-amber-500/30';
+        resBadge.innerText = `${passCount}/4 項目合致 (要警戒)`;
+      }
+
+      document.getElementById('mustConditionsGrid').innerHTML = mustList.map(m => `
+        <div class="px-2.5 py-1.5 rounded-lg border flex items-center justify-between ${m.pass ? 'bg-emerald-500/10 border-emerald-500/30 text-emerald-300' : 'bg-rose-500/15 border-rose-500/35 text-rose-300 font-bold'}">
+          <span class="truncate">${escapeHtml(m.title)}</span>
+          <i data-lucide="${m.pass ? 'check' : 'x'}" class="w-3.5 h-3.5 flex-shrink-0"></i>
+        </div>
+      `).join('');
+
+      // Fill Detailed 10 Axes matrix
+      const axisContainer = document.getElementById('analystAxisGrid');
+      const ax = report.axes || {};
+      const axisList = [
+        { label: '① 職種合致', pass: ax.jobType !== false },
+        { label: '② 基本給21万↑', pass: ax.salary !== false, critical: true },
+        { label: '③ 残業20h内', pass: ax.overtime !== false },
+        { label: '④ 年休120日↑', pass: ax.holidays !== false },
+        { label: '⑤ 客先常駐排除', pass: ax.workType !== false, critical: true },
+        { label: '⑥ 福利厚生/手当', pass: ax.welfare !== false },
+        { label: '⑦ 研修・OJT', pass: ax.training !== false },
+        { label: '⑧ 昇給・賞与', pass: ax.bonus !== false },
+        { label: '⑨ 定着率・安定', pass: ax.retention !== false },
+        { label: '⑩ リモート環境', pass: ax.remote !== false }
+      ];
+
+      axisContainer.innerHTML = axisList.map(a => `
+        <div class="px-2 py-1.5 rounded-lg border flex items-center justify-between ${a.pass ? 'bg-emerald-500/10 border-emerald-500/30 text-emerald-300' : (a.critical ? 'bg-rose-500/20 border-rose-500/40 text-rose-300 font-bold' : 'bg-slate-800 border-slate-700 text-slate-400')}">
+          <span class="truncate">${escapeHtml(a.label)}</span>
+          <i data-lucide="${a.pass ? 'check' : 'x'}" class="w-3.5 h-3.5 flex-shrink-0"></i>
+        </div>
+      `).join('');
+
+      // Fill 8 Major Items
+      for (let i = 1; i <= 9; i++) {
+        const el = document.getElementById(`analystItem${i}`);
+        if (el) {
+          const content = report.items && report.items[i-1] ? report.items[i-1] : '（未記載）';
+          el.innerHTML = formatAnalystItemText(content);
+        }
+      }
+
+      document.getElementById('analystEditFormContainer').classList.add('hidden');
+      document.getElementById('analystEditBtnText').innerText = '分析メモ編集';
+    }
+
+    function formatAnalystItemText(text) {
+      if (!text) return '';
+      let safe = escapeHtml(text);
+      safe = safe.replace(/【(.*?)】/g, '<span class="text-indigo-300 font-bold block mb-0.5">【$1】</span>');
+      safe = safe.replace(/(基本給：.*?[円|万])/g, '<span class="text-emerald-400 font-bold">$1</span>');
+      safe = safe.replace(/(固定残業代：.*?[分|なし])/g, '<span class="text-amber-300 font-semibold">$1</span>');
+      safe = safe.replace(/(危険|注意|カラクリ|裏の顔|地雷|ガチャ)/g, '<span class="text-rose-400 font-bold underline">$1</span>');
+      return safe;
+    }
+
+    function toggleEditAnalystReport() {
+      const formBox = document.getElementById('analystEditFormContainer');
+      const isHidden = formBox.classList.contains('hidden');
+      if (isHidden) {
+        formBox.classList.remove('hidden');
+        document.getElementById('analystEditBtnText').innerText = '編集を閉じる';
+        
+        const comp = activeDetailItem ? activeDetailItem.companyName : '';
+        const rep = (activeDetailItem && activeDetailItem.analystReport) ? activeDetailItem.analystReport : (ANALYST_REPORTS[comp] || {});
+        
+        document.getElementById('editReportScore').value = rep.score || 7.0;
+        document.getElementById('editReportVerdict').value = rep.verdict || '';
+        document.getElementById('editReportHeadline').value = rep.headline || '';
+        document.getElementById('editReportFullText').value = rep.items ? rep.items.join('\n\n') : '';
+      } else {
+        formBox.classList.add('hidden');
+        document.getElementById('analystEditBtnText').innerText = '分析メモ編集';
+      }
+    }
+
+    function cancelEditAnalystReport() {
+      document.getElementById('analystEditFormContainer').classList.add('hidden');
+      document.getElementById('analystEditBtnText').innerText = '分析メモ編集';
+    }
+
+    function saveEditedAnalystReport() {
+      if (!activeDetailItem) return;
+
+      const score = parseFloat(document.getElementById('editReportScore').value) || 7.0;
+      const verdict = document.getElementById('editReportVerdict').value.trim() || '分析済';
+      const headline = document.getElementById('editReportHeadline').value.trim();
+      const rawText = document.getElementById('editReportFullText').value.trim();
+
+      const items = rawText ? rawText.split('\n\n').filter(Boolean) : [];
+
+      const updatedReport = {
+        score: score,
+        verdict: verdict,
+        headline: headline,
+        mustConditions: (activeDetailItem.analystReport && activeDetailItem.analystReport.mustConditions) || {
+          salary: score >= 7.0, directTrade: score >= 7.5, transparency: true, workLife: true
+        },
+        axes: (activeDetailItem.analystReport && activeDetailItem.analystReport.axes) || {
+          jobType: true, salary: true, overtime: true, holidays: true, workType: true,
+          welfare: true, training: true, bonus: true, retention: true, remote: true
+        },
+        items: items
+      };
+
+      activeDetailItem.analystReport = updatedReport;
+      ANALYST_REPORTS[activeDetailItem.companyName] = updatedReport;
+
+      saveState();
+      populateAnalystSection(activeDetailItem.companyName, updatedReport);
+      renderOffers();
+      renderPipeline();
+      showToast('アナリスト分析データを保存・更新しました！', 'success');
+    }
+
+    function handleUpdatePipeline(e) {
+      e.preventDefault();
+      if (!activeDetailItem) return;
+
+      activeDetailItem.stage = document.getElementById('detailStage').value;
+      activeDetailItem.priority = document.getElementById('detailPriority').value;
+      activeDetailItem.action = document.getElementById('detailAction').value.trim();
+      activeDetailItem.nextSchedule = document.getElementById('detailNextSchedule').value.trim();
+
+      activeDetailItem.infoSessionStatus = document.getElementById('detailInfoSessionStatus').value;
+      activeDetailItem.infoSessionDate = document.getElementById('detailInfoSessionDate').value.trim();
+      activeDetailItem.infoSessionDeadline = document.getElementById('detailInfoSessionDeadline').value.trim();
+      activeDetailItem.infoSessionNotes = document.getElementById('detailInfoSessionNotes').value.trim();
+
+      activeDetailItem.webTestType = document.getElementById('detailWebTestType').value.trim();
+      activeDetailItem.mypageUrl = document.getElementById('detailMypageUrl').value.trim();
+      activeDetailItem.loginId = document.getElementById('detailLoginId').value.trim();
+      activeDetailItem.portfolioUrl = document.getElementById('detailPortfolioUrl').value.trim();
+      activeDetailItem.motiveSummary = document.getElementById('detailMotiveSummary').value.trim();
+      activeDetailItem.questionsAsked = document.getElementById('detailQuestionsAsked').value.trim();
+      activeDetailItem.reverseQuestions = document.getElementById('detailReverseQuestions').value.trim();
+      activeDetailItem.interviewReview = document.getElementById('detailInterviewReview').value.trim();
+
+      saveState();
+      closeModal('pipelineDetailModal');
+      renderPipeline();
+      showToast(`「${activeDetailItem.companyName}」の選考情報を保存しました`, 'success');
+    }
+
+    function deleteCurrentPipelineItem() {
+      if (!activeDetailItem) return;
+      if (!confirm(`「${activeDetailItem.companyName}」の選考データを削除してもよろしいですか？`)) return;
+
+      pipeline = pipeline.filter(p => p.id !== activeDetailItem.id);
+      saveState();
+      closeModal('pipelineDetailModal');
+      renderPipeline();
+      showToast('選考データを削除しました', 'info');
+    }
+
+    function copyLoginId() {
+      const val = document.getElementById('detailLoginId').value;
+      if (!val) {
+        showToast('コピーするID情報がありません', 'error');
+        return;
+      }
+      navigator.clipboard.writeText(val).then(() => {
+        showToast('ログインID情報をコピーしました', 'info');
+      }).catch(() => {
+        showToast('コピーに失敗しました', 'error');
+      });
+    }
+
+    function openProfileModal() {
+      document.getElementById('profileModal').classList.remove('hidden');
+      document.getElementById('profileModal').classList.add('flex');
+      lucide.createIcons();
+    }
+
+    // ==========================================
+    // Modals & General Forms
+    // ==========================================
+    function openCreateModal() {
+      document.getElementById('createModal').classList.remove('hidden');
+      document.getElementById('createModal').classList.add('flex');
+      document.getElementById('offerDeadline').value = getOffsetDateString(7);
+      lucide.createIcons();
+    }
+
+    function closeModal(modalId) {
+      const m = document.getElementById(modalId);
+      if (m) {
+        m.classList.add('hidden');
+        m.classList.remove('flex');
+      }
+    }
+
+    function switchCreateType(type) {
+      const offerBtn = document.getElementById('createTypeOfferBtn');
+      const pipeBtn = document.getElementById('createTypePipelineBtn');
+      const offerForm = document.getElementById('offerCreateForm');
+      const pipeForm = document.getElementById('pipelineCreateForm');
+
+      if (type === 'offer') {
+        offerBtn.className = 'pb-3 px-4 font-semibold text-sm border-b-2 border-indigo-500 text-indigo-400 flex items-center gap-2';
+        pipeBtn.className = 'pb-3 px-4 font-semibold text-sm border-b-2 border-transparent text-slate-400 hover:text-slate-200 flex items-center gap-2';
+        offerForm.classList.remove('hidden');
+        pipeForm.classList.add('hidden');
+      } else {
+        pipeBtn.className = 'pb-3 px-4 font-semibold text-sm border-b-2 border-indigo-500 text-indigo-400 flex items-center gap-2';
+        offerBtn.className = 'pb-3 px-4 font-semibold text-sm border-b-2 border-transparent text-slate-400 hover:text-slate-200 flex items-center gap-2';
+        pipeForm.classList.remove('hidden');
+        offerForm.classList.add('hidden');
+      }
+    }
+
+    function handleCreateOffer(e) {
+      e.preventDefault();
+      const comp = document.getElementById('offerCompanyName').value.trim();
+      const newOffer = {
+        id: 'offer-' + Date.now(),
+        companyName: comp,
+        media: document.getElementById('offerMedia').value,
+        deadline: document.getElementById('offerDeadline').value,
+        offerType: document.getElementById('offerType').value,
+        rating: Number(document.getElementById('offerRating').value),
+        status: document.getElementById('offerStatus').value,
+        url: document.getElementById('offerUrl').value.trim(),
+        notes: document.getElementById('offerNotes').value.trim(),
+        analystReport: ANALYST_REPORTS[comp] ? JSON.parse(JSON.stringify(ANALYST_REPORTS[comp])) : null
+      };
+
+      offers.unshift(newOffer);
+      saveState();
+      closeModal('createModal');
+      document.getElementById('offerCreateForm').reset();
+      renderOffers();
+      showToast(`オファー「${newOffer.companyName}」を登録しました`, 'success');
+    }
+
+    function handleCreatePipeline(e) {
+      e.preventDefault();
+      const comp = document.getElementById('pipeCompanyName').value.trim();
+      const stageVal = document.getElementById('pipeStage').value;
+      const infoSessionStatusVal = document.getElementById('pipeInfoSessionStatus').value;
+
+      const newItem = {
+        id: 'pipe-' + Date.now(),
+        originalOfferId: null,
+        companyName: comp,
+        media: document.getElementById('pipeMedia').value.trim(),
+        stage: stageVal,
+        priority: document.getElementById('pipePriority').value,
+        action: document.getElementById('pipeAction').value.trim(),
+        nextSchedule: document.getElementById('pipeNextSchedule').value.trim(),
+        infoSessionStatus: infoSessionStatusVal,
+        infoSessionDate: document.getElementById('pipeInfoSessionDate').value.trim(),
+        infoSessionDeadline: '',
+        infoSessionNotes: '',
+        webTestType: document.getElementById('pipeWebTestType').value.trim(),
+        mypageUrl: document.getElementById('pipeMypageUrl').value.trim(),
+        loginId: document.getElementById('pipeLoginId').value.trim(),
+        motiveSummary: document.getElementById('pipeMotiveSummary').value.trim(),
+        portfolioUrl: '',
+        questionsAsked: '',
+        reverseQuestions: '',
+        interviewReview: '',
+        analystReport: ANALYST_REPORTS[comp] ? JSON.parse(JSON.stringify(ANALYST_REPORTS[comp])) : null
+      };
+
+      pipeline.unshift(newItem);
+      saveState();
+      closeModal('createModal');
+      document.getElementById('pipelineCreateForm').reset();
+      renderPipeline();
+      showToast(`選考企業「${newItem.companyName}」を登録しました`, 'success');
+      switchTab('pipeline');
+    }
+
+    let editingOfferId = null;
+    function openOfferEditModal(id) {
+      const offer = offers.find(o => o.id === id);
+      if (!offer) return;
+      editingOfferId = id;
+
+      document.getElementById('editOfferId').value = offer.id;
+      document.getElementById('editOfferCompanyName').value = offer.companyName;
+      document.getElementById('editOfferMedia').value = offer.media || 'OfferBox';
+      document.getElementById('editOfferDeadline').value = offer.deadline || '';
+      document.getElementById('editOfferType').value = offer.offerType || '特別選考/1次免除';
+      document.getElementById('editOfferRating').value = offer.rating || 2;
+      document.getElementById('editOfferStatus').value = offer.status || '検討中';
+      document.getElementById('editOfferUrl').value = offer.url || '';
+      document.getElementById('editOfferNotes').value = offer.notes || '';
+
+      document.getElementById('offerEditModal').classList.remove('hidden');
+      document.getElementById('offerEditModal').classList.add('flex');
+      lucide.createIcons();
+    }
+
+    function handleUpdateOffer(e) {
+      e.preventDefault();
+      const id = document.getElementById('editOfferId').value;
+      const offer = offers.find(o => o.id === id);
+      if (!offer) return;
+
+      offer.companyName = document.getElementById('editOfferCompanyName').value.trim();
+      offer.media = document.getElementById('editOfferMedia').value;
+      offer.deadline = document.getElementById('editOfferDeadline').value;
+      offer.offerType = document.getElementById('editOfferType').value;
+      offer.rating = Number(document.getElementById('editOfferRating').value);
+      offer.status = document.getElementById('editOfferStatus').value;
+      offer.url = document.getElementById('editOfferUrl').value.trim();
+      offer.notes = document.getElementById('editOfferNotes').value.trim();
+
+      saveState();
+      closeModal('offerEditModal');
+      renderOffers();
+      showToast(`オファー「${offer.companyName}」を更新しました`, 'success');
+    }
+
+    function deleteCurrentOffer() {
+      if (!editingOfferId) return;
+      if (!confirm('このオファーを削除してもよろしいですか？')) return;
+
+      offers = offers.filter(o => o.id !== editingOfferId);
+      saveState();
+      closeModal('offerEditModal');
+      renderOffers();
+      showToast('オファーを削除しました', 'info');
+    }
+
+    // ==========================================
+    // Backup & Restore
+    // ==========================================
+    function exportData() {
+      const data = {
+        student: '田中 壮 (東京情報クリエイター工学院専門学校 高度クリエイター学科 ゲーム制作コース 3年制 2028卒)',
+        exportedAt: new Date().toISOString(),
+        version: '5.0',
+        rubric: {
+          tiers: {
+            top: '9.0 - 10.0 (最高峰・理想枠 / トップティア)',
+            target: '7.5 - 8.5 (高評価・強力な併願/滑り止め候補 ★推奨)',
+            mid: '6.0 - 7.0 (中位・条件付き検討枠)',
+            warn: '4.5 - 5.5 (注意・リスク大の懸念枠)',
+            danger: '1.0 - 4.0 (地雷・完全ミスマッチ枠)'
+          },
+          mustConditions: [
+            '基本給単体21万円以上',
+            '自社開発または直取引・自社内受託（6割以上）',
+            '給与・契約の透明性（固定残業過剰なし・賞与年2回）',
+            '年間休日120日以上かつ残業月20時間以内'
+          ]
+        },
+        offers: offers,
+        pipeline: pipeline,
+        archivedPipeline: archivedPipeline,
+        analystReports: ANALYST_REPORTS
+      };
+      const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `就活ダッシュボード_田中壮様_新スコアリング評価ログ_${new Date().toISOString().slice(0,10)}.json`;
+      a.click();
+      URL.revokeObjectURL(url);
+      showToast('新評価基準の就活分析ログを書き出しました', 'success');
+    }
+
+    function importData(event) {
+      const file = event.target.files[0];
+      if (!file) return;
+
+      const reader = new FileReader();
+      reader.onload = function(e) {
+        try {
+          const parsed = JSON.parse(e.target.result);
+          if (parsed.offers && parsed.pipeline) {
+            offers = parsed.offers;
+            pipeline = parsed.pipeline;
+            if (parsed.archivedPipeline) {
+              archivedPipeline = parsed.archivedPipeline;
+            }
+            if (parsed.analystReports) {
+              Object.assign(ANALYST_REPORTS, parsed.analystReports);
+            }
+            saveState();
+            renderOffers();
+            renderPipeline();
+            renderArchived();
+            showToast('データを復元しました！', 'success');
+          } else {
+            showToast('データ形式が正しくありません', 'error');
+          }
+        } catch (err) {
+          showToast('JSONファイルの読み込みに失敗しました', 'error');
+        }
+      };
+      reader.readAsText(file);
+      event.target.value = '';
+    }
+
+    function resetToSampleData() {
+      if (!confirm('提示された新評価基準（4大必須条件・5段階ルーブリック）にデータを初期化しますか？')) return;
+      offers = JSON.parse(JSON.stringify(SAMPLE_OFFERS));
+      pipeline = JSON.parse(JSON.stringify(SAMPLE_PIPELINE));
+      archivedPipeline = JSON.parse(JSON.stringify(SAMPLE_ARCHIVED));
+      saveState();
+      attachAnalystReports();
+      renderOffers();
+      renderPipeline();
+      renderArchived();
+      showToast('新スコアリング基準のデータを再読み込みしました', 'info');
+    }
+
+    // Toast
+    function showToast(message, type = 'info') {
+      const container = document.getElementById('toastContainer');
+      const toast = document.createElement('div');
+      
+      let borderAndText = 'border-indigo-500/30 text-indigo-200 bg-slate-900/95';
+      let icon = '<i data-lucide="info" class="w-4 h-4 text-indigo-400"></i>';
+
+      if (type === 'success') {
+        borderAndText = 'border-emerald-500/40 text-emerald-200 bg-slate-900/95';
+        icon = '<i data-lucide="check-circle" class="w-4 h-4 text-emerald-400"></i>';
+      } else if (type === 'error') {
+        borderAndText = 'border-rose-500/40 text-rose-200 bg-slate-900/95';
+        icon = '<i data-lucide="alert-triangle" class="w-4 h-4 text-rose-400"></i>';
+      }
+
+      toast.className = `flex items-center gap-2.5 px-4 py-3 rounded-xl border shadow-xl backdrop-blur-md text-xs font-medium transition-all duration-300 transform translate-y-2 opacity-0 pointer-events-auto ${borderAndText}`;
+      toast.innerHTML = `${icon}<span>${escapeHtml(message)}</span>`;
+
+      container.appendChild(toast);
+      lucide.createIcons();
+
+      requestAnimationFrame(() => {
+        toast.classList.remove('translate-y-2', 'opacity-0');
+      });
+
+      setTimeout(() => {
+        toast.classList.add('opacity-0', 'translate-y-2');
+        setTimeout(() => toast.remove(), 300);
+      }, 3000);
+    }
+
+    function escapeHtml(str) {
+      if (!str) return '';
+      return String(str)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#039;');
+    }
+
+    // ==========================================
+    // 🔒 Security & Password Auth (Sou180409ts)
+    // ==========================================
+    const AUTH_PASS_HASH = 'Sou180409ts'; // User designated password
+
+    function checkAuth() {
+      const isAuthLocal = localStorage.getItem('job_hunt_auth') === 'true';
+      const isAuthSession = sessionStorage.getItem('job_hunt_auth') === 'true';
+      const lockScreen = document.getElementById('authLockScreen');
+
+      if (isAuthLocal || isAuthSession) {
+        lockScreen.classList.add('hidden');
+      } else {
+        lockScreen.classList.remove('hidden');
+        setTimeout(() => {
+          document.getElementById('authPasswordInput')?.focus();
+        }, 100);
+      }
+    }
+
+    function handleAuthLogin(e) {
+      e.preventDefault();
+      const input = document.getElementById('authPasswordInput').value;
+      const remember = document.getElementById('authRememberMe').checked;
+      const errorMsg = document.getElementById('authErrorMessage');
+      const lockScreen = document.getElementById('authLockScreen');
+
+      if (input === AUTH_PASS_HASH) {
+        errorMsg.classList.add('hidden');
+        if (remember) {
+          localStorage.setItem('job_hunt_auth', 'true');
+        } else {
+          sessionStorage.setItem('job_hunt_auth', 'true');
+        }
+        
+        lockScreen.classList.add('opacity-0');
+        setTimeout(() => {
+          lockScreen.classList.add('hidden');
+          lockScreen.classList.remove('opacity-0');
+        }, 300);
+
+        showToast('認証に成功しました。おかえりなさい！', 'success');
+      } else {
+        errorMsg.classList.remove('hidden');
+        const inputEl = document.getElementById('authPasswordInput');
+        inputEl.classList.add('border-rose-500', 'animate-shake');
+        setTimeout(() => {
+          inputEl.classList.remove('border-rose-500', 'animate-shake');
+        }, 500);
+      }
+    }
+
+    function handleAuthLogout() {
+      if (!confirm('ログアウトしてダッシュボードをロックしますか？')) return;
+      localStorage.removeItem('job_hunt_auth');
+      sessionStorage.removeItem('job_hunt_auth');
+      const lockScreen = document.getElementById('authLockScreen');
+      document.getElementById('authPasswordInput').value = '';
+      document.getElementById('authErrorMessage').classList.add('hidden');
+      lockScreen.classList.remove('hidden');
+      showToast('ログアウトしました', 'info');
+    }
+
+    function togglePasswordVisibility() {
+      const input = document.getElementById('authPasswordInput');
+      const eyeIcon = document.getElementById('authEyeIcon');
+      if (input.type === 'password') {
+        input.type = 'text';
+        eyeIcon.setAttribute('data-lucide', 'eye-off');
+      } else {
+        input.type = 'password';
+        eyeIcon.setAttribute('data-lucide', 'eye');
+      }
+      lucide.createIcons();
+    }
+
+    // ==========================================
+    // 📱 PWA Service Worker Registration
+    // ==========================================
+    if ('serviceWorker' in navigator && window.location.protocol.startsWith('http')) {
+      navigator.serviceWorker.register('./sw.js').catch(() => {});
+    }
+
+    window.addEventListener('DOMContentLoaded', () => {
+      checkAuth();
+      loadState();
+      renderOffers();
+      renderPipeline();
+      renderArchived();
+      lucide.createIcons();
+    });
+  </script>
+</body>
+</html>
