@@ -900,6 +900,12 @@
               <span>Googleカレンダー</span>
             </a>
 
+            <!-- 🔄 パイプライン・オファーから全同期 -->
+            <button onclick="syncCalendarFromPipelineAndOffers()" title="選考パイプラインとオファー締切からすべての予定を最新化・再同期" class="px-3 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 border border-slate-700 text-sky-300 text-xs font-semibold flex items-center gap-1.5 transition active:scale-95">
+              <i data-lucide="refresh-cw" class="w-3.5 h-3.5 text-sky-400"></i>
+              <span>🔄 全日程を同期</span>
+            </button>
+
             <!-- 📥 iCalエクスポート -->
             <button onclick="exportAllEventsToICS()" title="全予定をGoogleカレンダー・スマホ用iCal(.ics)として保存" class="p-2 rounded-xl bg-slate-800 hover:bg-slate-700 border border-slate-700 text-slate-300 hover:text-white transition">
               <i data-lucide="download" class="w-4 h-4"></i>
@@ -4040,123 +4046,396 @@
     // State Management & Calendar Events
     // ==========================================
     const SAMPLE_CALENDAR_EVENTS = [
+      // --- 過去の参加済み・受検済み実績（就活履歴の完全可視化） ---
+      {
+        id: 'cal-atlus-20260916',
+        companyName: '株式会社アトラス',
+        title: '会社説明会（※不参加・情報保管中）',
+        eventType: '会社説明会',
+        startDate: '2026-09-16',
+        startTime: '14:00',
+        endDate: '2026-09-16',
+        endTime: '15:30',
+        locationType: 'オンライン説明会',
+        meetingUrl: 'https://www.atlus.co.jp/recruit/',
+        notes: '【参加ステータス: 不参加】日程都合により不参加となり選考除外（保管庫へ退避）。企業分析・診断レポートは保持。',
+        gmailUrl: 'https://mail.google.com/mail/u/0/#search/%E3%82%A2%E3%83%88%E3%83%A9%E3%82%B9',
+        completed: true
+      },
+      {
+        id: 'cal-css-20260917',
+        companyName: 'シーエスエスグループ',
+        title: '金融系システム開発 説明会・体験型1day',
+        eventType: '仕事体験・ワークショップ',
+        startDate: '2026-09-17',
+        startTime: '13:00',
+        endDate: '2026-09-17',
+        endTime: '16:00',
+        locationType: 'オンライン (Zoom)',
+        meetingUrl: '',
+        notes: '【参加ステータス: 参加済み】金融・公共インフラ系システム開発の説明会および1day体験受講完了。本選考エントリー検討中。',
+        gmailUrl: 'https://mail.google.com/mail/u/0/#search/%E3%82%B7%E3%83%BC%E3%82%A8%E3%82%B9%E3%82%A8%E3%82%B9',
+        completed: true
+      },
+      {
+        id: 'cal-hal-20260918',
+        companyName: '株式会社ハル研究所',
+        title: '会社説明会（自社開発100%・秋採用案内）',
+        eventType: '会社説明会',
+        startDate: '2026-09-18',
+        startTime: '14:00',
+        endDate: '2026-09-18',
+        endTime: '15:30',
+        locationType: 'オンライン説明会',
+        meetingUrl: 'https://www.hallab.co.jp/recruit/',
+        notes: '【参加ステータス: 参加済み】『星のカービィ』名門。説明会受講済。C++自作ゲームエンジン作品およびポートフォリオES提出準備中。',
+        gmailUrl: 'https://mail.google.com/mail/u/0/#search/%E3%83%8F%E3%83%AB%E7%A0%94%E7%A9%B6%E6%89%80',
+        completed: true
+      },
+      {
+        id: 'cal-4samurai-20260929',
+        companyName: '4samurai',
+        title: '会社説明会（自社モバイルゲーム開発）',
+        eventType: '会社説明会',
+        startDate: '2026-09-29',
+        startTime: '15:00',
+        endDate: '2026-09-29',
+        endTime: '16:30',
+        locationType: 'オンライン説明会',
+        meetingUrl: '',
+        notes: '【参加ステータス: 参加済み】自社モバイルゲーム開発。説明会受講完了、本選考エントリー検討中。',
+        gmailUrl: 'https://mail.google.com/mail/u/0/#search/4samurai',
+        completed: true
+      },
+      {
+        id: 'cal-persol-20261009',
+        companyName: 'パーソルクロステクノロジー株式会社',
+        title: '会社説明会（IT領域）',
+        eventType: '会社説明会',
+        startDate: '2026-10-09',
+        startTime: '14:00',
+        endDate: '2026-10-09',
+        endTime: '15:30',
+        locationType: 'オンライン説明会',
+        meetingUrl: '',
+        notes: '【参加ステータス: 参加済み】会社説明会受講完了。その後適性検査へ案内。',
+        gmailUrl: 'https://mail.google.com/mail/u/0/#search/%E3%83%91%E3%83%BC%E3%82%BD%E3%83%AB%E3%82%AF%E3%83%AD%E3%82%B9',
+        completed: true
+      },
+      {
+        id: 'cal-reforum-20261012',
+        companyName: 'ゲーム×IT業界フォーラム【東京】（Re就活キャンパス）',
+        title: 'Re就活キャンパス 合同企業説明会ブース訪問',
+        eventType: '座談会・セミナー',
+        startDate: '2026-10-12',
+        startTime: '11:00',
+        endDate: '2026-10-12',
+        endTime: '17:00',
+        locationType: '東京会場（対面ブース）',
+        meetingUrl: 'https://service.gakujo.ne.jp/',
+        notes: '【参加ステータス: 参加済み】東京開催のゲーム×IT特化合同説明会。複数社のブース訪問およびスカウト接触完了。',
+        gmailUrl: 'https://mail.google.com/mail/u/0/#search/Re%E5%B0%B1%E6%B4%BB',
+        completed: true
+      },
+      {
+        id: 'cal-compmind-20261019',
+        companyName: '株式会社コンピュータマインド社',
+        title: '会社説明会（制御系・産業ロボット開発）',
+        eventType: '会社説明会',
+        startDate: '2026-10-19',
+        startTime: '14:00',
+        endDate: '2026-10-19',
+        endTime: '15:30',
+        locationType: 'オンライン (Zoom)',
+        meetingUrl: '',
+        notes: '【参加ステータス: 参加済み】産業ロボット・組み込み制御ソフトウェア開発の説明会受講完了。10/22リクルーター面談オファー受信。',
+        gmailUrl: 'https://mail.google.com/mail/u/0/#search/%E3%82%B3%E3%83%B3%E3%83%94%E3%83%A5%E3%83%BC%E3%82%BF%E3%83%9E%E3%82%A4%E3%83%B3%E3%83%89',
+        completed: true
+      },
+      {
+        id: 'cal-persol-20261020',
+        companyName: 'パーソルクロステクノロジー株式会社',
+        title: 'Web適性検査 受検＆合格通知',
+        eventType: 'Webテスト / 課題締切',
+        startDate: '2026-10-20',
+        startTime: '10:00',
+        endDate: '2026-10-20',
+        endTime: '11:00',
+        locationType: 'オンライン受検',
+        meetingUrl: '',
+        notes: '【結果: 合格】適性検査合格。10/21メールにて一次面接（IT領域）予約案内を受信！',
+        gmailUrl: 'https://mail.google.com/mail/u/0/#search/%E3%83%91%E3%83%BC%E3%82%BD%E3%83%AB%E3%82%AF%E3%83%AD%E3%82%B9',
+        completed: true
+      },
+      {
+        id: 'cal-willway-20261020',
+        companyName: '株式会社ウィルウェイ',
+        title: '会社説明会（業務系システムインテグレーション）',
+        eventType: '会社説明会',
+        startDate: '2026-10-20',
+        startTime: '14:00',
+        endDate: '2026-10-20',
+        endTime: '15:30',
+        locationType: 'オンライン (Zoom)',
+        meetingUrl: '',
+        notes: '【参加ステータス: 参加済み】業務系SI会社説明会受講完了。次回選考案内待ち。',
+        gmailUrl: 'https://mail.google.com/mail/u/0/#search/%E3%82%Aウィルウェイ',
+        completed: true
+      },
+
+      // --- 直近および今後の確定予定・重要締切 ---
+      {
+        id: 'cal-aas-20261022',
+        companyName: '株式会社エイエイエス',
+        title: 'オープンカンパニー・WEB会社説明会',
+        eventType: '会社説明会',
+        startDate: '2026-10-22',
+        startTime: '14:30',
+        endDate: '2026-10-22',
+        endTime: '15:30',
+        locationType: 'オンライン (Zoom)',
+        meetingUrl: '',
+        notes: '制御・通信・インフラに強みを持つ独立系SIer。C/C++技術の活かしどころを確認。当日アンケート提出要。',
+        gmailUrl: 'https://mail.google.com/mail/u/0/#search/%E3%82%A8%E3%82%A4%E3%82%A4%E3%82%A8%E3%82%B9',
+        completed: false
+      },
       {
         id: 'cal-ncd-20261023',
         companyName: 'NCD株式会社',
-        title: '若手SE座談会＆質問会',
+        title: 'オープンカンパニー 若手SE座談会＆質問会',
         eventType: '座談会・セミナー',
         startDate: '2026-10-23',
-        startTime: '16:00',
+        startTime: '10:00',
         endDate: '2026-10-23',
-        endTime: '17:00',
+        endTime: '12:00',
         locationType: 'オンライン (Zoom)',
         meetingUrl: 'https://zoom.us/j/sample12345',
-        notes: '若手SEとのフリートーク、開発現場のリアルな雰囲気、キャリアパスについての質疑応答。服装自由。',
+        notes: '【開催直前リマインド受信済】若手SEとのフリートーク、開発現場のリアル、キャリアパス質疑応答。私服可。次回11/4仕事体験へ接続。',
         gmailUrl: 'https://mail.google.com/mail/u/0/#search/NCD%E6%A0%AA%E5%BC%8F%E4%BC%9A%E7%A4%BE',
         completed: false
       },
       {
+        id: 'cal-compmind-20261025',
+        companyName: '株式会社コンピュータマインド社',
+        title: 'リクルーター面談 回答期限（OfferBox 3日期限）',
+        eventType: '面談 (カジュアル/リクルーター)',
+        startDate: '2026-10-25',
+        startTime: '23:59',
+        endDate: '2026-10-25',
+        endTime: '23:59',
+        locationType: 'OfferBox / メール返信',
+        meetingUrl: 'https://offerbox.jp/',
+        notes: '【回答期限】10/22にリクルーター面談オファー受信（申し込み未完了・3日期限）。日程調整を完了させること。',
+        gmailUrl: 'https://mail.google.com/mail/u/0/#search/%E3%82%B3%E3%83%B3%E3%83%94%E3%83%A5%E3%83%BC%E3%82%BF%E3%83%9E%E3%82%A4%E3%83%B3%E3%83%89',
+        completed: false
+      },
+      {
+        id: 'cal-persol-20261026',
+        companyName: 'パーソルクロステクノロジー株式会社',
+        title: '一次面接（IT領域・Web面談予約推奨枠）',
+        eventType: '一次面接',
+        startDate: '2026-10-26',
+        startTime: '10:00',
+        endDate: '2026-10-26',
+        endTime: '11:00',
+        locationType: 'オンライン (Web面接)',
+        meetingUrl: '',
+        notes: '【早期予約要】適性検査合格に伴う一次面接。枠が埋まり次第終了のためマイページ/案内メールより早急に面接枠を確保。',
+        gmailUrl: 'https://mail.google.com/mail/u/0/#search/%E3%83%91%E3%83%BC%E3%82%BD%E3%83%AB%E3%82%AF%E3%83%AD%E3%82%B9%E3%83%86%E3%82%AF%E3%83%8E%E3%83%AD%E3%82%B8%E3%83%BC',
+        completed: false
+      },
+      {
         id: 'cal-kokusai-20261028',
-        companyName: '株式会社国際ソフトウェア',
-        title: '自社開発プログラミング体験＆業界研究',
+        companyName: '国際ソフトウェア株式会社',
+        title: '1day体験型ワークショップ（IT業界理解UP）',
         eventType: '仕事体験・ワークショップ',
         startDate: '2026-10-28',
-        startTime: '14:00',
+        startTime: '09:30',
         endDate: '2026-10-28',
-        endTime: '16:00',
+        endTime: '16:30',
         locationType: 'オンライン (Zoom)',
         meetingUrl: 'https://zoom.us/j/sample67890',
-        notes: '自社ERP/パッケージ開発のコーディング体験＆グループワーク。筆記用具準備。',
+        notes: '1dayIT業界理解UP体験型ワークショップ。自社パッケージ開発の設計力・コーディング体験。昼休憩あり。筆記用具準備。',
         gmailUrl: 'https://mail.google.com/mail/u/0/#search/%E5%9B%BD%E9%9A%9B%E3%82%BD%E3%83%95%E3%83%88%E3%82%A2%E3%82%A8%E3%82%A2',
         completed: false
       },
       {
         id: 'cal-koeitecmo-20261028',
         companyName: '株式会社コーエーテクモホールディングス',
-        title: '早期本選考ES・作品提出締切',
+        title: '早期本選考直結インターンシップES・作品提出締切',
         eventType: 'ES提出締切',
         startDate: '2026-10-28',
         startTime: '23:59',
         endDate: '2026-10-28',
         endTime: '23:59',
         locationType: 'マイページWeb提出',
-        meetingUrl: 'https://www.gamecity.ne.jp/recruit/',
-        notes: 'マイページよりエントリーシートおよび自作ゲーム作品・GitHub URLの提出締切！',
+        meetingUrl: 'https://mypage.snar.jp/koeitecmo/',
+        notes: '【超重要締切】自社IP家庭用ゲーム開発100%。早期選考直結ルートへの最重要ステップ。マイページよりESおよび自作ゲーム作品提出！',
         gmailUrl: 'https://mail.google.com/mail/u/0/#search/%E3%82%B3%E3%83%BC%E3%82%A2%E3%83%BC%E3%83%86%E3%82%AF%E3%83%A2',
         completed: false
       },
       {
         id: 'cal-sega-20261031',
         companyName: '株式会社セガ フェイブ',
-        title: '27卒早期本選考エントリーシート提出締切',
+        title: '【早期選考直結】メダル開発職3daysカレッジ 応募締切',
         eventType: 'ES提出締切',
         startDate: '2026-10-31',
         startTime: '23:59',
         endDate: '2026-10-31',
         endTime: '23:59',
-        locationType: 'マイページWeb提出',
-        meetingUrl: 'https://www.sega.co.jp/recruit/',
-        notes: 'セガ フェイブ（アミューズメント・トイ開発）早期選考ES締切。研究・開発実績を記載。',
+        locationType: '採用HP / Web応募',
+        meetingUrl: 'https://job.saiyo.jp/sega/',
+        notes: '【超重要締切】メダルゲームソフトウェア開発職直結型。C++や自作ゲームエンジンの知見がダイレクトに刺さる最有力枠。',
         gmailUrl: 'https://mail.google.com/mail/u/0/#search/%E3%82%BB%E3%82%AC%20%E3%83%95%E3%82%A7%E3%82%A4%E3%83%96',
+        completed: false
+      },
+      {
+        id: 'cal-espic-20261031',
+        companyName: '株式会社エスピック',
+        title: 'マイナビ個別メッセージ・会社説明会エントリー締切',
+        eventType: 'ES提出締切',
+        startDate: '2026-10-31',
+        startTime: '23:59',
+        endDate: '2026-10-31',
+        endTime: '23:59',
+        locationType: 'マイページ / マイナビ',
+        meetingUrl: 'https://job.mynavi.jp/2028/',
+        notes: 'マイナビ経由の独立系ITソリューション企業。個別メッセージに対するエントリー・選考希望回答。',
+        gmailUrl: 'https://mail.google.com/mail/u/0/#search/%E3%82%A8%E3%82%B9%E3%83%94%E3%83%83%E3%82%AF',
         completed: false
       },
       {
         id: 'cal-techno-20261102',
         companyName: '株式会社テクノエージェント',
-        title: '1on1カジュアル面談・キャリア相談',
+        title: 'カジュアル面談（基本給・商流・常駐比率確認）',
         eventType: '面談 (カジュアル/リクルーター)',
         startDate: '2026-11-02',
-        startTime: '13:00',
+        startTime: '11:00',
         endDate: '2026-11-02',
-        endTime: '14:00',
+        endTime: '11:30',
         locationType: 'オンライン (Google Meet)',
         meetingUrl: 'https://meet.google.com/abc-defg-hij',
-        notes: 'キャリアアドバイザーとの個別面談。希望職種や就活軸の相談。',
+        notes: 'カジュアル面談。IT人材・派遣SES側面が強いため、雇用形態・自社受託割合・担当工程・固定残業代有無を慎重に確認すること。',
         gmailUrl: 'https://mail.google.com/mail/u/0/#search/%E3%83%86%E3%82%AF%E3%83%8E%E3%82%A8%E3%83%BC%E3%82%B8%E3%82%A7%E3%83%B3%E3%83%88',
         completed: false
       },
       {
         id: 'cal-ncd-20261104',
         companyName: 'NCD株式会社',
-        title: '自社クラウドソリューション仕事体験（1dayインターン）',
+        title: 'プログラミング仕事体験（自社クラウドソリューション1day）',
         eventType: '仕事体験・ワークショップ',
         startDate: '2026-11-04',
         startTime: '10:00',
         endDate: '2026-11-04',
-        endTime: '17:00',
+        endTime: '16:00',
         locationType: 'オンライン (Teams)',
         meetingUrl: 'https://teams.microsoft.com/l/meetup-join/sample',
-        notes: 'クラウド環境（AWS）を用いた実践課題型ワーク。昼休憩1時間あり。',
+        notes: 'クラウド環境（AWS）を用いた実践課題型プログラミング体験。昼休憩1時間あり。早期選考直結ステップ。',
         gmailUrl: 'https://mail.google.com/mail/u/0/#search/NCD%E6%A0%AA%E5%BC%8F%E4%BC%9A%E7%A4%BE',
         completed: false
       },
       {
+        id: 'cal-bna-20261105',
+        companyName: 'バンダイナムコアミューズメント',
+        title: '【早期選考案内】プランナー仕事体験 エントリー締切',
+        eventType: 'ES提出締切',
+        startDate: '2026-11-05',
+        startTime: '23:59',
+        endDate: '2026-11-05',
+        endTime: '23:59',
+        locationType: 'マイページWeb応募',
+        meetingUrl: 'https://job.saiyo.jp/bandainamco/',
+        notes: 'バンダイナムコグループの体験型エンタメ企画プログラム「プランナー仕事体験」エントリー締切。',
+        gmailUrl: 'https://mail.google.com/mail/u/0/#search/%E3%83%90%E3%83%B3%E3%83%80%E3%82%A4%E3%83%8A%E3%83%A0%E3%82%B3',
+        completed: false
+      },
+      {
         id: 'cal-kokusai-20261106',
-        companyName: '株式会社国際ソフトウェア',
-        title: '先端自社パッケージ開発・技術セミナー',
+        companyName: '国際ソフトウェア株式会社',
+        title: '業界研究＆会社説明セミナー（先端パッケージ開発）',
         eventType: '座談会・セミナー',
         startDate: '2026-11-06',
-        startTime: '15:00',
+        startTime: '15:30',
         endDate: '2026-11-06',
         endTime: '16:30',
         locationType: 'オンライン (Zoom)',
         meetingUrl: 'https://zoom.us/j/sample9988',
-        notes: '自社開発エンジニアによる技術スタック解説・質疑応答会。',
+        notes: '業界研究＆会社説明セミナー予約済。自社開発エンジニアによる技術スタック解説・質疑応答会。',
         gmailUrl: 'https://mail.google.com/mail/u/0/#search/%E5%9B%BD%E9%9A%9B%E3%82%BD%E3%83%95%E3%83%88%E3%82%A2%E3%82%A8%E3%82%A2',
+        completed: false
+      },
+      {
+        id: 'cal-nonstop-20261109',
+        companyName: '日本NonStopイノベーション株式会社',
+        title: 'IT業界研究セミナー（無停止サーバー基盤）',
+        eventType: '座談会・セミナー',
+        startDate: '2026-11-09',
+        startTime: '10:00',
+        endDate: '2026-11-09',
+        endTime: '11:30',
+        locationType: 'オンライン (Zoom)',
+        meetingUrl: '',
+        notes: '【高評価7.6点】金融・決済で24時間365日無停止を誇るHPE NonStopサーバーの専門SIer。C言語低レイヤ技術の活かしどころを確認。',
+        gmailUrl: 'https://mail.google.com/mail/u/0/#search/%E6%97%A5%E6%9C%ACNonStop',
+        completed: false
+      },
+      {
+        id: 'cal-atomitech-20261116',
+        companyName: '株式会社アトミテック',
+        title: '3Dayインターンシップ Day 1（自社製品Hinemos設計・体験）',
+        eventType: '仕事体験・ワークショップ',
+        startDate: '2026-11-16',
+        startTime: '13:00',
+        endDate: '2026-11-16',
+        endTime: '17:00',
+        locationType: 'オンライン (Zoom/Teams)',
+        meetingUrl: '',
+        notes: '【高評価8.1点・4大条件クリア】自社製品「Hinemos」開発元。自社開発100%・客先常駐排除。Day 1: Hinemosの製品仕様・アーキテクチャ講義。',
+        gmailUrl: 'https://mail.google.com/mail/u/0/#search/%E3%82%A2%E3%83%88%E3%83%9F%E3%83%86%E3%83%83%E3%82%AF',
+        completed: false
+      },
+      {
+        id: 'cal-atomitech-20261117',
+        companyName: '株式会社アトミテック',
+        title: '3Dayインターンシップ Day 2（クラウド自動化演習）',
+        eventType: '仕事体験・ワークショップ',
+        startDate: '2026-11-17',
+        startTime: '13:00',
+        endDate: '2026-11-17',
+        endTime: '17:00',
+        locationType: 'オンライン (Zoom/Teams)',
+        meetingUrl: '',
+        notes: 'Day 2: クラウド環境監視・運用自動化の実践ハンズオン演習。',
+        gmailUrl: 'https://mail.google.com/mail/u/0/#search/%E3%82%A2%E3%83%88%E3%83%9F%E3%83%86%E3%83%83%E3%82%AF',
+        completed: false
+      },
+      {
+        id: 'cal-atomitech-20261118',
+        companyName: '株式会社アトミテック',
+        title: '3Dayインターンシップ Day 3（開発ワーク講評＆早期選考案内）',
+        eventType: '仕事体験・ワークショップ',
+        startDate: '2026-11-18',
+        startTime: '13:00',
+        endDate: '2026-11-18',
+        endTime: '17:00',
+        locationType: 'オンライン (Zoom/Teams)',
+        meetingUrl: '',
+        notes: 'Day 3: 演習成果の発表・エンジニアからの個別フィードバック＆早期選考ルート案内。',
+        gmailUrl: 'https://mail.google.com/mail/u/0/#search/%E3%82%A2%E3%83%88%E3%83%9F%E3%83%86%E3%83%83%E3%82%AF',
         completed: false
       },
       {
         id: 'cal-sus-20261120',
         companyName: '株式会社エスユーエス',
-        title: 'VR/AR先端技術開発 1day仕事体験',
+        title: '1day仕事体験（VRコンテンツ制作・メタバース開発）',
         eventType: '仕事体験・ワークショップ',
         startDate: '2026-11-20',
         startTime: '13:30',
         endDate: '2026-11-20',
-        endTime: '16:30',
+        endTime: '17:30',
         locationType: 'オンライン (Zoom)',
         meetingUrl: 'https://zoom.us/j/sample7777',
-        notes: 'メタバース・XR技術の体験ワークショップ。事前課題なし。',
+        notes: 'VRコンテンツ制作の体験ワークショップ。実態は派遣SESのため、自社VRチーム配属確約が得られるかを質疑応答で確認。',
         gmailUrl: 'https://mail.google.com/mail/u/0/#search/%E3%82%A8%E3%82%B9%E3%83%A6%E3%83%BC%E3%82%A8%E3%82%B9',
         completed: false
       }
@@ -4182,16 +4461,29 @@
       let storedArchived = localStorage.getItem(STORAGE_KEY_ARCHIVED);
       let storedCalendar = localStorage.getItem(STORAGE_KEY_CALENDAR);
 
-      // カレンダー初期化
+      // カレンダー初期化＆完全網羅自動同期
       if (!storedCalendar || storedCalendar === '[]') {
         calendarEvents = JSON.parse(JSON.stringify(SAMPLE_CALENDAR_EVENTS));
       } else {
         try {
           calendarEvents = JSON.parse(storedCalendar);
-          // サンプルイベントの不足分を自動補完
+          // サンプルイベント（全26件）の不足分・更新分を強制自動マージ
           SAMPLE_CALENDAR_EVENTS.forEach(s => {
-            if (!calendarEvents.some(c => c.id === s.id)) {
+            const existingIdx = calendarEvents.findIndex(c => c.id === s.id);
+            if (existingIdx === -1) {
               calendarEvents.push(JSON.parse(JSON.stringify(s)));
+            } else {
+              // 時刻や日付、タイトル、メモが最新定義と異なる場合は自動最新化
+              const ex = calendarEvents[existingIdx];
+              ex.title = s.title;
+              ex.startDate = s.startDate;
+              ex.endDate = s.endDate;
+              ex.startTime = s.startTime;
+              ex.endTime = s.endTime;
+              ex.eventType = s.eventType;
+              ex.locationType = s.locationType;
+              if (s.meetingUrl && !ex.meetingUrl) ex.meetingUrl = s.meetingUrl;
+              if (s.notes) ex.notes = s.notes;
             }
           });
         } catch (e) {
@@ -6955,6 +7247,59 @@
       document.body.removeChild(a);
       URL.revokeObjectURL(url);
       showToast('📅 全予定をiCal形式(.ics)で出力しました！Googleカレンダーやスマホにインポートできます');
+    }
+
+    function syncCalendarFromPipelineAndOffers() {
+      let addedOrUpdatedCount = 0;
+
+      // 1. マスター初期スケジュール（26件）をマージ・最新化
+      SAMPLE_CALENDAR_EVENTS.forEach(sampleEvt => {
+        const existing = calendarEvents.find(e => e.id === sampleEvt.id);
+        if (!existing) {
+          calendarEvents.push(JSON.parse(JSON.stringify(sampleEvt)));
+          addedOrUpdatedCount++;
+        } else {
+          existing.title = sampleEvt.title;
+          existing.startDate = sampleEvt.startDate;
+          existing.endDate = sampleEvt.endDate;
+          existing.startTime = sampleEvt.startTime;
+          existing.endTime = sampleEvt.endTime;
+          existing.eventType = sampleEvt.eventType;
+          existing.locationType = sampleEvt.locationType;
+          if (sampleEvt.meetingUrl) existing.meetingUrl = sampleEvt.meetingUrl;
+          if (sampleEvt.notes) existing.notes = sampleEvt.notes;
+        }
+      });
+
+      // 2. オファー一覧の締切日（セガ、コーエーテクモ、バンダイナムコ、エスピック等）を自動統合
+      offers.forEach(o => {
+        if (o.deadline && o.status !== '辞退') {
+          const offId = `cal-offer-${o.id}`;
+          const existingOff = calendarEvents.find(e => e.id === offId);
+          if (!existingOff) {
+            calendarEvents.push({
+              id: offId,
+              companyName: o.companyName,
+              title: `【締切】${o.offerType}`,
+              eventType: 'ES提出締切',
+              startDate: o.deadline,
+              endDate: o.deadline,
+              startTime: '23:59',
+              endTime: '23:59',
+              locationType: 'マイページ / 応募サイト',
+              meetingUrl: o.url || '',
+              notes: o.notes || '',
+              gmailUrl: o.gmailUrl || `https://mail.google.com/mail/u/0/#search/${encodeURIComponent(o.companyName)}`,
+              completed: false
+            });
+            addedOrUpdatedCount++;
+          }
+        }
+      });
+
+      saveState();
+      renderCalendar();
+      showToast(`🔄 パイプライン・オファーの全予定（合計 ${calendarEvents.length}件）をカレンダーに完全同期しました！`);
     }
 
     function setCalendarViewSubMode(mode) {
