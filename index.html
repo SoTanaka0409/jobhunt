@@ -504,21 +504,27 @@
         </div>
       </div>
 
-      <!-- Center Navigation Tabs: 3-column equal grid on mobile, flex on desktop -->
-      <nav class="grid grid-cols-3 md:flex items-center bg-slate-800/80 p-0.5 sm:p-1 rounded-xl border border-slate-700/60 shadow-inner w-full md:w-auto">
-        <button id="tabOffersBtn" onclick="switchTab('offers')" class="flex items-center justify-center gap-1 sm:gap-2 px-2 sm:px-4 py-1.5 sm:py-2 rounded-lg text-xs sm:text-sm font-semibold transition-all duration-150 bg-indigo-600 text-white shadow-sm text-center">
+      <!-- Center Navigation Tabs: 4-column equal grid on mobile, flex on desktop -->
+      <nav class="grid grid-cols-4 md:flex items-center bg-slate-800/80 p-0.5 sm:p-1 rounded-xl border border-slate-700/60 shadow-inner w-full md:w-auto">
+        <button id="tabOffersBtn" onclick="switchTab('offers')" class="flex items-center justify-center gap-1 sm:gap-2 px-1.5 sm:px-3 py-1.5 sm:py-2 rounded-lg text-xs sm:text-sm font-semibold transition-all duration-150 bg-indigo-600 text-white shadow-sm text-center">
           <i data-lucide="mail-check" class="w-3.5 h-3.5 sm:w-4 sm:h-4 shrink-0"></i>
           <span class="hidden sm:inline">オファー・スカウト管理</span>
           <span class="sm:hidden">オファー</span>
           <span id="offersBadgeCount" class="text-[10px] sm:text-xs px-1.5 py-0.2 rounded-full bg-indigo-800/80 text-indigo-200 shrink-0">0</span>
         </button>
-        <button id="tabPipelineBtn" onclick="switchTab('pipeline')" class="flex items-center justify-center gap-1 sm:gap-2 px-2 sm:px-4 py-1.5 sm:py-2 rounded-lg text-xs sm:text-sm font-semibold transition-all duration-150 text-slate-400 hover:text-slate-200 text-center">
+        <button id="tabPipelineBtn" onclick="switchTab('pipeline')" class="flex items-center justify-center gap-1 sm:gap-2 px-1.5 sm:px-3 py-1.5 sm:py-2 rounded-lg text-xs sm:text-sm font-semibold transition-all duration-150 text-slate-400 hover:text-slate-200 text-center">
           <i data-lucide="kanban-square" class="w-3.5 h-3.5 sm:w-4 sm:h-4 shrink-0"></i>
           <span class="hidden sm:inline">選考パイプライン (全日程反映済)</span>
           <span class="sm:hidden">選考中</span>
           <span id="pipelineBadgeCount" class="text-[10px] sm:text-xs px-1.5 py-0.2 rounded-full bg-slate-700 text-slate-300 shrink-0">0</span>
         </button>
-        <button id="tabArchivedBtn" onclick="switchTab('archived')" class="flex items-center justify-center gap-1 sm:gap-2 px-2 sm:px-4 py-1.5 sm:py-2 rounded-lg text-xs sm:text-sm font-semibold transition-all duration-150 text-slate-400 hover:text-slate-200 text-center">
+        <button id="tabCalendarBtn" onclick="switchTab('calendar')" class="flex items-center justify-center gap-1 sm:gap-2 px-1.5 sm:px-3 py-1.5 sm:py-2 rounded-lg text-xs sm:text-sm font-semibold transition-all duration-150 text-slate-400 hover:text-slate-200 text-center">
+          <i data-lucide="calendar" class="w-3.5 h-3.5 sm:w-4 sm:h-4 shrink-0 text-sky-400"></i>
+          <span class="hidden sm:inline">📅 選考カレンダー (Google同期)</span>
+          <span class="sm:hidden">カレンダー</span>
+          <span id="calendarBadgeCount" class="text-[10px] sm:text-xs px-1.5 py-0.2 rounded-full bg-sky-500/20 text-sky-300 border border-sky-500/30 shrink-0">0</span>
+        </button>
+        <button id="tabArchivedBtn" onclick="switchTab('archived')" class="flex items-center justify-center gap-1 sm:gap-2 px-1.5 sm:px-3 py-1.5 sm:py-2 rounded-lg text-xs sm:text-sm font-semibold transition-all duration-150 text-slate-400 hover:text-slate-200 text-center">
           <i data-lucide="archive" class="w-3.5 h-3.5 sm:w-4 sm:h-4 shrink-0"></i>
           <span class="hidden sm:inline">選考除外・ゴミ箱 (保管庫)</span>
           <span class="sm:hidden">保管庫</span>
@@ -846,6 +852,152 @@
       <!-- VIEW MODE B: Overall List View Container (Vertical Scroll, perfect for mobile overview) -->
       <div id="pipelineListViewContainer" class="flex-1 space-y-3 pb-6 hidden">
         <!-- List sections per stage will be generated here -->
+      </div>
+    </section>
+
+    <!-- ============================================== -->
+    <!-- VIEW 4: 選考カレンダー ＆ Googleカレンダー同期ビュー -->
+    <!-- ============================================== -->
+    <section id="viewCalendar" class="flex-1 flex flex-col space-y-4 hidden">
+      <!-- Calendar Controls Header -->
+      <div class="bg-slate-800/40 border border-slate-800 p-3 sm:p-4 rounded-2xl space-y-3">
+        <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-3">
+          <div>
+            <div class="flex items-center gap-2">
+              <span class="w-2.5 h-2.5 rounded-full bg-sky-400"></span>
+              <h2 class="text-sm sm:text-lg font-bold text-white flex items-center gap-2">
+                <i data-lucide="calendar" class="w-4 h-4 text-sky-400"></i>
+                <span>就活・選考カレンダー</span>
+                <span class="text-xs font-semibold px-2 py-0.5 rounded-full bg-sky-500/20 text-sky-300 border border-sky-500/30 flex items-center gap-1">
+                  <i data-lucide="refresh-cw" class="w-3 h-3 text-sky-400"></i>
+                  Google同期対応
+                </span>
+              </h2>
+              <span id="calendarTotalEventsBadge" class="text-xs px-2.5 py-0.5 rounded-full bg-slate-800 text-slate-300 border border-slate-700 font-bold">0件</span>
+            </div>
+            <p class="text-xs text-slate-400 mt-0.5 leading-relaxed">
+              会社説明会・一次面接・座談会・ES提出締切を全自動マッピング。予約完了メールからの即時スケジュール解析やGoogleカレンダー同期に対応。
+            </p>
+          </div>
+
+          <!-- Quick Action Buttons -->
+          <div class="flex items-center gap-2 flex-wrap">
+            <!-- ⚡ メールから即時追加 -->
+            <button onclick="openCalendarEmailImportModal()" class="px-3 py-1.5 rounded-xl bg-gradient-to-r from-amber-500/20 to-orange-500/20 hover:from-amber-500/30 hover:to-orange-500/30 border border-amber-500/40 text-amber-300 text-xs font-bold flex items-center gap-1.5 transition active:scale-95 shadow-sm">
+              <i data-lucide="sparkles" class="w-3.5 h-3.5 text-amber-400"></i>
+              <span>⚡ メールから即時追加</span>
+            </button>
+
+            <!-- ＋ 予定手動追加 -->
+            <button onclick="openCalendarEventModal()" class="px-3 py-1.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-bold flex items-center gap-1.5 transition active:scale-95 shadow-md shadow-indigo-600/30">
+              <i data-lucide="plus-circle" class="w-3.5 h-3.5"></i>
+              <span>予定を追加</span>
+            </button>
+
+            <!-- 📅 Googleカレンダーを開く -->
+            <a href="https://calendar.google.com/" target="_blank" rel="noopener noreferrer" class="px-3 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 border border-slate-700 text-slate-200 text-xs font-semibold flex items-center gap-1.5 transition active:scale-95">
+              <i data-lucide="external-link" class="w-3.5 h-3.5 text-sky-400"></i>
+              <span>Googleカレンダー</span>
+            </a>
+
+            <!-- 📥 iCalエクスポート -->
+            <button onclick="exportAllEventsToICS()" title="全予定をGoogleカレンダー・スマホ用iCal(.ics)として保存" class="p-2 rounded-xl bg-slate-800 hover:bg-slate-700 border border-slate-700 text-slate-300 hover:text-white transition">
+              <i data-lucide="download" class="w-4 h-4"></i>
+            </button>
+          </div>
+        </div>
+
+        <!-- Month Navigator & View Switcher Bar -->
+        <div class="flex flex-col sm:flex-row items-center justify-between gap-2 pt-2 border-t border-slate-800/80">
+          <div class="flex items-center gap-2 w-full sm:w-auto justify-between sm:justify-start">
+            <button onclick="changeCalendarMonth(-1)" class="p-1.5 px-2.5 rounded-lg bg-slate-800 hover:bg-slate-700 border border-slate-700 text-slate-300 hover:text-white text-xs font-semibold flex items-center gap-1 transition">
+              <i data-lucide="chevron-left" class="w-3.5 h-3.5"></i>
+              <span>前月</span>
+            </button>
+            <h3 id="calendarCurrentMonthTitle" class="text-sm font-bold text-white min-w-[130px] text-center tracking-wide font-mono">2026年 10月</h3>
+            <button onclick="changeCalendarMonth(1)" class="p-1.5 px-2.5 rounded-lg bg-slate-800 hover:bg-slate-700 border border-slate-700 text-slate-300 hover:text-white text-xs font-semibold flex items-center gap-1 transition">
+              <span>次月</span>
+              <i data-lucide="chevron-right" class="w-3.5 h-3.5"></i>
+            </button>
+            <button onclick="goToCalendarToday()" class="p-1.5 px-2.5 rounded-lg bg-slate-800/60 hover:bg-slate-700/80 border border-slate-700/60 text-sky-400 text-xs font-semibold transition ml-1">
+              今日
+            </button>
+          </div>
+
+          <!-- View Mode Switch: Month Grid vs Agenda List vs Google Calendar Embed -->
+          <div class="flex items-center bg-slate-800/90 border border-slate-700/80 rounded-xl p-0.5 shadow-inner w-full sm:w-auto justify-center">
+            <button id="calViewMonthBtn" onclick="setCalendarViewSubMode('month')" class="flex items-center gap-1 px-3 py-1 rounded-lg text-xs font-semibold bg-indigo-600 text-white transition shadow-sm">
+              <i data-lucide="calendar-days" class="w-3.5 h-3.5"></i>
+              <span>月間</span>
+            </button>
+            <button id="calViewAgendaBtn" onclick="setCalendarViewSubMode('agenda')" class="flex items-center gap-1 px-3 py-1 rounded-lg text-xs font-semibold text-slate-400 hover:text-slate-200 transition">
+              <i data-lucide="list-collapse" class="w-3.5 h-3.5"></i>
+              <span>アジェンダ一覧</span>
+            </button>
+            <button id="calViewGCalBtn" onclick="setCalendarViewSubMode('gcal')" class="flex items-center gap-1 px-3 py-1 rounded-lg text-xs font-semibold text-slate-400 hover:text-slate-200 transition">
+              <i data-lucide="globe" class="w-3.5 h-3.5 text-sky-400"></i>
+              <span>Google連携</span>
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Mode 1: Month Grid View -->
+      <div id="calendarMonthGridContainer" class="bg-slate-900/80 border border-slate-800 rounded-2xl p-2 sm:p-4 shadow-xl overflow-hidden flex flex-col">
+        <!-- Weekday Header -->
+        <div class="grid grid-cols-7 gap-1 text-center font-bold text-[11px] sm:text-xs text-slate-400 pb-2 border-b border-slate-800">
+          <span class="text-rose-400">日</span>
+          <span>月</span>
+          <span>火</span>
+          <span>水</span>
+          <span>木</span>
+          <span>金</span>
+          <span class="text-sky-400">土</span>
+        </div>
+        <!-- Days Grid -->
+        <div id="calendarMonthDaysGrid" class="grid grid-cols-7 gap-1 sm:gap-1.5 pt-2">
+          <!-- Injected via JS -->
+        </div>
+      </div>
+
+      <!-- Mode 2: Agenda Timeline List View -->
+      <div id="calendarAgendaContainer" class="space-y-3 hidden">
+        <div id="calendarAgendaList" class="space-y-3">
+          <!-- Injected via JS -->
+        </div>
+      </div>
+
+      <!-- Mode 3: Google Calendar Embed & Direct Sync View -->
+      <div id="calendarGCalContainer" class="bg-slate-900 border border-slate-800 rounded-2xl p-4 sm:p-6 space-y-5 hidden">
+        <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 bg-slate-800/40 border border-slate-800 p-4 rounded-xl">
+          <div class="space-y-1">
+            <h4 class="text-sm font-bold text-white flex items-center gap-2">
+              <i data-lucide="calendar" class="w-4 h-4 text-sky-400"></i>
+              <span>Googleカレンダー 直接同期・埋め込み表示</span>
+            </h4>
+            <p class="text-xs text-slate-400 leading-relaxed">
+              Googleアカウントのカレンダーを直接開くか、またはGoogleカレンダーの埋め込み表示をこの画面内で確認できます。
+            </p>
+          </div>
+          <div class="flex items-center gap-2">
+            <a href="https://calendar.google.com/" target="_blank" rel="noopener noreferrer" class="px-4 py-2 rounded-xl bg-sky-600 hover:bg-sky-500 text-white font-bold text-xs flex items-center gap-2 shadow-lg shadow-sky-600/30 transition active:scale-95">
+              <i data-lucide="external-link" class="w-4 h-4"></i>
+              <span>Googleカレンダーを別タブで開く</span>
+            </a>
+          </div>
+        </div>
+
+        <!-- Google Calendar Iframe Embed Area -->
+        <div class="bg-slate-950 border border-slate-800 rounded-2xl overflow-hidden shadow-inner p-2">
+          <div class="flex items-center justify-between p-2 text-xs text-slate-400 border-b border-slate-800 mb-2">
+            <span class="flex items-center gap-1.5">
+              <i data-lucide="lock" class="w-3.5 h-3.5 text-amber-400"></i>
+              <span>Googleアカウントのカレンダー埋め込み（Googleにログイン済みのブラウザでそのまま閲覧可能）</span>
+            </span>
+            <span class="text-[11px] text-slate-500">※ Google側のログイン状態に連動</span>
+          </div>
+          <iframe id="gcalEmbedIframe" src="https://calendar.google.com/calendar/embed?src=primary&ctz=Asia%2FTokyo" style="border: 0" width="100%" height="600" frameborder="0" scrolling="no" class="rounded-xl w-full"></iframe>
+        </div>
       </div>
     </section>
 
@@ -2646,6 +2798,273 @@
           </div>
         </form>
 
+  <!-- ============================================== -->
+  <!-- MODAL: メールから予定を自動解析・即座に追加モーダル -->
+  <!-- ============================================== -->
+  <div id="calendarEmailImportModal" class="fixed inset-0 z-50 bg-black/80 backdrop-blur-md hidden items-center justify-center p-3 sm:p-4 overflow-y-auto">
+    <div class="bg-slate-900 border border-slate-700 rounded-3xl w-full max-w-2xl shadow-2xl overflow-hidden my-6 flex flex-col">
+      <div class="bg-gradient-to-r from-slate-800 via-amber-950/40 to-slate-800 px-6 py-4 border-b border-slate-700 flex items-center justify-between">
+        <h3 class="text-base font-bold text-white flex items-center gap-2">
+          <i data-lucide="sparkles" class="w-5 h-5 text-amber-400"></i>
+          <span>メールから予定を自動解析 ＆ カレンダー即時追加</span>
+        </h3>
+        <button onclick="closeModal('calendarEmailImportModal')" class="text-slate-400 hover:text-white p-1 rounded-lg hover:bg-slate-700/50">
+          <i data-lucide="x" class="w-5 h-5"></i>
+        </button>
+      </div>
+
+      <div class="p-6 space-y-4">
+        <p class="text-xs text-slate-300 leading-relaxed">
+          会社説明会の予約完了メールや一次面接の日程案内メールの本文をそのまま貼り付けてください。日時・企業名・形式（Zoom等）を自動抽出し、カレンダーおよびGoogleカレンダー連携へ即座に登録します。
+        </p>
+
+        <div>
+          <label class="block text-xs font-semibold text-slate-300 mb-1 flex items-center justify-between">
+            <span>受信メールの本文（ペースト）</span>
+            <button type="button" onclick="pasteSampleInviteEmail()" class="text-[11px] text-amber-400 hover:underline">
+              サンプルメールを入力
+            </button>
+          </label>
+          <textarea id="calendarEmailRawInput" rows="6" placeholder="例:&#10;田中 壮 様&#10;&#10;株式会社コーエーテクモホールディングス 採用担当です。&#10;この度は会社説明会へのご予約ありがとうございます。&#10;&#10;【日時】2026年10月28日(水) 14:00〜15:30&#10;【形式】オンライン（Zoom）&#10;【URL】https://zoom.us/j/123456789&#10;&#10;当日は開始5分前に上記URLよりご入室ください。" class="w-full text-xs rounded-xl bg-slate-800 border border-slate-700 p-3 text-white placeholder-slate-500 focus:outline-none focus:border-amber-500 font-mono"></textarea>
+        </div>
+
+        <div class="flex justify-end">
+          <button type="button" onclick="runEmailScheduleParser()" class="px-4 py-2 rounded-xl bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold text-xs flex items-center gap-2 shadow-lg shadow-amber-500/20 transition active:scale-95">
+            <i data-lucide="scan" class="w-4 h-4"></i>
+            <span>⚡ メール本文を自動解析する</span>
+          </button>
+        </div>
+
+        <!-- Parsed Result Preview / Form -->
+        <div id="emailParseResultBox" class="bg-slate-800/60 border border-slate-700/90 rounded-2xl p-4 space-y-3.5 hidden">
+          <div class="flex items-center justify-between border-b border-slate-700/80 pb-2">
+            <span class="text-xs font-bold text-amber-300 flex items-center gap-1.5">
+              <i data-lucide="check-circle" class="w-4 h-4 text-emerald-400"></i>
+              <span>解析結果（必要に応じて修正して保存してください）</span>
+            </span>
+            <span class="text-[11px] text-slate-400">即時反映</span>
+          </div>
+
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            <div>
+              <label class="block text-[11px] text-slate-400 mb-1">企業名</label>
+              <input type="text" id="parseResultCompany" class="w-full text-xs rounded-lg bg-slate-900 border border-slate-700 px-3 py-2 text-white font-bold">
+            </div>
+            <div>
+              <label class="block text-[11px] text-slate-400 mb-1">予定種別</label>
+              <select id="parseResultType" class="w-full text-xs rounded-lg bg-slate-900 border border-slate-700 px-3 py-2 text-white font-semibold">
+                <option value="会社説明会">会社説明会 (参加予定)</option>
+                <option value="座談会・セミナー">座談会・セミナー</option>
+                <option value="仕事体験・ワークショップ">仕事体験・ワークショップ</option>
+                <option value="面談 (カジュアル/リクルーター)">面談 (カジュアル / リクルーター)</option>
+                <option value="一次面接">一次面接</option>
+                <option value="二次 / 三次面接">二次 / 三次面接</option>
+                <option value="最終面接">最終面接</option>
+                <option value="Webテスト / 課題締切">Webテスト / 課題締切</option>
+                <option value="ES提出締切">ES提出締切</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+            <div>
+              <label class="block text-[11px] text-slate-400 mb-1">日付</label>
+              <input type="date" id="parseResultDate" class="w-full text-xs rounded-lg bg-slate-900 border border-slate-700 px-3 py-2 text-white">
+            </div>
+            <div>
+              <label class="block text-[11px] text-slate-400 mb-1">開始時刻</label>
+              <input type="time" id="parseResultStartTime" class="w-full text-xs rounded-lg bg-slate-900 border border-slate-700 px-3 py-2 text-white">
+            </div>
+            <div>
+              <label class="block text-[11px] text-slate-400 mb-1">終了時刻</label>
+              <input type="time" id="parseResultEndTime" class="w-full text-xs rounded-lg bg-slate-900 border border-slate-700 px-3 py-2 text-white">
+            </div>
+          </div>
+
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            <div>
+              <label class="block text-[11px] text-slate-400 mb-1">実施形式 / 場所</label>
+              <input type="text" id="parseResultLocation" placeholder="例: Zoomウェビナー, Teams, 本社ビル等" class="w-full text-xs rounded-lg bg-slate-900 border border-slate-700 px-3 py-2 text-white">
+            </div>
+            <div>
+              <label class="block text-[11px] text-slate-400 mb-1">参加URL / マイページURL</label>
+              <input type="url" id="parseResultUrl" placeholder="https://..." class="w-full text-xs rounded-lg bg-slate-900 border border-slate-700 px-3 py-2 text-white">
+            </div>
+          </div>
+
+          <div>
+            <label class="block text-[11px] text-slate-400 mb-1">メモ・持ち物・特記事項</label>
+            <input type="text" id="parseResultNotes" placeholder="例: 開始5分前入室、筆記用具、私服参加可など" class="w-full text-xs rounded-lg bg-slate-900 border border-slate-700 px-3 py-2 text-white">
+          </div>
+
+          <div class="flex items-center justify-between pt-2 border-t border-slate-700/80">
+            <label class="flex items-center gap-2 text-xs text-slate-300 cursor-pointer">
+              <input type="checkbox" id="parseAddToGoogleCalCheckbox" checked class="rounded border-slate-700 text-indigo-500 focus:ring-0">
+              <span>登録完了後、Googleカレンダー追加画面も直接開く</span>
+            </label>
+            <button type="button" onclick="confirmEmailScheduleImport()" class="px-5 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white font-bold text-xs shadow-lg shadow-indigo-600/30 transition active:scale-95 flex items-center gap-1.5">
+              <i data-lucide="calendar-plus" class="w-4 h-4"></i>
+              <span>カレンダー＆パイプラインに登録</span>
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============================================== -->
+  <!-- MODAL: 予定の手動作成 / 編集モーダル -->
+  <!-- ============================================== -->
+  <div id="calendarEventModal" class="fixed inset-0 z-50 bg-black/80 backdrop-blur-md hidden items-center justify-center p-3 sm:p-4 overflow-y-auto">
+    <div class="bg-slate-900 border border-slate-700 rounded-3xl w-full max-w-lg shadow-2xl overflow-hidden my-6 flex flex-col">
+      <div class="bg-slate-800 px-6 py-4 border-b border-slate-700 flex items-center justify-between">
+        <h3 id="calModalTitle" class="text-base font-bold text-white flex items-center gap-2">
+          <i data-lucide="calendar-plus" class="w-5 h-5 text-sky-400"></i>
+          <span>予定の追加</span>
+        </h3>
+        <button onclick="closeModal('calendarEventModal')" class="text-slate-400 hover:text-white p-1 rounded-lg hover:bg-slate-700/50">
+          <i data-lucide="x" class="w-5 h-5"></i>
+        </button>
+      </div>
+
+      <form id="calendarEventForm" onsubmit="handleSaveCalendarEvent(event)" class="p-6 space-y-4">
+        <input type="hidden" id="calEventId">
+
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+          <div>
+            <label class="block text-xs font-semibold text-slate-300 mb-1">企業名 <span class="text-rose-400">*</span></label>
+            <input type="text" id="calEventCompany" required placeholder="例: 株式会社コーエーテクモHD" class="w-full text-xs rounded-lg bg-slate-800 border border-slate-700 px-3 py-2 text-white">
+          </div>
+          <div>
+            <label class="block text-xs font-semibold text-slate-300 mb-1">予定種別</label>
+            <select id="calEventType" class="w-full text-xs rounded-lg bg-slate-800 border border-slate-700 px-3 py-2 text-white">
+              <option value="会社説明会">会社説明会 (参加予定)</option>
+              <option value="座談会・セミナー">座談会・セミナー</option>
+              <option value="仕事体験・ワークショップ">仕事体験・ワークショップ</option>
+              <option value="面談 (カジュアル/リクルーター)">面談 (カジュアル / リクルーター)</option>
+              <option value="一次面接">一次面接</option>
+              <option value="二次 / 三次面接">二次 / 三次面接</option>
+              <option value="最終面接">最終面接</option>
+              <option value="Webテスト / 課題締切">Webテスト / 課題締切</option>
+              <option value="ES提出締切">ES提出締切</option>
+              <option value="オファー返信期限">オファー返信期限</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+          <div>
+            <label class="block text-xs font-semibold text-slate-300 mb-1">日付 <span class="text-rose-400">*</span></label>
+            <input type="date" id="calEventDate" required class="w-full text-xs rounded-lg bg-slate-800 border border-slate-700 px-3 py-2 text-white">
+          </div>
+          <div>
+            <label class="block text-xs font-semibold text-slate-300 mb-1">開始時刻</label>
+            <input type="time" id="calEventStartTime" value="10:00" class="w-full text-xs rounded-lg bg-slate-800 border border-slate-700 px-3 py-2 text-white">
+          </div>
+          <div>
+            <label class="block text-xs font-semibold text-slate-300 mb-1">終了時刻</label>
+            <input type="time" id="calEventEndTime" value="11:30" class="w-full text-xs rounded-lg bg-slate-800 border border-slate-700 px-3 py-2 text-white">
+          </div>
+        </div>
+
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+          <div>
+            <label class="block text-xs font-semibold text-slate-300 mb-1">実施形式 / 会場</label>
+            <input type="text" id="calEventLocation" placeholder="オンライン (Zoom) / 本社等" class="w-full text-xs rounded-lg bg-slate-800 border border-slate-700 px-3 py-2 text-white">
+          </div>
+          <div>
+            <label class="block text-xs font-semibold text-slate-300 mb-1">参加URL / リンク</label>
+            <input type="url" id="calEventUrl" placeholder="https://zoom.us/..." class="w-full text-xs rounded-lg bg-slate-800 border border-slate-700 px-3 py-2 text-white">
+          </div>
+        </div>
+
+        <div>
+          <label class="block text-xs font-semibold text-slate-300 mb-1">詳細メモ / 持ち物</label>
+          <textarea id="calEventNotes" rows="2" placeholder="持ち物、逆質問メモ、事前アンケート提出など..." class="w-full text-xs rounded-lg bg-slate-800 border border-slate-700 p-2.5 text-white"></textarea>
+        </div>
+
+        <div class="flex justify-between items-center pt-3 border-t border-slate-800">
+          <button type="button" id="calEventDeleteBtn" onclick="deleteCurrentCalendarEvent()" class="px-3 py-2 rounded-lg text-xs font-medium text-rose-400 hover:bg-rose-500/10 transition hidden">削除</button>
+          <div class="flex gap-2 ml-auto">
+            <button type="button" onclick="closeModal('calendarEventModal')" class="px-4 py-2 rounded-lg text-xs font-medium bg-slate-800 hover:bg-slate-700 text-slate-300">キャンセル</button>
+            <button type="submit" class="px-5 py-2 rounded-lg text-xs font-medium bg-sky-600 hover:bg-sky-500 text-white shadow-lg shadow-sky-600/30">予定を保存</button>
+          </div>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- ============================================== -->
+  <!-- MODAL: カレンダー予定の詳細ポップアップ -->
+  <!-- ============================================== -->
+  <div id="calendarEventDetailModal" class="fixed inset-0 z-50 bg-black/80 backdrop-blur-md hidden items-center justify-center p-3 sm:p-4 overflow-y-auto">
+    <div class="bg-slate-900 border border-slate-700 rounded-3xl w-full max-w-lg shadow-2xl overflow-hidden my-6 flex flex-col">
+      <div class="bg-slate-800 px-6 py-4 border-b border-slate-700 flex items-center justify-between">
+        <div class="flex items-center gap-2">
+          <span id="calDetailTypeBadge" class="text-xs px-2.5 py-0.5 rounded-full font-bold">種別</span>
+          <span id="calDetailScoreBadge"></span>
+        </div>
+        <button onclick="closeModal('calendarEventDetailModal')" class="text-slate-400 hover:text-white p-1 rounded-lg hover:bg-slate-700/50">
+          <i data-lucide="x" class="w-5 h-5"></i>
+        </button>
+      </div>
+
+      <div class="p-6 space-y-4">
+        <div>
+          <h3 id="calDetailCompanyTitle" class="text-lg font-black text-white leading-tight"></h3>
+          <div id="calDetailDateTimeText" class="text-sm text-sky-300 font-bold mt-1.5 flex items-center gap-1.5 font-mono">
+            <i data-lucide="clock" class="w-4 h-4"></i>
+            <span>日時</span>
+          </div>
+        </div>
+
+        <div class="bg-slate-800/40 border border-slate-800 rounded-2xl p-4 space-y-2.5 text-xs text-slate-300">
+          <div class="flex items-center gap-2">
+            <span class="text-slate-400 w-16 shrink-0">形式・場所:</span>
+            <span id="calDetailLocationText" class="font-semibold text-white"></span>
+          </div>
+          <div id="calDetailUrlRow" class="flex items-center gap-2">
+            <span class="text-slate-400 w-16 shrink-0">参加URL:</span>
+            <a id="calDetailUrlLink" href="#" target="_blank" rel="noopener noreferrer" class="text-indigo-400 hover:underline truncate"></a>
+          </div>
+          <div class="pt-2 border-t border-slate-700/50">
+            <span class="text-slate-400 block mb-1">メモ・特記事項:</span>
+            <p id="calDetailNotesText" class="text-slate-300 leading-relaxed whitespace-pre-wrap"></p>
+          </div>
+        </div>
+
+        <!-- Action Links & Buttons -->
+        <div class="space-y-2 pt-2">
+          <!-- 📅 Googleカレンダーに直接追加 -->
+          <a id="calDetailGCalBtn" href="#" target="_blank" rel="noopener noreferrer" class="w-full py-2.5 rounded-xl bg-sky-600 hover:bg-sky-500 text-white font-bold text-xs flex items-center justify-center gap-2 shadow-lg shadow-sky-600/30 transition active:scale-95">
+            <i data-lucide="calendar" class="w-4 h-4"></i>
+            <span>📅 Googleカレンダーに追加（ワンクリック同期）</span>
+          </a>
+
+          <div class="grid grid-cols-2 gap-2">
+            <!-- ✉️ Gmailを開く -->
+            <a id="calDetailGmailBtn" href="#" target="_blank" rel="noopener noreferrer" class="py-2 rounded-xl bg-rose-500/15 hover:bg-rose-500/25 border border-rose-500/30 text-rose-300 font-bold text-xs flex items-center justify-center gap-1.5 transition">
+              <i data-lucide="mail" class="w-3.5 h-3.5 text-rose-400"></i>
+              <span>✉️ Gmailを開く</span>
+            </a>
+
+            <!-- 🎓 企業詳細・診断を開く -->
+            <button id="calDetailOpenPipeBtn" onclick="openEventCompanyDetail()" class="py-2 rounded-xl bg-indigo-500/15 hover:bg-indigo-500/25 border border-indigo-500/30 text-indigo-300 font-bold text-xs flex items-center justify-center gap-1.5 transition">
+              <i data-lucide="shield-alert" class="w-3.5 h-3.5"></i>
+              <span>🎓 診断・進捗メモ</span>
+            </button>
+          </div>
+
+          <div class="flex justify-between items-center pt-2 border-t border-slate-800">
+            <button onclick="editCurrentCalendarEvent()" class="text-xs text-slate-400 hover:text-white flex items-center gap-1">
+              <i data-lucide="edit" class="w-3.5 h-3.5"></i>
+              <span>編集する</span>
+            </button>
+            <button onclick="deleteEventFromDetailModal()" class="text-xs text-rose-400 hover:underline">
+              この予定を削除
+            </button>
+          </div>
+        </div>
       </div>
     </div>
   </div>
@@ -2661,6 +3080,7 @@
     const STORAGE_KEY_OFFERS = 'job_hunt_offers_v10';
     const STORAGE_KEY_PIPELINE = 'job_hunt_pipeline_v10';
     const STORAGE_KEY_ARCHIVED = 'job_hunt_archived_v10';
+    const STORAGE_KEY_CALENDAR = 'job_hunt_calendar_v10';
 
     const PIPELINE_STAGES = [
       '会社説明会 (参加予定)',
@@ -3617,19 +4037,168 @@
     }
 
     // ==========================================
-    // State Management
+    // State Management & Calendar Events
     // ==========================================
+    const SAMPLE_CALENDAR_EVENTS = [
+      {
+        id: 'cal-ncd-20261023',
+        companyName: 'NCD株式会社',
+        title: '若手SE座談会＆質問会',
+        eventType: '座談会・セミナー',
+        startDate: '2026-10-23',
+        startTime: '16:00',
+        endDate: '2026-10-23',
+        endTime: '17:00',
+        locationType: 'オンライン (Zoom)',
+        meetingUrl: 'https://zoom.us/j/sample12345',
+        notes: '若手SEとのフリートーク、開発現場のリアルな雰囲気、キャリアパスについての質疑応答。服装自由。',
+        gmailUrl: 'https://mail.google.com/mail/u/0/#search/NCD%E6%A0%AA%E5%BC%8F%E4%BC%9A%E7%A4%BE',
+        completed: false
+      },
+      {
+        id: 'cal-kokusai-20261028',
+        companyName: '株式会社国際ソフトウェア',
+        title: '自社開発プログラミング体験＆業界研究',
+        eventType: '仕事体験・ワークショップ',
+        startDate: '2026-10-28',
+        startTime: '14:00',
+        endDate: '2026-10-28',
+        endTime: '16:00',
+        locationType: 'オンライン (Zoom)',
+        meetingUrl: 'https://zoom.us/j/sample67890',
+        notes: '自社ERP/パッケージ開発のコーディング体験＆グループワーク。筆記用具準備。',
+        gmailUrl: 'https://mail.google.com/mail/u/0/#search/%E5%9B%BD%E9%9A%9B%E3%82%BD%E3%83%95%E3%83%88%E3%82%A2%E3%82%A8%E3%82%A2',
+        completed: false
+      },
+      {
+        id: 'cal-koeitecmo-20261028',
+        companyName: '株式会社コーエーテクモホールディングス',
+        title: '早期本選考ES・作品提出締切',
+        eventType: 'ES提出締切',
+        startDate: '2026-10-28',
+        startTime: '23:59',
+        endDate: '2026-10-28',
+        endTime: '23:59',
+        locationType: 'マイページWeb提出',
+        meetingUrl: 'https://www.gamecity.ne.jp/recruit/',
+        notes: 'マイページよりエントリーシートおよび自作ゲーム作品・GitHub URLの提出締切！',
+        gmailUrl: 'https://mail.google.com/mail/u/0/#search/%E3%82%B3%E3%83%BC%E3%82%A2%E3%83%BC%E3%83%86%E3%82%AF%E3%83%A2',
+        completed: false
+      },
+      {
+        id: 'cal-sega-20261031',
+        companyName: '株式会社セガ フェイブ',
+        title: '27卒早期本選考エントリーシート提出締切',
+        eventType: 'ES提出締切',
+        startDate: '2026-10-31',
+        startTime: '23:59',
+        endDate: '2026-10-31',
+        endTime: '23:59',
+        locationType: 'マイページWeb提出',
+        meetingUrl: 'https://www.sega.co.jp/recruit/',
+        notes: 'セガ フェイブ（アミューズメント・トイ開発）早期選考ES締切。研究・開発実績を記載。',
+        gmailUrl: 'https://mail.google.com/mail/u/0/#search/%E3%82%BB%E3%82%AC%20%E3%83%95%E3%82%A7%E3%82%A4%E3%83%96',
+        completed: false
+      },
+      {
+        id: 'cal-techno-20261102',
+        companyName: '株式会社テクノエージェント',
+        title: '1on1カジュアル面談・キャリア相談',
+        eventType: '面談 (カジュアル/リクルーター)',
+        startDate: '2026-11-02',
+        startTime: '13:00',
+        endDate: '2026-11-02',
+        endTime: '14:00',
+        locationType: 'オンライン (Google Meet)',
+        meetingUrl: 'https://meet.google.com/abc-defg-hij',
+        notes: 'キャリアアドバイザーとの個別面談。希望職種や就活軸の相談。',
+        gmailUrl: 'https://mail.google.com/mail/u/0/#search/%E3%83%86%E3%82%AF%E3%83%8E%E3%82%A8%E3%83%BC%E3%82%B8%E3%82%A7%E3%83%B3%E3%83%88',
+        completed: false
+      },
+      {
+        id: 'cal-ncd-20261104',
+        companyName: 'NCD株式会社',
+        title: '自社クラウドソリューション仕事体験（1dayインターン）',
+        eventType: '仕事体験・ワークショップ',
+        startDate: '2026-11-04',
+        startTime: '10:00',
+        endDate: '2026-11-04',
+        endTime: '17:00',
+        locationType: 'オンライン (Teams)',
+        meetingUrl: 'https://teams.microsoft.com/l/meetup-join/sample',
+        notes: 'クラウド環境（AWS）を用いた実践課題型ワーク。昼休憩1時間あり。',
+        gmailUrl: 'https://mail.google.com/mail/u/0/#search/NCD%E6%A0%AA%E5%BC%8F%E4%BC%9A%E7%A4%BE',
+        completed: false
+      },
+      {
+        id: 'cal-kokusai-20261106',
+        companyName: '株式会社国際ソフトウェア',
+        title: '先端自社パッケージ開発・技術セミナー',
+        eventType: '座談会・セミナー',
+        startDate: '2026-11-06',
+        startTime: '15:00',
+        endDate: '2026-11-06',
+        endTime: '16:30',
+        locationType: 'オンライン (Zoom)',
+        meetingUrl: 'https://zoom.us/j/sample9988',
+        notes: '自社開発エンジニアによる技術スタック解説・質疑応答会。',
+        gmailUrl: 'https://mail.google.com/mail/u/0/#search/%E5%9B%BD%E9%9A%9B%E3%82%BD%E3%83%95%E3%83%88%E3%82%A2%E3%82%A8%E3%82%A2',
+        completed: false
+      },
+      {
+        id: 'cal-sus-20261120',
+        companyName: '株式会社エスユーエス',
+        title: 'VR/AR先端技術開発 1day仕事体験',
+        eventType: '仕事体験・ワークショップ',
+        startDate: '2026-11-20',
+        startTime: '13:30',
+        endDate: '2026-11-20',
+        endTime: '16:30',
+        locationType: 'オンライン (Zoom)',
+        meetingUrl: 'https://zoom.us/j/sample7777',
+        notes: 'メタバース・XR技術の体験ワークショップ。事前課題なし。',
+        gmailUrl: 'https://mail.google.com/mail/u/0/#search/%E3%82%A8%E3%82%B9%E3%83%A6%E3%83%BC%E3%82%A8%E3%82%B9',
+        completed: false
+      }
+    ];
+
     let offers = [];
     let pipeline = [];
     let archivedPipeline = [];
+    let calendarEvents = [];
     let currentOffersLayout = 'grid';
     let activeDetailItem = null;
     let activeDetailType = 'pipeline';
+
+    // カレンダー表示状態
+    let currentCalYear = 2026;
+    let currentCalMonth = 9; // 0-indexed: 9 = 10月
+    let calendarViewSubMode = 'month'; // 'month' | 'agenda' | 'gcal'
+    let activeCalendarEventId = null;
 
     function loadState() {
       let storedOffers = localStorage.getItem(STORAGE_KEY_OFFERS);
       let storedPipeline = localStorage.getItem(STORAGE_KEY_PIPELINE);
       let storedArchived = localStorage.getItem(STORAGE_KEY_ARCHIVED);
+      let storedCalendar = localStorage.getItem(STORAGE_KEY_CALENDAR);
+
+      // カレンダー初期化
+      if (!storedCalendar || storedCalendar === '[]') {
+        calendarEvents = JSON.parse(JSON.stringify(SAMPLE_CALENDAR_EVENTS));
+      } else {
+        try {
+          calendarEvents = JSON.parse(storedCalendar);
+          // サンプルイベントの不足分を自動補完
+          SAMPLE_CALENDAR_EVENTS.forEach(s => {
+            if (!calendarEvents.some(c => c.id === s.id)) {
+              calendarEvents.push(JSON.parse(JSON.stringify(s)));
+            }
+          });
+        } catch (e) {
+          console.error("Failed to parse calendar events", e);
+          calendarEvents = JSON.parse(JSON.stringify(SAMPLE_CALENDAR_EVENTS));
+        }
+      }
 
       if (!storedOffers || !storedPipeline || !storedArchived || storedOffers === '[]') {
         pipeline = JSON.parse(JSON.stringify(SAMPLE_PIPELINE));
@@ -3692,6 +4261,7 @@
       }
 
       attachAnalystReports();
+      updateBadges();
     }
 
     function attachAnalystReports() {
@@ -3716,15 +4286,22 @@
       localStorage.setItem(STORAGE_KEY_OFFERS, JSON.stringify(offers));
       localStorage.setItem(STORAGE_KEY_PIPELINE, JSON.stringify(pipeline));
       localStorage.setItem(STORAGE_KEY_ARCHIVED, JSON.stringify(archivedPipeline));
+      localStorage.setItem(STORAGE_KEY_CALENDAR, JSON.stringify(calendarEvents));
       updateBadges();
     }
 
     function updateBadges() {
       const activeOffersCount = offers.filter(o => o.status !== '辞退').length;
-      document.getElementById('offersBadgeCount').innerText = activeOffersCount;
-      document.getElementById('pipelineBadgeCount').innerText = pipeline.length;
+      const offBadge = document.getElementById('offersBadgeCount');
+      if (offBadge) offBadge.innerText = activeOffersCount;
+      const pipeBadge = document.getElementById('pipelineBadgeCount');
+      if (pipeBadge) pipeBadge.innerText = pipeline.length;
       const archBadge = document.getElementById('archivedBadgeCount');
       if (archBadge) archBadge.innerText = archivedPipeline.length;
+      const calBadge = document.getElementById('calendarBadgeCount');
+      if (calBadge) calBadge.innerText = calendarEvents.length;
+      const calTotalBadge = document.getElementById('calendarTotalEventsBadge');
+      if (calTotalBadge) calTotalBadge.innerText = `${calendarEvents.length}件`;
     }
 
     // ==========================================
@@ -3733,37 +4310,47 @@
     function switchTab(tab) {
       const tabOffersBtn = document.getElementById('tabOffersBtn');
       const tabPipelineBtn = document.getElementById('tabPipelineBtn');
+      const tabCalendarBtn = document.getElementById('tabCalendarBtn');
       const tabArchivedBtn = document.getElementById('tabArchivedBtn');
       const viewOffers = document.getElementById('viewOffers');
       const viewPipeline = document.getElementById('viewPipeline');
+      const viewCalendar = document.getElementById('viewCalendar');
       const viewArchived = document.getElementById('viewArchived');
 
       const baseInactive = 'flex items-center justify-center gap-1 sm:gap-2 px-2 sm:px-4 py-1.5 sm:py-2 rounded-lg text-xs sm:text-sm font-semibold transition-all duration-150 text-slate-400 hover:text-slate-200 text-center';
       const baseActiveIndigo = 'flex items-center justify-center gap-1 sm:gap-2 px-2 sm:px-4 py-1.5 sm:py-2 rounded-lg text-xs sm:text-sm font-semibold transition-all duration-150 bg-indigo-600 text-white shadow-sm text-center';
+      const baseActiveSky = 'flex items-center justify-center gap-1 sm:gap-2 px-2 sm:px-4 py-1.5 sm:py-2 rounded-lg text-xs sm:text-sm font-semibold transition-all duration-150 bg-sky-600 text-white shadow-sm text-center';
       const baseActiveSlate = 'flex items-center justify-center gap-1 sm:gap-2 px-2 sm:px-4 py-1.5 sm:py-2 rounded-lg text-xs sm:text-sm font-semibold transition-all duration-150 bg-slate-700 text-white shadow-sm text-center';
 
       // Reset tabs
-      tabOffersBtn.className = baseInactive;
-      tabPipelineBtn.className = baseInactive;
+      if (tabOffersBtn) tabOffersBtn.className = baseInactive;
+      if (tabPipelineBtn) tabPipelineBtn.className = baseInactive;
+      if (tabCalendarBtn) tabCalendarBtn.className = baseInactive;
       if (tabArchivedBtn) tabArchivedBtn.className = baseInactive;
 
-      viewOffers.classList.add('hidden');
-      viewPipeline.classList.add('hidden');
+      if (viewOffers) viewOffers.classList.add('hidden');
+      if (viewPipeline) viewPipeline.classList.add('hidden');
+      if (viewCalendar) viewCalendar.classList.add('hidden');
       if (viewArchived) viewArchived.classList.add('hidden');
 
       if (tab === 'offers') {
-        tabOffersBtn.className = baseActiveIndigo;
-        viewOffers.classList.remove('hidden');
+        if (tabOffersBtn) tabOffersBtn.className = baseActiveIndigo;
+        if (viewOffers) viewOffers.classList.remove('hidden');
         renderOffers();
       } else if (tab === 'pipeline') {
-        tabPipelineBtn.className = baseActiveIndigo;
-        viewPipeline.classList.remove('hidden');
+        if (tabPipelineBtn) tabPipelineBtn.className = baseActiveIndigo;
+        if (viewPipeline) viewPipeline.classList.remove('hidden');
         renderPipeline();
+      } else if (tab === 'calendar') {
+        if (tabCalendarBtn) tabCalendarBtn.className = baseActiveSky;
+        if (viewCalendar) viewCalendar.classList.remove('hidden');
+        renderCalendar();
       } else if (tab === 'archived') {
         if (tabArchivedBtn) tabArchivedBtn.className = baseActiveSlate;
         if (viewArchived) viewArchived.classList.remove('hidden');
         renderArchived();
       }
+      lucide.createIcons();
     }
 
     function toggleOffersLayout(layout) {
@@ -6274,6 +6861,816 @@
       }
       document.getElementById('simStarsDisplay').innerHTML = starsHtml;
       lucide.createIcons();
+    }
+
+    // ==========================================
+    // Calendar & Google Calendar Sync Logic
+    // ==========================================
+
+    function getEventTypeBadgeClass(type) {
+      if (!type) return 'bg-slate-500/20 text-slate-300 border-slate-500/40';
+      if (type.includes('説明会')) return 'bg-sky-500/20 text-sky-300 border-sky-500/40';
+      if (type.includes('座談会') || type.includes('セミナー')) return 'bg-indigo-500/20 text-indigo-300 border-indigo-500/40';
+      if (type.includes('仕事体験') || type.includes('ワークショップ') || type.includes('インターン')) return 'bg-purple-500/20 text-purple-300 border-purple-500/40';
+      if (type.includes('面談')) return 'bg-teal-500/20 text-teal-300 border-teal-500/40';
+      if (type.includes('面接')) return 'bg-emerald-500/20 text-emerald-300 border-emerald-500/40';
+      if (type.includes('締切') || type.includes('Webテスト') || type.includes('ES')) return 'bg-rose-500/20 text-rose-300 border-rose-500/40';
+      if (type.includes('オファー')) return 'bg-amber-500/20 text-amber-300 border-amber-500/40';
+      return 'bg-slate-500/20 text-slate-300 border-slate-500/40';
+    }
+
+    function generateGoogleCalendarUrl(event) {
+      if (!event) return 'https://calendar.google.com/';
+      const title = encodeURIComponent(`【就活】${event.companyName} - ${event.title}`);
+      
+      const sDate = (event.startDate || '2026-10-23').replace(/-/g, '');
+      const sTime = (event.startTime || '10:00').replace(/:/g, '') + '00';
+      const eDate = (event.endDate || event.startDate || '2026-10-23').replace(/-/g, '');
+      let eTime = (event.endTime || '').replace(/:/g, '') + '00';
+      if (!event.endTime) {
+        const [h, m] = (event.startTime || '10:00').split(':').map(Number);
+        const endH = String((h + 1) % 24).padStart(2, '0');
+        eTime = `${endH}${String(m || 0).padStart(2, '0')}00`;
+      }
+      
+      const startIso = `${sDate}T${sTime}`;
+      const endIso = `${eDate}T${eTime}`;
+      
+      let details = `【企業名】${event.companyName}\n【内容】${event.title}\n【種別】${event.eventType || '選考イベント'}\n【形式】${event.locationType || 'オンライン'}\n`;
+      if (event.meetingUrl) details += `【URL】${event.meetingUrl}\n`;
+      if (event.notes) details += `【メモ】${event.notes}\n`;
+      if (event.gmailUrl) details += `【Gmail検索】${event.gmailUrl}\n`;
+      details += `\n※ 就活管理ダッシュボードより自動同期`;
+      
+      const encodedDetails = encodeURIComponent(details);
+      const location = encodeURIComponent(event.meetingUrl || event.locationType || 'オンライン');
+      
+      return `https://calendar.google.com/calendar/render?action=TEMPLATE&text=${title}&dates=${startIso}/${endIso}&details=${encodedDetails}&location=${location}`;
+    }
+
+    function exportAllEventsToICS() {
+      if (!calendarEvents || calendarEvents.length === 0) {
+        showToast('エクスポートする予定がありません');
+        return;
+      }
+      let icsContent = [
+        'BEGIN:VCALENDAR',
+        'VERSION:2.0',
+        'PRODID:-//JobHunt Dashboard//Selection Calendar//JA',
+        'CALSCALE:GREGORIAN',
+        'METHOD:PUBLISH'
+      ];
+      
+      calendarEvents.forEach(evt => {
+        const sDate = (evt.startDate || '2026-10-23').replace(/-/g, '');
+        const sTime = (evt.startTime || '10:00').replace(/:/g, '') + '00';
+        const eDate = (evt.endDate || evt.startDate || '2026-10-23').replace(/-/g, '');
+        let eTime = (evt.endTime || '').replace(/:/g, '') + '00';
+        if (!evt.endTime) {
+          const [h, m] = (evt.startTime || '10:00').split(':').map(Number);
+          eTime = `${String((h + 1) % 24).padStart(2, '0')}${String(m || 0).padStart(2, '0')}00`;
+        }
+        
+        icsContent.push('BEGIN:VEVENT');
+        icsContent.push(`UID:jobhunt-${evt.id || Date.now()}@jobhunt.local`);
+        icsContent.push(`DTSTAMP:${new Date().toISOString().replace(/[-:]/g, '').split('.')[0]}Z`);
+        icsContent.push(`DTSTART:${sDate}T${sTime}`);
+        icsContent.push(`DTEND:${eDate}T${eTime}`);
+        icsContent.push(`SUMMARY:【就活】${evt.companyName} - ${evt.title}`);
+        icsContent.push(`LOCATION:${(evt.meetingUrl || evt.locationType || '').replace(/[,;\n]/g, ' ')}`);
+        icsContent.push(`DESCRIPTION:${(evt.notes || '').replace(/\n/g, '\\n')}`);
+        icsContent.push('STATUS:CONFIRMED');
+        icsContent.push('END:VEVENT');
+      });
+      
+      icsContent.push('END:VCALENDAR');
+      
+      const blob = new Blob([icsContent.join('\r\n')], { type: 'text/calendar;charset=utf-8;' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `就活選考カレンダー_${new Date().toISOString().slice(0, 10)}.ics`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+      showToast('📅 全予定をiCal形式(.ics)で出力しました！Googleカレンダーやスマホにインポートできます');
+    }
+
+    function setCalendarViewSubMode(mode) {
+      calendarViewSubMode = mode;
+      const monthBtn = document.getElementById('calViewMonthBtn');
+      const agendaBtn = document.getElementById('calViewAgendaBtn');
+      const gcalBtn = document.getElementById('calViewGCalBtn');
+
+      const monthContainer = document.getElementById('calendarMonthGridContainer');
+      const agendaContainer = document.getElementById('calendarAgendaContainer');
+      const gcalContainer = document.getElementById('calendarGCalContainer');
+
+      const inactiveBtn = 'flex items-center gap-1 px-3 py-1 rounded-lg text-xs font-semibold text-slate-400 hover:text-slate-200 transition';
+      const activeBtn = 'flex items-center gap-1 px-3 py-1 rounded-lg text-xs font-semibold bg-indigo-600 text-white transition shadow-sm';
+
+      if (monthBtn) monthBtn.className = inactiveBtn;
+      if (agendaBtn) agendaBtn.className = inactiveBtn;
+      if (gcalBtn) gcalBtn.className = inactiveBtn;
+
+      if (monthContainer) monthContainer.classList.add('hidden');
+      if (agendaContainer) agendaContainer.classList.add('hidden');
+      if (gcalContainer) gcalContainer.classList.add('hidden');
+
+      if (mode === 'month') {
+        if (monthBtn) monthBtn.className = activeBtn;
+        if (monthContainer) monthContainer.classList.remove('hidden');
+      } else if (mode === 'agenda') {
+        if (agendaBtn) agendaBtn.className = activeBtn;
+        if (agendaContainer) agendaContainer.classList.remove('hidden');
+      } else if (mode === 'gcal') {
+        if (gcalBtn) gcalBtn.className = activeBtn;
+        if (gcalContainer) gcalContainer.classList.remove('hidden');
+      }
+
+      renderCalendar();
+      lucide.createIcons();
+    }
+
+    function changeCalendarMonth(delta) {
+      currentCalMonth += delta;
+      if (currentCalMonth > 11) {
+        currentCalMonth = 0;
+        currentCalYear += 1;
+      } else if (currentCalMonth < 0) {
+        currentCalMonth = 11;
+        currentCalYear -= 1;
+      }
+      renderCalendar();
+    }
+
+    function goToCalendarToday() {
+      const now = new Date();
+      currentCalYear = now.getFullYear();
+      currentCalMonth = now.getMonth();
+      renderCalendar();
+    }
+
+    function renderCalendar() {
+      // タイトル更新
+      const titleEl = document.getElementById('calendarCurrentMonthTitle');
+      if (titleEl) {
+        titleEl.innerText = `${currentCalYear}年 ${currentCalMonth + 1}月`;
+      }
+
+      // バッジ更新
+      const totalBadge = document.getElementById('calendarTotalEventsBadge');
+      if (totalBadge) totalBadge.innerText = `${calendarEvents.length}件`;
+      const navBadge = document.getElementById('calendarBadgeCount');
+      if (navBadge) navBadge.innerText = calendarEvents.length;
+
+      renderCalendarMonthGrid();
+      renderCalendarAgenda();
+      lucide.createIcons();
+    }
+
+    function renderCalendarMonthGrid() {
+      const grid = document.getElementById('calendarMonthDaysGrid');
+      if (!grid) return;
+      grid.innerHTML = '';
+
+      const firstDayIndex = new Date(currentCalYear, currentCalMonth, 1).getDay();
+      const daysInMonth = new Date(currentCalYear, currentCalMonth + 1, 0).getDate();
+      const prevMonthDays = new Date(currentCalYear, currentCalMonth, 0).getDate();
+
+      const today = new Date();
+      const isCurrentMonth = (today.getFullYear() === currentCalYear && today.getMonth() === currentCalMonth);
+      const todayDate = today.getDate();
+
+      // 前月のパディングセル
+      for (let i = firstDayIndex - 1; i >= 0; i--) {
+        const d = prevMonthDays - i;
+        const cell = document.createElement('div');
+        cell.className = 'min-h-[75px] sm:min-h-[105px] p-1 sm:p-1.5 rounded-xl bg-slate-900/30 border border-slate-800/40 opacity-30 flex flex-col justify-between';
+        cell.innerHTML = `<span class="text-[11px] font-mono text-slate-500 font-semibold">${d}</span>`;
+        grid.appendChild(cell);
+      }
+
+      // 当月の日付セル
+      for (let d = 1; d <= daysInMonth; d++) {
+        const dateStr = `${currentCalYear}-${String(currentCalMonth + 1).padStart(2, '0')}-${String(d).padStart(2, '0')}`;
+        const dayOfWeek = new Date(currentCalYear, currentCalMonth, d).getDay();
+        const isToday = isCurrentMonth && (d === todayDate);
+
+        // 該当日のイベントを抽出
+        const dayEvents = calendarEvents.filter(e => e.startDate === dateStr);
+
+        const cell = document.createElement('div');
+        cell.className = `min-h-[75px] sm:min-h-[105px] p-1 sm:p-1.5 rounded-xl border flex flex-col justify-between cursor-pointer transition hover:border-slate-600/80 group ${
+          isToday ? 'bg-sky-950/20 border-sky-500/50 shadow-md shadow-sky-500/10' : 'bg-slate-900/70 border-slate-800/80 hover:bg-slate-850'
+        }`;
+        cell.onclick = () => openCalendarEventModal(dateStr);
+
+        // セルヘッダー（日付表示）
+        let dateColor = 'text-slate-300';
+        if (dayOfWeek === 0) dateColor = 'text-rose-400';
+        else if (dayOfWeek === 6) dateColor = 'text-sky-400';
+
+        let headerHtml = `
+          <div class="flex items-center justify-between mb-1">
+            <span class="text-xs sm:text-xs font-mono font-bold ${isToday ? 'px-1.5 py-0.5 rounded-md bg-sky-500 text-slate-950 font-black' : dateColor}">
+              ${d}
+            </span>
+            <div class="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition">
+              <span class="text-[10px] text-slate-400 hover:text-white" title="この日に予定を追加">＋</span>
+            </div>
+          </div>
+        `;
+
+        // イベントバッジ群
+        let eventsHtml = '<div class="space-y-1 flex-1 overflow-y-auto max-h-[60px] sm:max-h-[75px] pr-0.5 custom-scrollbar">';
+        dayEvents.slice(0, 3).forEach(evt => {
+          let badgeBorder = 'border-l-2 border-indigo-400 bg-indigo-500/15 text-indigo-200';
+          if (evt.eventType.includes('面接')) {
+            badgeBorder = 'border-l-2 border-emerald-400 bg-emerald-500/15 text-emerald-200';
+          } else if (evt.eventType.includes('締切') || evt.eventType.includes('ES')) {
+            badgeBorder = 'border-l-2 border-rose-400 bg-rose-500/15 text-rose-200';
+          } else if (evt.eventType.includes('説明会') || evt.eventType.includes('座談会')) {
+            badgeBorder = 'border-l-2 border-sky-400 bg-sky-500/15 text-sky-200';
+          } else if (evt.eventType.includes('仕事体験')) {
+            badgeBorder = 'border-l-2 border-purple-400 bg-purple-500/15 text-purple-200';
+          }
+
+          eventsHtml += `
+            <div onclick="event.stopPropagation(); openCalendarEventDetail('${evt.id}')"
+                 class="p-1 rounded-md text-[10px] sm:text-[11px] leading-tight truncate font-medium ${badgeBorder} hover:brightness-125 transition active:scale-95 flex items-center justify-between gap-1 shadow-xs"
+                 title="${evt.companyName} (${evt.title || evt.eventType}) ${evt.startTime ? evt.startTime : ''}">
+              <span class="truncate font-bold">${evt.startTime ? `<span class="opacity-80">${evt.startTime}</span> ` : ''}${evt.companyName}</span>
+            </div>
+          `;
+        });
+
+        if (dayEvents.length > 3) {
+          eventsHtml += `
+            <div class="text-[9px] sm:text-[10px] text-slate-400 font-semibold text-center hover:text-slate-200">
+              他${dayEvents.length - 3}件...
+            </div>
+          `;
+        }
+        eventsHtml += '</div>';
+
+        cell.innerHTML = headerHtml + eventsHtml;
+        grid.appendChild(cell);
+      }
+
+      // 翌月のパディングセル（合計42マスまたは35マスでグリッドを埋める）
+      const totalCellsSoFar = firstDayIndex + daysInMonth;
+      const targetTotal = totalCellsSoFar <= 35 ? 35 : 42;
+      const nextMonthDaysCount = targetTotal - totalCellsSoFar;
+      for (let i = 1; i <= nextMonthDaysCount; i++) {
+        const cell = document.createElement('div');
+        cell.className = 'min-h-[75px] sm:min-h-[105px] p-1 sm:p-1.5 rounded-xl bg-slate-900/30 border border-slate-800/40 opacity-30 flex flex-col justify-between';
+        cell.innerHTML = `<span class="text-[11px] font-mono text-slate-500 font-semibold">${i}</span>`;
+        grid.appendChild(cell);
+      }
+    }
+
+    function renderCalendarAgenda() {
+      const container = document.getElementById('calendarAgendaList');
+      if (!container) return;
+
+      if (!calendarEvents || calendarEvents.length === 0) {
+        container.innerHTML = `
+          <div class="p-8 text-center text-slate-400 bg-slate-900/60 border border-slate-800 rounded-2xl space-y-2">
+            <i data-lucide="calendar" class="w-8 h-8 text-slate-600 mx-auto mb-2"></i>
+            <p class="text-sm font-bold text-slate-300">予定がまだ登録されていません</p>
+            <p class="text-xs text-slate-500">「⚡ メールから即時追加」または「予定を追加」ボタンから登録してください。</p>
+          </div>
+        `;
+        return;
+      }
+
+      // 時系列でソート（日付・時間順）
+      const sorted = [...calendarEvents].sort((a, b) => {
+        const dateA = (a.startDate || '') + ' ' + (a.startTime || '00:00');
+        const dateB = (b.startDate || '') + ' ' + (b.startTime || '00:00');
+        return dateA.localeCompare(dateB);
+      });
+
+      let html = '';
+      let lastDate = '';
+
+      sorted.forEach(evt => {
+        const isNewDate = evt.startDate !== lastDate;
+        lastDate = evt.startDate;
+
+        // 曜日
+        let dayOfWeekStr = '';
+        if (evt.startDate) {
+          const parts = evt.startDate.split('-').map(Number);
+          if (parts.length === 3) {
+            const dObj = new Date(parts[0], parts[1] - 1, parts[2]);
+            const dayNames = ['日', '月', '火', '水', '木', '金', '土'];
+            dayOfWeekStr = `（${dayNames[dObj.getDay()]}）`;
+          }
+        }
+
+        const badgeClass = getEventTypeBadgeClass(evt.eventType);
+        const gcalUrl = generateGoogleCalendarUrl(evt);
+        const gmailUrl = evt.gmailUrl || `https://mail.google.com/mail/u/0/#search/${encodeURIComponent(evt.companyName)}`;
+
+        html += `
+          <div class="bg-slate-900/90 border border-slate-800 hover:border-slate-700/80 rounded-2xl p-4 transition-all duration-200 hover:shadow-lg space-y-3 group">
+            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-slate-800/80 pb-2.5">
+              <div class="flex items-center gap-2.5 flex-wrap">
+                <span class="px-2.5 py-1 rounded-lg bg-sky-500/15 text-sky-300 font-mono font-bold text-xs flex items-center gap-1.5 border border-sky-500/30">
+                  <i data-lucide="calendar" class="w-3.5 h-3.5"></i>
+                  <span>${evt.startDate || '日程未定'} ${dayOfWeekStr}</span>
+                  <span class="text-white">${evt.startTime ? `${evt.startTime}〜${evt.endTime || ''}` : ''}</span>
+                </span>
+                <span class="px-2.5 py-0.5 rounded-full text-xs font-bold border ${badgeClass}">
+                  ${evt.eventType || '選考'}
+                </span>
+              </div>
+              <div class="flex items-center gap-1.5">
+                <!-- 📅 Googleカレンダーに追加 -->
+                <a href="${gcalUrl}" target="_blank" rel="noopener noreferrer"
+                   class="px-2.5 py-1 rounded-lg bg-sky-600/20 hover:bg-sky-600 text-sky-300 hover:text-white border border-sky-500/30 text-xs font-bold flex items-center gap-1 transition shadow-sm"
+                   title="Googleカレンダーにこの予定をワンクリック追加">
+                  <i data-lucide="calendar-plus" class="w-3.5 h-3.5"></i>
+                  <span class="hidden sm:inline">Google同期</span>
+                </a>
+                <!-- ✉️ Gmailを開く -->
+                <a href="${gmailUrl}" target="_blank" rel="noopener noreferrer"
+                   class="px-2.5 py-1 rounded-lg bg-rose-500/15 hover:bg-rose-500 text-rose-300 hover:text-white border border-rose-500/30 text-xs font-bold flex items-center gap-1 transition"
+                   title="この企業のメールをGmailで検索">
+                  <i data-lucide="mail" class="w-3.5 h-3.5"></i>
+                  <span class="hidden sm:inline">Gmail</span>
+                </a>
+                <!-- 詳細ボタン -->
+                <button onclick="openCalendarEventDetail('${evt.id}')"
+                        class="px-2.5 py-1 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white text-xs font-semibold flex items-center gap-1 transition">
+                  <i data-lucide="info" class="w-3.5 h-3.5"></i>
+                  <span>詳細</span>
+                </button>
+              </div>
+            </div>
+
+            <div class="flex flex-col md:flex-row md:items-center justify-between gap-2">
+              <div class="space-y-1">
+                <h4 class="text-base font-black text-white hover:text-indigo-300 cursor-pointer transition flex items-center gap-2"
+                    onclick="openCalendarEventDetail('${evt.id}')">
+                  <span>${evt.companyName}</span>
+                  <span class="text-xs font-normal text-slate-400">— ${evt.title || ''}</span>
+                </h4>
+                <div class="flex items-center gap-3 text-xs text-slate-400 flex-wrap">
+                  <span class="flex items-center gap-1 text-slate-300">
+                    <i data-lucide="map-pin" class="w-3.5 h-3.5 text-slate-500"></i>
+                    <span>${evt.locationType || 'オンライン'}</span>
+                  </span>
+                  ${evt.meetingUrl ? `
+                    <a href="${evt.meetingUrl}" target="_blank" rel="noopener noreferrer" class="flex items-center gap-1 text-indigo-400 hover:underline">
+                      <i data-lucide="video" class="w-3.5 h-3.5"></i>
+                      <span>参加URLを開く</span>
+                    </a>
+                  ` : ''}
+                </div>
+              </div>
+
+              ${evt.notes ? `
+                <div class="text-xs text-slate-400 max-w-md bg-slate-950/60 p-2 rounded-xl border border-slate-800/80 line-clamp-2">
+                  <span class="text-slate-500 font-semibold">メモ:</span> ${evt.notes}
+                </div>
+              ` : ''}
+            </div>
+          </div>
+        `;
+      });
+
+      container.innerHTML = html;
+    }
+
+    function openCalendarEventDetail(eventId) {
+      const evt = calendarEvents.find(e => e.id === eventId);
+      if (!evt) return;
+      activeCalendarEventId = eventId;
+
+      const modal = document.getElementById('calendarEventDetailModal');
+      document.getElementById('calDetailCompanyTitle').innerText = evt.companyName;
+      
+      const badgeClass = getEventTypeBadgeClass(evt.eventType);
+      const typeBadge = document.getElementById('calDetailTypeBadge');
+      typeBadge.className = `text-xs px-2.5 py-0.5 rounded-full font-bold border ${badgeClass}`;
+      typeBadge.innerText = evt.eventType || '予定';
+
+      // スコア表示
+      const scoreBadge = document.getElementById('calDetailScoreBadge');
+      const matched = [...pipeline, ...offers].find(i => normalizeCompanyName(i.companyName) === normalizeCompanyName(evt.companyName));
+      if (matched && matched.analystReport) {
+        scoreBadge.innerHTML = `<span class="px-2 py-0.5 rounded-full text-xs font-black bg-indigo-500/20 text-indigo-300 border border-indigo-500/30">スコア: ${matched.analystReport.score.toFixed(1)}点</span>`;
+      } else {
+        scoreBadge.innerHTML = '';
+      }
+
+      // 日時表示
+      const timeStr = evt.startTime ? `${evt.startTime} 〜 ${evt.endTime || ''}` : '終日・締切日';
+      document.getElementById('calDetailDateTimeText').innerHTML = `
+        <i data-lucide="calendar" class="w-4 h-4 text-sky-400"></i>
+        <span>${evt.startDate || ''} （${timeStr}）</span>
+      `;
+
+      document.getElementById('calDetailLocationText').innerText = evt.locationType || '指定なし（オンライン等）';
+
+      const urlRow = document.getElementById('calDetailUrlRow');
+      const urlLink = document.getElementById('calDetailUrlLink');
+      if (evt.meetingUrl) {
+        urlRow.classList.remove('hidden');
+        urlLink.href = evt.meetingUrl;
+        urlLink.innerText = evt.meetingUrl;
+      } else {
+        urlRow.classList.add('hidden');
+      }
+
+      document.getElementById('calDetailNotesText').innerText = evt.notes || 'メモや持ち物の登録はありません。';
+
+      // Googleカレンダー追加リンク
+      const gcalBtn = document.getElementById('calDetailGCalBtn');
+      gcalBtn.href = generateGoogleCalendarUrl(evt);
+
+      // Gmailリンク
+      const gmailBtn = document.getElementById('calDetailGmailBtn');
+      gmailBtn.href = evt.gmailUrl || `https://mail.google.com/mail/u/0/#search/${encodeURIComponent(evt.companyName)}`;
+
+      modal.classList.remove('hidden');
+      modal.classList.add('flex');
+      lucide.createIcons();
+    }
+
+    function openEventCompanyDetail() {
+      const evt = calendarEvents.find(e => e.id === activeCalendarEventId);
+      if (!evt) return;
+      closeModal('calendarEventDetailModal');
+
+      // パイプラインまたはオファーから検索
+      const pItem = pipeline.find(p => normalizeCompanyName(p.companyName) === normalizeCompanyName(evt.companyName));
+      if (pItem) {
+        openPipelineDetail(pItem.id);
+        return;
+      }
+      const oItem = offers.find(o => normalizeCompanyName(o.companyName) === normalizeCompanyName(evt.companyName));
+      if (oItem) {
+        openOfferDetail(oItem.id);
+        return;
+      }
+      showToast(`${evt.companyName} の選考詳細はパイプラインに登録されていません`);
+    }
+
+    function openCalendarEventModal(dateStr) {
+      activeCalendarEventId = null;
+      document.getElementById('calModalTitle').innerHTML = `
+        <i data-lucide="calendar-plus" class="w-5 h-5 text-sky-400"></i>
+        <span>予定の追加</span>
+      `;
+      document.getElementById('calEventId').value = '';
+      document.getElementById('calEventCompany').value = '';
+      document.getElementById('calEventType').value = '会社説明会';
+      document.getElementById('calEventDate').value = dateStr || '2026-10-23';
+      document.getElementById('calEventStartTime').value = '10:00';
+      document.getElementById('calEventEndTime').value = '11:30';
+      document.getElementById('calEventLocation').value = 'オンライン (Zoom)';
+      document.getElementById('calEventUrl').value = '';
+      document.getElementById('calEventNotes').value = '';
+      document.getElementById('calEventDeleteBtn').classList.add('hidden');
+
+      const modal = document.getElementById('calendarEventModal');
+      modal.classList.remove('hidden');
+      modal.classList.add('flex');
+      lucide.createIcons();
+    }
+
+    function editCurrentCalendarEvent() {
+      const evt = calendarEvents.find(e => e.id === activeCalendarEventId);
+      if (!evt) return;
+      closeModal('calendarEventDetailModal');
+
+      document.getElementById('calModalTitle').innerHTML = `
+        <i data-lucide="edit" class="w-5 h-5 text-indigo-400"></i>
+        <span>予定の編集</span>
+      `;
+      document.getElementById('calEventId').value = evt.id;
+      document.getElementById('calEventCompany').value = evt.companyName || '';
+      document.getElementById('calEventType').value = evt.eventType || '会社説明会';
+      document.getElementById('calEventDate').value = evt.startDate || '2026-10-23';
+      document.getElementById('calEventStartTime').value = evt.startTime || '';
+      document.getElementById('calEventEndTime').value = evt.endTime || '';
+      document.getElementById('calEventLocation').value = evt.locationType || '';
+      document.getElementById('calEventUrl').value = evt.meetingUrl || '';
+      document.getElementById('calEventNotes').value = evt.notes || '';
+      document.getElementById('calEventDeleteBtn').classList.remove('hidden');
+
+      const modal = document.getElementById('calendarEventModal');
+      modal.classList.remove('hidden');
+      modal.classList.add('flex');
+      lucide.createIcons();
+    }
+
+    function handleSaveCalendarEvent(e) {
+      e.preventDefault();
+      const id = document.getElementById('calEventId').value;
+      const company = document.getElementById('calEventCompany').value.trim();
+      const type = document.getElementById('calEventType').value;
+      const date = document.getElementById('calEventDate').value;
+      const startTime = document.getElementById('calEventStartTime').value;
+      const endTime = document.getElementById('calEventEndTime').value;
+      const location = document.getElementById('calEventLocation').value.trim();
+      const url = document.getElementById('calEventUrl').value.trim();
+      const notes = document.getElementById('calEventNotes').value.trim();
+
+      if (!company || !date) {
+        showToast('企業名と日付を入力してください');
+        return;
+      }
+
+      if (id) {
+        // 更新
+        const target = calendarEvents.find(ev => ev.id === id);
+        if (target) {
+          target.companyName = company;
+          target.eventType = type;
+          target.startDate = date;
+          target.endDate = date;
+          target.startTime = startTime;
+          target.endTime = endTime;
+          target.locationType = location;
+          target.meetingUrl = url;
+          target.notes = notes;
+          target.gmailUrl = `https://mail.google.com/mail/u/0/#search/${encodeURIComponent(company)}`;
+        }
+        showToast('予定を更新しました');
+      } else {
+        // 新規作成
+        const newEvt = {
+          id: 'cal-' + Date.now(),
+          companyName: company,
+          title: type,
+          eventType: type,
+          startDate: date,
+          endDate: date,
+          startTime: startTime,
+          endTime: endTime,
+          locationType: location,
+          meetingUrl: url,
+          notes: notes,
+          gmailUrl: `https://mail.google.com/mail/u/0/#search/${encodeURIComponent(company)}`,
+          completed: false
+        };
+        calendarEvents.push(newEvt);
+        showToast('新しい予定を追加しました');
+      }
+
+      saveState();
+      closeModal('calendarEventModal');
+      renderCalendar();
+    }
+
+    function deleteCurrentCalendarEvent() {
+      if (!confirm('この予定を削除しますか？')) return;
+      const id = document.getElementById('calEventId').value;
+      calendarEvents = calendarEvents.filter(e => e.id !== id);
+      saveState();
+      closeModal('calendarEventModal');
+      renderCalendar();
+      showToast('予定を削除しました');
+    }
+
+    function deleteEventFromDetailModal() {
+      if (!confirm('この予定をカレンダーから削除しますか？')) return;
+      calendarEvents = calendarEvents.filter(e => e.id !== activeCalendarEventId);
+      saveState();
+      closeModal('calendarEventDetailModal');
+      renderCalendar();
+      showToast('予定を削除しました');
+    }
+
+    // ==========================================
+    // Email Schedule Parser Logic (メール自動解析)
+    // ==========================================
+
+    function openCalendarEmailImportModal() {
+      document.getElementById('emailRawInput').value = '';
+      document.getElementById('emailParseResultBox').classList.add('hidden');
+      const modal = document.getElementById('calendarEmailImportModal');
+      modal.classList.remove('hidden');
+      modal.classList.add('flex');
+      lucide.createIcons();
+    }
+
+    function pasteSampleInviteEmail() {
+      const sample = `【NCD株式会社】若手SE座談会＆質問会のご案内（予約完了）
+
+田中 颯 様
+
+この度はNCD株式会社のイベントにご予約いただき、誠にありがとうございます。
+ご予約いただいたイベントの日程が確定いたしましたので、下記の通りご案内いたします。
+
+■ 日時
+2026年10月23日（金） 16:00〜17:00 （入室開始 15:55〜）
+
+■ 実施形式
+オンライン開催（Zoomウェビナー）
+
+■ 参加URL
+https://zoom.us/j/9876543210?pwd=samplepasscode
+
+■ イベント内容
+・会社概要および自社クラウドソリューション事業の紹介
+・若手システムエンジニア（2〜3年目）による業務紹介
+・フリートーク座談会＆何でも質問会（NGなし）
+
+■ 当日の持ち物・服装
+・服装自由（私服可、リラックスしてご参加ください）
+・筆記用具、メモ帳
+
+※ ご都合が悪くなった場合は、マイページより前日17時までにキャンセルのご連絡をお願いいたします。
+皆様のご参加を社員一同、心よりお待ちしております。
+
+--------------------------------------------------
+NCD株式会社 新卒採用事務局
+E-mail: recruit@ncd.co.jp
+URL: https://www.ncd.co.jp/
+--------------------------------------------------`;
+      document.getElementById('emailRawInput').value = sample;
+      runEmailScheduleParser();
+    }
+
+    function runEmailScheduleParser() {
+      const text = (document.getElementById('emailRawInput').value || '').trim();
+      if (!text) {
+        showToast('メール本文を貼り付けてください');
+        return;
+      }
+
+      // 1. 企業名抽出
+      let detectedCompany = '';
+      // 既存パイプライン・オファーとの一致判定
+      const allCompanies = [...pipeline, ...offers].map(i => i.companyName);
+      for (const comp of allCompanies) {
+        const norm = normalizeCompanyName(comp);
+        if (norm && text.includes(norm)) {
+          detectedCompany = comp;
+          break;
+        }
+      }
+      if (!detectedCompany) {
+        const compRegex = /(?:株式会社|合同会社|有限会社)[^\s\n、。！？【】「」()（）]+|[^\s\n、。！？【】「」()（）]+(?:株式会社|合同会社|有限会社)/;
+        const matchComp = text.match(compRegex);
+        if (matchComp) {
+          detectedCompany = matchComp[0].replace(/^[【「]|[】」]$/g, '').trim();
+        }
+      }
+      if (!detectedCompany) detectedCompany = '対象企業';
+
+      // 2. 予定種別抽出
+      let detectedType = '会社説明会';
+      if (/最終面接|役員面接/.test(text)) detectedType = '最終面接';
+      else if (/二次面接|2次面接|三次面接/.test(text)) detectedType = '二次 / 三次面接';
+      else if (/一次面接|1次面接/.test(text)) detectedType = '一次面接';
+      else if (/カジュアル面談|リクルーター面談|面談/.test(text)) detectedType = '面談 (カジュアル/リクルーター)';
+      else if (/仕事体験|インターン|ワークショップ|1day/.test(text)) detectedType = '仕事体験・ワークショップ';
+      else if (/座談会|質問会|技術セミナー/.test(text)) detectedType = '座談会・セミナー';
+      else if (/ES提出|エントリーシート|締め切り|締切/.test(text)) detectedType = 'ES提出締切';
+      else if (/Webテスト|適性検査|受検/.test(text)) detectedType = 'Webテスト / 課題締切';
+      else if (/説明会|セミナー/.test(text)) detectedType = '会社説明会';
+
+      // 3. 日付抽出 (YYYY年M月D日 or M月D日 or YYYY-MM-DD or MM/DD)
+      let detectedDate = '2026-10-23';
+      const fullDateMatch = text.match(/(202[5-9])[年\/\-](\d{1,2})[月\/\-](\d{1,2})/);
+      if (fullDateMatch) {
+        const y = fullDateMatch[1];
+        const m = fullDateMatch[2].padStart(2, '0');
+        const d = fullDateMatch[3].padStart(2, '0');
+        detectedDate = `${y}-${m}-${d}`;
+      } else {
+        const monthDateMatch = text.match(/(\d{1,2})[月\/](\d{1,2})日?/);
+        if (monthDateMatch) {
+          const m = monthDateMatch[1].padStart(2, '0');
+          const d = monthDateMatch[2].padStart(2, '0');
+          detectedDate = `2026-${m}-${d}`;
+        }
+      }
+
+      // 4. 時刻抽出 (HH:MM 〜 HH:MM)
+      let detectedStartTime = '10:00';
+      let detectedEndTime = '11:00';
+      const timeRangeMatch = text.match(/(\d{1,2})[：:](\d{2})\s*(?:〜|~|～|-|ー)\s*(\d{1,2})[：:](\d{2})/);
+      if (timeRangeMatch) {
+        detectedStartTime = `${timeRangeMatch[1].padStart(2, '0')}:${timeRangeMatch[2]}`;
+        detectedEndTime = `${timeRangeMatch[3].padStart(2, '0')}:${timeRangeMatch[4]}`;
+      } else {
+        const singleTimeMatch = text.match(/(\d{1,2})[：:](\d{2})/);
+        if (singleTimeMatch) {
+          const sh = singleTimeMatch[1].padStart(2, '0');
+          const sm = singleTimeMatch[2];
+          detectedStartTime = `${sh}:${sm}`;
+          const eh = String((parseInt(sh, 10) + 1) % 24).padStart(2, '0');
+          detectedEndTime = `${eh}:${sm}`;
+        }
+      }
+
+      // 5. 形式＆URL抽出
+      let detectedLocation = 'オンライン (Zoom)';
+      if (/Teams|teams/i.test(text)) detectedLocation = 'オンライン (Teams)';
+      else if (/Google Meet|meet\.google/i.test(text)) detectedLocation = 'オンライン (Google Meet)';
+      else if (/Webex/i.test(text)) detectedLocation = 'オンライン (Webex)';
+      else if (/本社|来社|指定会場|対面/i.test(text)) detectedLocation = '対面 (指定会場/本社)';
+
+      let detectedUrl = '';
+      const urlMatch = text.match(/https?:\/\/[^\s\n<>"'）\)]+/);
+      if (urlMatch) {
+        detectedUrl = urlMatch[0];
+      }
+
+      // 6. メモ抽出（持ち物や服装など）
+      let notesArr = [];
+      const lines = text.split('\n');
+      lines.forEach(l => {
+        if (/持ち物|服装|私服|筆記用具|事前準備|5分前|事前提出/i.test(l)) {
+          const clean = l.replace(/^[・■※\-* ]+/, '').trim();
+          if (clean && !notesArr.includes(clean)) notesArr.push(clean);
+        }
+      });
+      const detectedNotes = notesArr.slice(0, 3).join(' / ');
+
+      // プレビューフィールドに代入
+      document.getElementById('parseResultCompany').value = detectedCompany;
+      document.getElementById('parseResultType').value = detectedType;
+      document.getElementById('parseResultDate').value = detectedDate;
+      document.getElementById('parseResultStartTime').value = detectedStartTime;
+      document.getElementById('parseResultEndTime').value = detectedEndTime;
+      document.getElementById('parseResultLocation').value = detectedLocation;
+      document.getElementById('parseResultUrl').value = detectedUrl;
+      document.getElementById('parseResultNotes').value = detectedNotes;
+
+      document.getElementById('emailParseResultBox').classList.remove('hidden');
+      showToast('⚡ メールから予定情報を自動解析しました！内容を確認して保存してください');
+      lucide.createIcons();
+    }
+
+    function confirmEmailScheduleImport() {
+      const company = document.getElementById('parseResultCompany').value.trim();
+      const type = document.getElementById('parseResultType').value;
+      const date = document.getElementById('parseResultDate').value;
+      const startTime = document.getElementById('parseResultStartTime').value;
+      const endTime = document.getElementById('parseResultEndTime').value;
+      const location = document.getElementById('parseResultLocation').value.trim();
+      const url = document.getElementById('parseResultUrl').value.trim();
+      const notes = document.getElementById('parseResultNotes').value.trim();
+      const openGCal = document.getElementById('parseAddToGoogleCalCheckbox').checked;
+
+      if (!company || !date) {
+        showToast('企業名と日付を確認してください');
+        return;
+      }
+
+      const newEvent = {
+        id: 'cal-' + Date.now(),
+        companyName: company,
+        title: type,
+        eventType: type,
+        startDate: date,
+        endDate: date,
+        startTime: startTime,
+        endTime: endTime,
+        locationType: location,
+        meetingUrl: url,
+        notes: notes,
+        gmailUrl: `https://mail.google.com/mail/u/0/#search/${encodeURIComponent(company)}`,
+        completed: false
+      };
+
+      calendarEvents.unshift(newEvent);
+
+      // パイプライン連携：同名企業があれば次回日程・ステージを自動更新
+      const pipeItem = pipeline.find(p => normalizeCompanyName(p.companyName) === normalizeCompanyName(company));
+      if (pipeItem) {
+        pipeItem.nextDate = date;
+        if (type.includes('面接')) {
+          pipeItem.stage = type;
+        } else if (type.includes('説明会') && !pipeItem.stage.includes('面接')) {
+          pipeItem.stage = '会社説明会 (参加予定)';
+        }
+        if (url && !pipeItem.notes.includes(url)) {
+          pipeItem.notes = (pipeItem.notes ? pipeItem.notes + '\n' : '') + `参加URL: ${url}`;
+        }
+      }
+
+      saveState();
+      closeModal('calendarEmailImportModal');
+
+      // Googleカレンダー作成画面を別タブで開く
+      if (openGCal) {
+        const gcalUrl = generateGoogleCalendarUrl(newEvent);
+        window.open(gcalUrl, '_blank');
+      }
+
+      switchTab('calendar');
+      showToast(`🎉「${company}」の予定をカレンダーに追加しました！`);
     }
 
     function resetSimulatorDefaults() {
