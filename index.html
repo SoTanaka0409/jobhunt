@@ -523,7 +523,7 @@
         <i data-lucide="upload" class="w-4 h-4"></i>
         <input type="file" id="importFileInput" accept=".json" class="hidden" onchange="importData(event)">
       </label>
-      <button onclick="resetToSampleData()" title="新評価基準のデータに初期化" class="p-2 rounded-lg bg-slate-800 hover:bg-slate-700 border border-slate-700 text-slate-400 hover:text-amber-400 transition">
+      <button onclick="resetToSampleData()" title="【注意】デモデータへの初期化（現在のデータをサンプルに戻す）" class="p-2 rounded-lg bg-slate-800 hover:bg-rose-500/20 border border-slate-700 text-slate-500 hover:text-rose-400 transition" aria-label="初期データへリセット">
         <i data-lucide="rotate-ccw" class="w-4 h-4"></i>
       </button>
 
@@ -3834,9 +3834,16 @@
     }
 
     function openAppearanceModal() {
+      const modal = document.getElementById('appearanceModal');
+      if (!modal) {
+        console.error('appearanceModal element not found');
+        return;
+      }
       const settings = loadAppearanceSettings();
       updateAppearanceModalUI(settings);
-      openModal('appearanceModal');
+      modal.classList.remove('hidden');
+      modal.classList.add('flex');
+      if (window.lucide) lucide.createIcons();
     }
 
     function setAppearanceOption(key, value) {
@@ -4867,6 +4874,15 @@
       lucide.createIcons();
     }
 
+    function openModal(modalId) {
+      const m = document.getElementById(modalId);
+      if (m) {
+        m.classList.remove('hidden');
+        m.classList.add('flex');
+        if (window.lucide) lucide.createIcons();
+      }
+    }
+
     function closeModal(modalId) {
       const m = document.getElementById(modalId);
       if (m) {
@@ -5099,7 +5115,7 @@
     }
 
     function resetToSampleData() {
-      if (!confirm('提示された新評価基準（4大必須条件・5段階ルーブリック）にデータを初期化しますか？')) return;
+      if (!confirm('【確認】現在のデータを、初期デモサンプルデータ（新評価基準サンプル）へリセットしてよろしいですか？\n\n※現在登録されている選考やオファーが初期状態に戻ります。\n※誤って押した場合は「キャンセル」を押してください。')) return;
       offers = JSON.parse(JSON.stringify(SAMPLE_OFFERS));
       pipeline = JSON.parse(JSON.stringify(SAMPLE_PIPELINE));
       archivedPipeline = JSON.parse(JSON.stringify(SAMPLE_ARCHIVED));
