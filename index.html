@@ -466,147 +466,465 @@
   <!-- ============================================== -->
   <!-- MODAL: 評価基準・ルーブリック & 4大必須条件モーダル -->
   <!-- ============================================== -->
-  <div id="profileModal" class="fixed inset-0 z-50 bg-black/75 backdrop-blur-sm hidden items-center justify-center p-4 overflow-y-auto">
-    <div class="bg-slate-900 border border-slate-700 rounded-2xl w-full max-w-4xl shadow-2xl overflow-hidden my-8">
-      <div class="bg-gradient-to-r from-slate-800 via-indigo-950 to-slate-800 px-6 py-4 border-b border-slate-700 flex items-center justify-between">
+  <div id="profileModal" class="fixed inset-0 z-50 bg-black/80 backdrop-blur-md hidden items-center justify-center p-3 sm:p-4 overflow-y-auto">
+    <div class="bg-slate-900 border border-slate-700 rounded-3xl w-full max-w-5xl shadow-2xl overflow-hidden my-6 flex flex-col max-h-[90vh]">
+      
+      <!-- Modal Header -->
+      <div class="bg-gradient-to-r from-slate-800 via-indigo-950 to-slate-800 px-6 py-4 border-b border-slate-700/80 flex items-center justify-between shrink-0">
         <div class="flex items-center gap-3">
-          <div class="p-2.5 rounded-xl bg-indigo-500/20 text-indigo-300 border border-indigo-500/30">
-            <i data-lucide="award" class="w-5 h-5"></i>
+          <div class="p-2.5 rounded-2xl bg-indigo-500/20 text-indigo-300 border border-indigo-500/40 shadow-inner">
+            <i data-lucide="calculator" class="w-6 h-6 text-indigo-400"></i>
           </div>
           <div>
-            <h3 class="text-base font-bold text-white flex items-center gap-2">
-              田中壮さん専用：新スコアリング・ルーブリック ＆ 4大必須条件
-            </h3>
-            <p class="text-xs text-slate-300">10段階評価の明確な数値基準と、高評価（7.5点以上）を出すための絶対条件</p>
+            <div class="flex items-center gap-2">
+              <h3 class="text-base sm:text-lg font-bold text-white tracking-tight">
+                専門アナリスト監修：企業採点基準 ＆ スコア計算シミュレーター
+              </h3>
+              <span class="text-[11px] px-2.5 py-0.5 rounded-full bg-indigo-500/20 text-indigo-300 border border-indigo-500/40 font-bold hidden sm:inline">10.0点満点・加点倍率体系</span>
+            </div>
+            <p class="text-xs text-slate-400 mt-0.5">専門卒（3年制）・C++ゲームプログラマー基準に特化した厳格採点システム（他者共有対応版）</p>
           </div>
         </div>
-        <button onclick="closeModal('profileModal')" class="text-slate-400 hover:text-white p-1 rounded-lg hover:bg-slate-700/50">
+        <button onclick="closeModal('profileModal')" class="text-slate-400 hover:text-white p-2 rounded-xl hover:bg-slate-800 transition">
           <i data-lucide="x" class="w-5 h-5"></i>
         </button>
       </div>
 
-      <div class="p-6 space-y-6 max-h-[75vh] overflow-y-auto custom-scrollbar text-xs">
-        
-        <!-- SECTION 1: 4大必須条件 -->
-        <div class="bg-gradient-to-br from-indigo-950/40 via-slate-800/80 to-slate-800/80 border border-indigo-500/40 rounded-2xl p-5 shadow-lg">
-          <div class="flex items-center justify-between mb-3 border-b border-indigo-500/30 pb-2">
-            <h4 class="text-sm font-bold text-white flex items-center gap-2">
-              <i data-lucide="check-check" class="w-4 h-4 text-emerald-400"></i>
-              高評価（7.5点以上）を出すための「4大必須条件」
-            </h4>
-            <span class="text-[11px] px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 font-bold">すべてまたは大半が合致必須</span>
+      <!-- Navigation Tabs inside Modal -->
+      <div class="bg-slate-850 px-6 pt-3 border-b border-slate-800 flex items-center gap-2 overflow-x-auto shrink-0 custom-scrollbar">
+        <button id="rubricTabBtnSim" onclick="switchRubricTab('sim')" class="flex items-center gap-1.5 px-4 py-2.5 border-b-2 border-indigo-500 text-indigo-300 text-xs font-bold transition">
+          <i data-lucide="sparkles" class="w-4 h-4"></i>
+          <span>① 対話型スコア計算シミュレーター（採点電卓）</span>
+        </button>
+        <button id="rubricTabBtnTable" onclick="switchRubricTab('table')" class="flex items-center gap-1.5 px-4 py-2.5 border-b-2 border-transparent text-slate-400 hover:text-slate-200 text-xs font-semibold transition">
+          <i data-lucide="table" class="w-4 h-4"></i>
+          <span>② 優先順位・配点・加算倍率 完全早見表</span>
+        </button>
+        <button id="rubricTabBtnTiers" onclick="switchRubricTab('tiers')" class="flex items-center gap-1.5 px-4 py-2.5 border-b-2 border-transparent text-slate-400 hover:text-slate-200 text-xs font-semibold transition">
+          <i data-lucide="layers" class="w-4 h-4"></i>
+          <span>③ 5段階ティア定義 ＆ 4大必須条件</span>
+        </button>
+      </div>
+
+      <!-- Modal Body (Scrollable) -->
+      <div class="p-5 sm:p-6 space-y-6 overflow-y-auto custom-scrollbar flex-1 text-xs">
+
+        <!-- TAB 1: 対話型スコア計算シミュレーター -->
+        <div id="rubricTabContentSim" class="space-y-6">
+          
+          <!-- Top Interactive Score Result Banner -->
+          <div class="bg-gradient-to-r from-indigo-950/80 via-slate-900 to-indigo-950/80 border-2 border-indigo-500/50 rounded-2xl p-4 sm:p-5 shadow-xl flex flex-col md:flex-row items-center justify-between gap-4">
+            <div class="flex items-center gap-4 text-center md:text-left">
+              <div class="w-20 h-20 rounded-2xl bg-slate-900 border border-indigo-500/40 flex flex-col items-center justify-center shadow-lg shadow-indigo-950/50 shrink-0">
+                <span class="text-[10px] text-indigo-400 font-bold uppercase tracking-wider">合計スコア</span>
+                <span id="simScoreDisplay" class="text-3xl font-black text-transparent bg-clip-text bg-gradient-to-r from-indigo-300 via-sky-300 to-emerald-300 font-mono">8.5</span>
+                <span class="text-[10px] text-slate-500">/ 10.0 点</span>
+              </div>
+              <div>
+                <div class="flex items-center gap-2 justify-center md:justify-start mb-1 flex-wrap">
+                  <span id="simVerdictBadge" class="px-3 py-1 rounded-full bg-emerald-500/20 text-emerald-300 border border-emerald-500/40 font-bold text-xs">
+                    【8.5】高評価・本命併願枠 ★目指す水準
+                  </span>
+                  <div id="simStarsDisplay" class="flex items-center gap-0.5 text-amber-400">
+                    <i data-lucide="star" class="w-4 h-4 fill-amber-400"></i>
+                    <i data-lucide="star" class="w-4 h-4 fill-amber-400"></i>
+                    <i data-lucide="star" class="w-4 h-4 fill-amber-400"></i>
+                    <i data-lucide="star" class="w-4 h-4 fill-amber-400"></i>
+                    <i data-lucide="star" class="w-4 h-4 text-slate-600"></i>
+                  </div>
+                </div>
+                <p id="simAdviceText" class="text-xs text-slate-300 leading-relaxed max-w-xl">
+                  4大必須条件をクリア。基本給・商流・契約透明性のバランスが高く、本命群および堅実な併願先として極めて優秀です。
+                </p>
+              </div>
+            </div>
+            <button onclick="resetSimulatorDefaults()" class="text-[11px] px-3 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 border border-slate-700 text-slate-300 hover:text-white transition flex items-center gap-1.5 shrink-0">
+              <i data-lucide="rotate-ccw" class="w-3.5 h-3.5"></i>
+              <span>標準値にリセット</span>
+            </button>
           </div>
-          <div class="grid grid-cols-1 md:grid-cols-2 gap-3.5 pt-1">
-            <div class="bg-slate-900/70 border border-slate-700/80 p-3.5 rounded-xl">
-              <div class="font-bold text-indigo-300 flex items-center gap-1.5 mb-1 text-xs">
-                <span class="w-5 h-5 rounded-full bg-indigo-500/20 flex items-center justify-center text-[10px]">1</span>
-                基本給単体が「21万円以上」
+
+          <!-- Simulator Form Controls -->
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            
+            <!-- Category A: 4大必須条件（基礎点・最大7.0点） -->
+            <div class="bg-slate-850 border border-slate-700/80 rounded-2xl p-4 space-y-3.5">
+              <div class="flex items-center justify-between border-b border-slate-700 pb-2">
+                <span class="font-bold text-indigo-300 flex items-center gap-1.5 text-xs">
+                  <i data-lucide="shield-check" class="w-4 h-4 text-indigo-400"></i>
+                  【優先度1位】4大必須条件（基礎点：最大 7.0点）
+                </span>
+                <span class="text-[10px] text-slate-400">※合格の前提条件</span>
               </div>
-              <p class="text-slate-300 leading-relaxed">総額月給ではなく、一律手当や固定残業代を除いた純粋なベースが21万円を超えているか。</p>
-            </div>
-            <div class="bg-slate-900/70 border border-slate-700/80 p-3.5 rounded-xl">
-              <div class="font-bold text-indigo-300 flex items-center gap-1.5 mb-1 text-xs">
-                <span class="w-5 h-5 rounded-full bg-indigo-500/20 flex items-center justify-center text-[10px]">2</span>
-                商流：自社開発 または 直取引・自社内受託（6割以上）
+
+              <!-- 1. 基本給 -->
+              <div>
+                <label class="block text-slate-300 font-semibold mb-1 flex items-center justify-between">
+                  <span>① 基本給単体（専門卒3年制の純粋ベース金額）</span>
+                  <span id="ptsSalary" class="text-indigo-400 font-mono font-bold">+1.5点</span>
+                </label>
+                <select id="simSalary" onchange="runSimulatorCalc()" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-white text-xs focus:border-indigo-500">
+                  <option value="2.0">24.0万円以上（大手ゲーム開発水準等） [+2.0点]</option>
+                  <option value="1.5" selected>21.0万〜23.9万円（合格ライン・4大条件達成） [+1.5点]</option>
+                  <option value="0.5">20.0万〜20.9万円（境界線・わずかに未達） [+0.5点]</option>
+                  <option value="0.0">20.0万円未満（4大条件割れ・大幅未達） [0.0点]</option>
+                </select>
               </div>
-              <p class="text-slate-300 leading-relaxed">二次請け以降の多重下請けや、常時客先常駐となるSESモデルではないこと（案件ガチャ・下流工程リスクの排除）。</p>
-            </div>
-            <div class="bg-slate-900/70 border border-slate-700/80 p-3.5 rounded-xl">
-              <div class="font-bold text-indigo-300 flex items-center gap-1.5 mb-1 text-xs">
-                <span class="w-5 h-5 rounded-full bg-indigo-500/20 flex items-center justify-center text-[10px]">3</span>
-                給与・契約の透明性が高いこと
+
+              <!-- 2. 商流・配属先 -->
+              <div>
+                <label class="block text-slate-300 font-semibold mb-1 flex items-center justify-between">
+                  <span>② 商流・配属先（自社開発 vs 客先常駐SES排除）</span>
+                  <span id="ptsTrade" class="text-indigo-400 font-mono font-bold">+1.5点</span>
+                </label>
+                <select id="simTrade" onchange="runSimulatorCalc()" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-white text-xs focus:border-indigo-500">
+                  <option value="2.0">自社IP・自社ゲーム/プロダクト開発100% [+2.0点]</option>
+                  <option value="1.5" selected>プライム一次請け・自社内受託 70%以上（常駐極小） [+1.5点]</option>
+                  <option value="0.8">二次請け自社内受託メイン [+0.8点]</option>
+                  <option value="-2.0">客先常駐（SES）メイン / 案件ガチャ大 [-2.0点 減点]</option>
+                </select>
               </div>
-              <p class="text-slate-300 leading-relaxed">固定残業代（みなし残業）が過剰でない、または完全になし（全額支給）であり、賞与が年2回しっかり還元される仕組み。</p>
-            </div>
-            <div class="bg-slate-900/70 border border-slate-700/80 p-3.5 rounded-xl">
-              <div class="font-bold text-indigo-300 flex items-center gap-1.5 mb-1 text-xs">
-                <span class="w-5 h-5 rounded-full bg-indigo-500/20 flex items-center justify-center text-[10px]">4</span>
-                年間休日「120日以上」＆ 残業「月20時間以内」
+
+              <!-- 3. 給与・契約透明性 -->
+              <div>
+                <label class="block text-slate-300 font-semibold mb-1 flex items-center justify-between">
+                  <span>③ 給与透明性（固定残業ゼロ ＆ 賞与還元）</span>
+                  <span id="ptsOvertime" class="text-indigo-400 font-mono font-bold">+1.0点</span>
+                </label>
+                <select id="simOvertime" onchange="runSimulatorCalc()" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-white text-xs focus:border-indigo-500">
+                  <option value="1.5">固定残業完全なし（1分単位支給） ＋ 賞与年2回（高実績） [+1.5点]</option>
+                  <option value="1.0" selected>固定残業なし（全額支給） ＋ 賞与年2回（標準） [+1.0点]</option>
+                  <option value="0.5">固定残業20h未満だが基本給とは別枠明記 [+0.5点]</option>
+                  <option value="-1.5">固定残業30h以上、または賞与なし/寸志 [-1.5点 減点]</option>
+                </select>
               </div>
-              <p class="text-slate-300 leading-relaxed">労務管理がホワイトであり、長期的なキャリアと生活のバランスが維持できること。</p>
+
+              <!-- 4. 年間休日・残業時間 -->
+              <div>
+                <label class="block text-slate-300 font-semibold mb-1 flex items-center justify-between">
+                  <span>④ 年間休日・残業管理（健全性）</span>
+                  <span id="ptsHolidays" class="text-indigo-400 font-mono font-bold">+1.0点</span>
+                </label>
+                <select id="simHolidays" onchange="runSimulatorCalc()" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-white text-xs focus:border-indigo-500">
+                  <option value="1.5">年間休日125日以上 ＋ 月残業15h未満 ＋ 有給高消化 [+1.5点]</option>
+                  <option value="1.0" selected>年間休日120日以上 ＋ 月残業20h以内 [+1.0点]</option>
+                  <option value="0.5">年間休日115〜119日 [+0.5点]</option>
+                  <option value="-1.0">年間休日110日未満 または 残業常態化 [-1.0点 減点]</option>
+                </select>
+              </div>
             </div>
+
+            <!-- Category B: スキル適合 ＆ 就活軸（加点・最大3.0点） -->
+            <div class="bg-slate-850 border border-slate-700/80 rounded-2xl p-4 space-y-3.5">
+              <div class="flex items-center justify-between border-b border-slate-700 pb-2">
+                <span class="font-bold text-sky-300 flex items-center gap-1.5 text-xs">
+                  <i data-lucide="cpu" class="w-4 h-4 text-sky-400"></i>
+                  【優先度2位】スキル適合 ＆ 就活軸（加点：最大 3.0点）
+                </span>
+                <span class="text-[10px] text-slate-400">※強みが活きる度合い</span>
+              </div>
+
+              <!-- 5. 担当工程・C++直結度 -->
+              <div>
+                <label class="block text-slate-300 font-semibold mb-1 flex items-center justify-between">
+                  <span>⑤ 担当工程・技術直結度（C++ / エンジン / 3D物理）</span>
+                  <span id="ptsTech" class="text-sky-400 font-mono font-bold">+1.0点</span>
+                </label>
+                <select id="simTech" onchange="runSimulatorCalc()" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-white text-xs focus:border-indigo-500">
+                  <option value="1.0" selected>C/C++、ゲームエンジン、3D数学、物理演算直結 [+1.0点]</option>
+                  <option value="0.8">制御系・組込系・インフラ基盤（C言語親和性） [+0.8点]</option>
+                  <option value="0.7">Web・アプリ・DX受託開発（プログラミング工程確約） [+0.7点]</option>
+                  <option value="-1.5">プログラミングなし（運用監視・マニュアルテスト） [-1.5点 減点]</option>
+                </select>
+              </div>
+
+              <!-- 6. 学歴公平性 -->
+              <div>
+                <label class="block text-slate-300 font-semibold mb-1 flex items-center justify-between">
+                  <span>⑥ 学歴公平性（専門卒3年制の実力主義評価）</span>
+                  <span id="ptsEducation" class="text-sky-400 font-mono font-bold">+0.5点</span>
+                </label>
+                <select id="simEducation" onchange="runSimulatorCalc()" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-white text-xs focus:border-indigo-500">
+                  <option value="0.5" selected>専門生も大卒と同等待遇・実力作品主義 [+0.5点]</option>
+                  <option value="0.3">専門卒採用実績多数（給与差わずか） [+0.3点]</option>
+                  <option value="0.0">大卒限定・学歴フィルターあり / 昇進格差 [0.0点]</option>
+                </select>
+              </div>
+
+              <!-- 7. リモートワーク -->
+              <div>
+                <label class="block text-slate-300 font-semibold mb-1 flex items-center justify-between">
+                  <span>⑦ リモートワーク制度（ハイブリッド実績）</span>
+                  <span id="ptsRemote" class="text-sky-400 font-mono font-bold">+0.5点</span>
+                </label>
+                <select id="simRemote" onchange="runSimulatorCalc()" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-white text-xs focus:border-indigo-500">
+                  <option value="0.5" selected>週2〜3日ハイブリッドまたはフルリモート制度あり [+0.5点]</option>
+                  <option value="0.3">部分的在宅可（プロジェクト状況による） [+0.3点]</option>
+                  <option value="0.0">原則完全出社固定 [0.0点]</option>
+                </select>
+              </div>
+
+              <!-- 8. 福利厚生 & 9. 研修 -->
+              <div class="grid grid-cols-2 gap-2">
+                <div>
+                  <label class="block text-slate-300 font-semibold mb-1 flex items-center justify-between">
+                    <span>⑧ 福利厚生（住宅/資格）</span>
+                    <span id="ptsWelfare" class="text-sky-400 font-mono font-bold">+0.5点</span>
+                  </label>
+                  <select id="simWelfare" onchange="runSimulatorCalc()" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-2.5 py-2 text-white text-xs focus:border-indigo-500">
+                    <option value="0.5" selected>住宅手当＋資格手当 [+0.5点]</option>
+                    <option value="0.3">いずれか一方あり [+0.3点]</option>
+                    <option value="0.0">手当なし [0.0点]</option>
+                  </select>
+                </div>
+                <div>
+                  <label class="block text-slate-300 font-semibold mb-1 flex items-center justify-between">
+                    <span>⑨ 研修・平均勤続年数</span>
+                    <span id="ptsTraining" class="text-sky-400 font-mono font-bold">+0.5点</span>
+                  </label>
+                  <select id="simTraining" onchange="runSimulatorCalc()" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-2.5 py-2 text-white text-xs focus:border-indigo-500">
+                    <option value="0.5" selected>3ヶ月以上研修＋専任メンター [+0.5点]</option>
+                    <option value="0.3">標準的新卒研修（1〜2ヶ月） [+0.3点]</option>
+                    <option value="0.0">研修なし・現場丸投げ [0.0点]</option>
+                  </select>
+                </div>
+              </div>
+
+              <!-- 特例倍率・地雷チェック -->
+              <div class="pt-2 border-t border-slate-700/60 space-y-2">
+                <label class="flex items-center gap-2 cursor-pointer select-none text-[11px] text-amber-300">
+                  <input type="checkbox" id="simBonusMultiplier" onchange="runSimulatorCalc()" class="rounded bg-slate-800 border-slate-700 text-amber-500">
+                  <span>🎮 自社IPゲーム開発・夢枠特例ボーナス（合計点に ×1.05倍）</span>
+                </label>
+                <label class="flex items-center gap-2 cursor-pointer select-none text-[11px] text-rose-400">
+                  <input type="checkbox" id="simDangerCap" onchange="runSimulatorCalc()" class="rounded bg-slate-800 border-slate-700 text-rose-500">
+                  <span>⚠️ 地雷検知（文系営業・新卒使い捨て構造・見かけ月給詐欺）：上限3.5点キャップ</span>
+                </label>
+              </div>
+
+            </div>
+
           </div>
         </div>
 
-        <!-- SECTION 2: 10段階評価の数値基準（スコアリング・ルーブリック） -->
-        <div>
-          <h4 class="text-xs font-bold text-slate-300 uppercase tracking-wider mb-3 flex items-center gap-2">
-            <i data-lucide="layers" class="w-4 h-4 text-indigo-400"></i>
-            10段階評価の数値基準（スコアリング・ルーブリック）
-          </h4>
+        <!-- TAB 2: 優先順位・配点・加算倍率 完全早見表 -->
+        <div id="rubricTabContentTable" class="space-y-4 hidden">
+          <div class="bg-slate-850 border border-slate-700/80 rounded-2xl p-4 overflow-x-auto">
+            <table class="w-full text-left border-collapse text-xs">
+              <thead>
+                <tr class="border-b border-slate-700 text-slate-400 font-bold">
+                  <th class="py-2.5 px-3">優先度</th>
+                  <th class="py-2.5 px-3">評価項目</th>
+                  <th class="py-2.5 px-3">配点範囲</th>
+                  <th class="py-2.5 px-3">加点条件（満点基準）</th>
+                  <th class="py-2.5 px-3">減点ペナルティ / 判定理由</th>
+                </tr>
+              </thead>
+              <tbody class="divide-y divide-slate-800 text-slate-300">
+                <tr class="bg-indigo-950/20 font-semibold text-white">
+                  <td colspan="5" class="py-2 px-3 text-indigo-300">【第1グループ：4大必須条件ゲート（基礎点：最大 7.0点）】※未達時は高評価不可</td>
+                </tr>
+                <tr>
+                  <td class="py-2.5 px-3 font-bold text-indigo-400">優先度 1位</td>
+                  <td class="py-2.5 px-3 font-bold text-white">① 基本給単体<br><span class="text-[10px] text-slate-400">（3年制専門卒ベース）</span></td>
+                  <td class="py-2.5 px-3 font-mono font-bold text-emerald-400">0.0 〜 +2.0点</td>
+                  <td class="py-2.5 px-3">・基本給単体 24万円以上: +2.0点<br>・基本給単体 21.0〜23.9万円: +1.5点</td>
+                  <td class="py-2.5 px-3 text-rose-300">20万円未満は0点。大卒と専門卒で減額される場合は専門卒テーブルを強制適用。</td>
+                </tr>
+                <tr>
+                  <td class="py-2.5 px-3 font-bold text-indigo-400">優先度 2位</td>
+                  <td class="py-2.5 px-3 font-bold text-white">② 商流・配属先<br><span class="text-[10px] text-slate-400">（客先常駐SES排除）</span></td>
+                  <td class="py-2.5 px-3 font-mono font-bold text-emerald-400">-2.0 〜 +2.0点</td>
+                  <td class="py-2.5 px-3">・自社IP/プロダクト開発100%: +2.0点<br>・プライム直受託70%以上: +1.5点</td>
+                  <td class="py-2.5 px-3 text-rose-300">客先常駐（SES）メインは-2.0点ペナルティ（案件ガチャ・下流固定リスク）。</td>
+                </tr>
+                <tr>
+                  <td class="py-2.5 px-3 font-bold text-indigo-400">優先度 3位</td>
+                  <td class="py-2.5 px-3 font-bold text-white">③ 給与・契約透明性<br><span class="text-[10px] text-slate-400">（固定残業ゼロ＆賞与）</span></td>
+                  <td class="py-2.5 px-3 font-mono font-bold text-emerald-400">-1.5 〜 +1.5点</td>
+                  <td class="py-2.5 px-3">・固定残業なし（全額支給） ＋ 賞与年2回支給実績あり</td>
+                  <td class="py-2.5 px-3 text-rose-300">固定残業30h以上、賞与寸志・なしは-1.5点ペナルティ。</td>
+                </tr>
+                <tr>
+                  <td class="py-2.5 px-3 font-bold text-indigo-400">優先度 4位</td>
+                  <td class="py-2.5 px-3 font-bold text-white">④ 労働環境・年休<br><span class="text-[10px] text-slate-400">（残業20h・有給消化）</span></td>
+                  <td class="py-2.5 px-3 font-mono font-bold text-emerald-400">-1.0 〜 +1.5点</td>
+                  <td class="py-2.5 px-3">・年間休日125日以上 ＋ 残業15h未満: +1.5点<br>・年休120日以上 ＋ 残業20h以内: +1.0点</td>
+                  <td class="py-2.5 px-3 text-rose-300">年間休日110日未満は-1.0点ペナルティ。</td>
+                </tr>
+                <tr class="bg-sky-950/20 font-semibold text-white">
+                  <td colspan="5" class="py-2 px-3 text-sky-300">【第2グループ：就活軸・スキル適合加点（加点：最大 3.0点）】※強み発揮度</td>
+                </tr>
+                <tr>
+                  <td class="py-2.5 px-3 font-bold text-sky-400">優先度 5位</td>
+                  <td class="py-2.5 px-3 font-bold text-white">⑤ C++・ゲーム技術直結</td>
+                  <td class="py-2.5 px-3 font-mono font-bold text-emerald-400">-1.5 〜 +1.0点</td>
+                  <td class="py-2.5 px-3">C/C++、3D物理、ゲームエンジン開発が直結: +1.0点（Web/DX受託は+0.7点）</td>
+                  <td class="py-2.5 px-3 text-rose-300">プログラミングなし（運用監視・マニュアルテスト）は-1.5点ペナルティ。</td>
+                </tr>
+                <tr>
+                  <td class="py-2.5 px-3 font-bold text-sky-400">優先度 6位</td>
+                  <td class="py-2.5 px-3 font-bold text-white">⑥ 学歴公平性</td>
+                  <td class="py-2.5 px-3 font-mono font-bold text-emerald-400">0.0 〜 +0.5点</td>
+                  <td class="py-2.5 px-3">専門生も大卒と同等待遇・実力作品主義: +0.5点（実績多数は+0.3点）</td>
+                  <td class="py-2.5 px-3 text-slate-400">大卒限定または昇進格差ありは加点0点。</td>
+                </tr>
+                <tr>
+                  <td class="py-2.5 px-3 font-bold text-sky-400">優先度 7位</td>
+                  <td class="py-2.5 px-3 font-bold text-white">⑦ リモート・ハイブリッド</td>
+                  <td class="py-2.5 px-3 font-mono font-bold text-emerald-400">0.0 〜 +0.5点</td>
+                  <td class="py-2.5 px-3">週2〜3日以上のハイブリッドまたはフル在宅制度あり: +0.5点</td>
+                  <td class="py-2.5 px-3 text-slate-400">完全出社固定は加点0点。</td>
+                </tr>
+                <tr>
+                  <td class="py-2.5 px-3 font-bold text-sky-400">優先度 8位</td>
+                  <td class="py-2.5 px-3 font-bold text-white">⑧ 福利厚生（住宅/資格）</td>
+                  <td class="py-2.5 px-3 font-mono font-bold text-emerald-400">0.0 〜 +0.5点</td>
+                  <td class="py-2.5 px-3">住宅手当（月2〜3万等）または寮 ＋ 資格取得祝い金・手当あり: +0.5点</td>
+                  <td class="py-2.5 px-3 text-slate-400">手当なしは加点0点。</td>
+                </tr>
+                <tr>
+                  <td class="py-2.5 px-3 font-bold text-sky-400">優先度 9位</td>
+                  <td class="py-2.5 px-3 font-bold text-white">⑨ 研修体制・定着率</td>
+                  <td class="py-2.5 px-3 font-mono font-bold text-emerald-400">0.0 〜 +0.5点</td>
+                  <td class="py-2.5 px-3">3ヶ月以上研修 ＋ 専任メンター ＋ 平均勤続10年以上: +0.5点</td>
+                  <td class="py-2.5 px-3 text-slate-400">研修丸投げは加点0点。</td>
+                </tr>
+                <tr class="bg-amber-950/20 font-semibold text-white">
+                  <td colspan="5" class="py-2 px-3 text-amber-300">【第3グループ：特例倍率 ＆ 地雷キャップ】</td>
+                </tr>
+                <tr>
+                  <td class="py-2.5 px-3 font-bold text-amber-400">特例倍率</td>
+                  <td class="py-2.5 px-3 font-bold text-white">🎮 自社IPゲーム夢枠</td>
+                  <td class="py-2.5 px-3 font-mono font-bold text-amber-300">× 1.05倍</td>
+                  <td class="py-2.5 px-3" colspan="2">自社IP家庭用・PC・アーケードゲーム開発でC++技術を直結できる最高峰企業は合計点に1.05倍を乗算（上限10.0点）。</td>
+                </tr>
+                <tr>
+                  <td class="py-2.5 px-3 font-bold text-rose-400">地雷キャップ</td>
+                  <td class="py-2.5 px-3 font-bold text-white">⚠️ 地雷・ブラック判定</td>
+                  <td class="py-2.5 px-3 font-mono font-bold text-rose-400">上限 3.5点</td>
+                  <td class="py-2.5 px-3" colspan="2">自社開発なし文系営業職（OA機器等）、新卒使い捨て、見かけ月給詐欺は無条件で3.5点以下とし【自動削除ログ】へ移送。</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- TAB 3: 5段階ティア定義 ＆ 4大必須条件 -->
+        <div id="rubricTabContentTiers" class="space-y-4 hidden">
+          <!-- SECTION 1: 4大必須条件 -->
+          <div class="bg-gradient-to-br from-indigo-950/40 via-slate-800/80 to-slate-800/80 border border-indigo-500/40 rounded-2xl p-5 shadow-lg">
+            <div class="flex items-center justify-between mb-3 border-b border-indigo-500/30 pb-2">
+              <h4 class="text-sm font-bold text-white flex items-center gap-2">
+                <i data-lucide="check-check" class="w-4 h-4 text-emerald-400"></i>
+                高評価（7.5点以上）を出すための「4大必須条件」
+              </h4>
+              <span class="text-[11px] px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 font-bold">すべてまたは大半が合致必須</span>
+            </div>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-3.5 pt-1">
+              <div class="bg-slate-900/70 border border-slate-700/80 p-3.5 rounded-xl">
+                <div class="font-bold text-indigo-300 flex items-center gap-1.5 mb-1 text-xs">
+                  <span class="w-5 h-5 rounded-full bg-indigo-500/20 flex items-center justify-center text-[10px]">1</span>
+                  基本給単体が「21万円以上」（専門卒3年制基準）
+                </div>
+                <p class="text-slate-300 leading-relaxed">総額月給ではなく、一律手当や固定残業代を除いた純粋なベースが21万円を超えているか。</p>
+              </div>
+              <div class="bg-slate-900/70 border border-slate-700/80 p-3.5 rounded-xl">
+                <div class="font-bold text-indigo-300 flex items-center gap-1.5 mb-1 text-xs">
+                  <span class="w-5 h-5 rounded-full bg-indigo-500/20 flex items-center justify-center text-[10px]">2</span>
+                  商流：自社開発 または 直取引・自社内受託（6割以上）
+                </div>
+                <p class="text-slate-300 leading-relaxed">二次請け以降の多重下請けや、常時客先常駐となるSESモデルではないこと（案件ガチャ・下流工程リスクの排除）。</p>
+              </div>
+              <div class="bg-slate-900/70 border border-slate-700/80 p-3.5 rounded-xl">
+                <div class="font-bold text-indigo-300 flex items-center gap-1.5 mb-1 text-xs">
+                  <span class="w-5 h-5 rounded-full bg-indigo-500/20 flex items-center justify-center text-[10px]">3</span>
+                  給与・契約の透明性が高いこと（固定残業なし）
+                </div>
+                <p class="text-slate-300 leading-relaxed">固定残業代（みなし残業）が過剰でない、または完全になし（全額支給）であり、賞与が年2回しっかり還元される仕組み。</p>
+              </div>
+              <div class="bg-slate-900/70 border border-slate-700/80 p-3.5 rounded-xl">
+                <div class="font-bold text-indigo-300 flex items-center gap-1.5 mb-1 text-xs">
+                  <span class="w-5 h-5 rounded-full bg-indigo-500/20 flex items-center justify-center text-[10px]">4</span>
+                  年間休日「120日以上」＆ 残業「月20時間以内」
+                </div>
+                <p class="text-slate-300 leading-relaxed">労務管理がホワイトであり、長期的なキャリアと生活のバランスが維持できること。</p>
+              </div>
+            </div>
+          </div>
+
+          <!-- SECTION 2: 10段階評価の数値基準 -->
           <div class="space-y-3">
+            <h4 class="text-xs font-bold text-slate-300 uppercase tracking-wider mb-2 flex items-center gap-2">
+              <i data-lucide="layers" class="w-4 h-4 text-indigo-400"></i>
+              5段階ティア（★1〜★5）の定義と目安
+            </h4>
             
             <!-- Tier 1: 9.0〜10.0 -->
             <div class="bg-slate-800/40 border-l-4 border-l-purple-500 border border-slate-700/70 p-4 rounded-xl">
               <div class="flex items-center justify-between gap-2 mb-1.5">
                 <span class="text-sm font-bold text-purple-300 flex items-center gap-2">
-                  <span class="px-2 py-0.5 rounded bg-purple-500/20 border border-purple-500/40">9.0 〜 10.0点</span>
+                  <span class="px-2 py-0.5 rounded bg-purple-500/20 border border-purple-500/40">9.0 〜 10.0点（★★★★★）</span>
                   最高峰・理想枠 / トップティア
                 </span>
-                <span class="text-[11px] text-slate-400">例：ハル研究所、GO株式会社など</span>
+                <span class="text-[11px] text-slate-400">例：ハル研究所、アトラス、コーエーテクモHD</span>
               </div>
-              <p class="text-slate-300 leading-relaxed">全ての就活軸を完璧にクリア。完全自社開発または一次請けプライム、基本給単体で23万〜25万円以上、みなし残業なし、年間休日125日、リモートワーク完備、賞与・福利厚生も文句なしの企業。</p>
+              <p class="text-slate-300 leading-relaxed">全ての就活軸を完璧にクリア。完全自社開発、基本給単体で23万〜25万円以上、みなし残業なし、年間休日125日、C++技術フル活用。</p>
             </div>
 
-            <!-- Tier 2: 7.5〜8.5 -->
+            <!-- Tier 2: 7.5〜8.9 -->
             <div class="bg-slate-800/40 border-l-4 border-l-emerald-500 border border-slate-700/70 p-4 rounded-xl">
               <div class="flex items-center justify-between gap-2 mb-1.5">
                 <span class="text-sm font-bold text-emerald-300 flex items-center gap-2">
-                  <span class="px-2 py-0.5 rounded bg-emerald-500/20 border border-emerald-500/40">7.5 〜 8.5点</span>
-                  高評価・強力な併願/滑り止め候補 ★ここを目指す
+                  <span class="px-2 py-0.5 rounded bg-emerald-500/20 border border-emerald-500/40">7.5 〜 8.9点（★★★★☆）</span>
+                  高評価・本命併願 / 滑り止め最有力 ★ここを目指す
                 </span>
-                <span class="text-[11px] text-slate-400">例：NCD、アトミテック、サイバーアークなど</span>
+                <span class="text-[11px] text-slate-400">例：セガ フェイブ、バンダイナムコアミューズメント、NCD、アトミテック</span>
               </div>
-              <p class="text-slate-300 leading-relaxed">致命的なリスクがなく、主要な希望条件を高水準で満たしている企業。<br>
-              <strong>主な条件：</strong>基本給単体21万円以上クリア、自社内受託または直取引メイン（常駐リスク小）、賞与実績が豊富（4ヶ月分以上など）、年間休日120日以上。</p>
+              <p class="text-slate-300 leading-relaxed">致命的なリスクがなく、基本給単体21万円以上クリア、自社内受託または直取引メイン（常駐リスク小）、年間休日120日以上。</p>
             </div>
 
-            <!-- Tier 3: 6.0〜7.0 -->
+            <!-- Tier 3: 6.0〜7.4 -->
             <div class="bg-slate-800/40 border-l-4 border-l-indigo-400 border border-slate-700/70 p-4 rounded-xl">
               <div class="flex items-center justify-between gap-2 mb-1.5">
                 <span class="text-sm font-bold text-indigo-300 flex items-center gap-2">
-                  <span class="px-2 py-0.5 rounded bg-indigo-500/20 border border-indigo-500/40">6.0 〜 7.0点</span>
-                  中位・条件付き検討枠
+                  <span class="px-2 py-0.5 rounded bg-indigo-500/20 border border-indigo-500/40">6.0 〜 7.4点（★★★☆☆）</span>
+                  中位・条件付き検討枠（セーフティネット）
                 </span>
-                <span class="text-[11px] text-slate-400">例：国際ソフトウェア、コンピュータマインドなど</span>
+                <span class="text-[11px] text-slate-400">例：コンピュータマインド社、パーソルクロステクノロジー、エスピック</span>
               </div>
-              <p class="text-slate-300 leading-relaxed">条件の一部に惜しい点や軽微な懸念があるものの、セーフティネットとして機能する企業。<br>
-              <strong>主な条件：</strong>基本給単体が20万〜21万円未満でわずかに届かない、または自社開発比率は高いがドメインがゲーム・ITからやや外れるなど。</p>
+              <p class="text-slate-300 leading-relaxed">基本給単体が20万〜21万円未満でわずかに届かない、または開発上流だが一部クライアント先常駐を含むなど条件付き枠。</p>
             </div>
 
-            <!-- Tier 4: 4.5〜5.5 -->
+            <!-- Tier 4: 4.5〜5.9 -->
             <div class="bg-slate-800/40 border-l-4 border-l-amber-500 border border-slate-700/70 p-4 rounded-xl">
               <div class="flex items-center justify-between gap-2 mb-1.5">
                 <span class="text-sm font-bold text-amber-300 flex items-center gap-2">
-                  <span class="px-2 py-0.5 rounded bg-amber-500/20 border border-amber-500/40">4.5 〜 5.5点</span>
-                  注意・リスク大の懸念枠
+                  <span class="px-2 py-0.5 rounded bg-amber-500/20 border border-amber-500/40">4.5 〜 5.9点（★★☆☆☆）</span>
+                  注意・リスク大の懸念枠（面接練習用のみ）
                 </span>
-                <span class="text-[11px] text-slate-400">例：パーソルクロステクノロジー、フューチャーWebなど</span>
+                <span class="text-[11px] text-slate-400">例：エスユーエス、テクノエージェント</span>
               </div>
-              <p class="text-slate-300 leading-relaxed">表面上の福利厚生は良くても、構造的なリスクが目立つ企業。<br>
-              <strong>主な条件：</strong>基本給単体が17万〜20万台前半で手当やみなし残業に依存している、客先常駐（SES）比率が6〜8割以上で「案件ガチャ」や下流工程リスクが高い。</p>
+              <p class="text-slate-300 leading-relaxed">基本給単体が低く固定残業代で月給をカサ増し、または客先常駐SES率が6〜8割以上で案件ガチャ・下流工程リスク大。</p>
             </div>
 
-            <!-- Tier 5: 1.0〜4.0 -->
+            <!-- Tier 5: 1.0〜4.4 -->
             <div class="bg-slate-800/40 border-l-4 border-l-rose-500 border border-slate-700/70 p-4 rounded-xl">
               <div class="flex items-center justify-between gap-2 mb-1.5">
                 <span class="text-sm font-bold text-rose-300 flex items-center gap-2">
-                  <span class="px-2 py-0.5 rounded bg-rose-500/20 border border-rose-500/40">1.0 〜 4.0点</span>
-                  地雷・完全ミスマッチ枠
+                  <span class="px-2 py-0.5 rounded bg-rose-500/20 border border-rose-500/40">1.0 〜 4.4点（★☆☆☆☆）</span>
+                  地雷・完全ミスマッチ枠（自動削除対象）
                 </span>
-                <span class="text-[11px] text-slate-400">例：フューチャーAIシステムズ（辞退済）</span>
+                <span class="text-[11px] text-slate-400">例：株式会社MJE（文系営業）、フューチャーAIシステムズ</span>
               </div>
-              <p class="text-slate-300 leading-relaxed">労働環境の悪さや、多重下請けの底辺構造、基本給の極端な低さが明確な企業。</p>
+              <p class="text-slate-300 leading-relaxed">自社IT開発なし、多重下請けSES、新卒使い捨て構造。新基準ルールによりオファー一覧から自動削除。</p>
             </div>
-
           </div>
         </div>
 
       </div>
     </div>
-  </div>
-
-  <!-- ============================================== -->
+  </div><!-- ============================================== -->
   <!-- MODAL: 新規作成モーダル -->
   <!-- ============================================== -->
   <div id="createModal" class="fixed inset-0 z-50 bg-black/70 backdrop-blur-sm hidden items-center justify-center p-4 overflow-y-auto">
@@ -4161,6 +4479,137 @@
     // ==========================================
     if ('serviceWorker' in navigator && window.location.protocol.startsWith('http')) {
       navigator.serviceWorker.register('./sw.js').catch(() => {});
+    }
+
+    // ==========================================
+    // 📊 スコア計算シミュレーター ＆ ルーブリックタブ制御
+    // ==========================================
+    function switchRubricTab(tab) {
+      const tabs = ['sim', 'table', 'tiers'];
+      tabs.forEach(t => {
+        const btn = document.getElementById('rubricTabBtn' + t.charAt(0).toUpperCase() + t.slice(1));
+        const contentEl = document.getElementById('rubricTabContent' + t.charAt(0).toUpperCase() + t.slice(1));
+        if (t === tab) {
+          if (btn) btn.className = 'flex items-center gap-1.5 px-4 py-2.5 border-b-2 border-indigo-500 text-indigo-300 text-xs font-bold transition';
+          if (contentEl) contentEl.classList.remove('hidden');
+        } else {
+          if (btn) btn.className = 'flex items-center gap-1.5 px-4 py-2.5 border-b-2 border-transparent text-slate-400 hover:text-slate-200 text-xs font-semibold transition';
+          if (contentEl) contentEl.classList.add('hidden');
+        }
+      });
+      lucide.createIcons();
+    }
+
+    function runSimulatorCalc() {
+      const salary = parseFloat(document.getElementById('simSalary').value) || 0;
+      const trade = parseFloat(document.getElementById('simTrade').value) || 0;
+      const overtime = parseFloat(document.getElementById('simOvertime').value) || 0;
+      const holidays = parseFloat(document.getElementById('simHolidays').value) || 0;
+
+      const tech = parseFloat(document.getElementById('simTech').value) || 0;
+      const education = parseFloat(document.getElementById('simEducation').value) || 0;
+      const remote = parseFloat(document.getElementById('simRemote').value) || 0;
+      const welfare = parseFloat(document.getElementById('simWelfare').value) || 0;
+      const training = parseFloat(document.getElementById('simTraining').value) || 0;
+
+      const bonusMultiplier = document.getElementById('simBonusMultiplier').checked;
+      const dangerCap = document.getElementById('simDangerCap').checked;
+
+      // Update badge points
+      document.getElementById('ptsSalary').innerText = (salary >= 0 ? '+' : '') + salary.toFixed(1) + '点';
+      document.getElementById('ptsTrade').innerText = (trade >= 0 ? '+' : '') + trade.toFixed(1) + '点';
+      document.getElementById('ptsOvertime').innerText = (overtime >= 0 ? '+' : '') + overtime.toFixed(1) + '点';
+      document.getElementById('ptsHolidays').innerText = (holidays >= 0 ? '+' : '') + holidays.toFixed(1) + '点';
+      document.getElementById('ptsTech').innerText = (tech >= 0 ? '+' : '') + tech.toFixed(1) + '点';
+      document.getElementById('ptsEducation').innerText = (education >= 0 ? '+' : '') + education.toFixed(1) + '点';
+      document.getElementById('ptsRemote').innerText = (remote >= 0 ? '+' : '') + remote.toFixed(1) + '点';
+      document.getElementById('ptsWelfare').innerText = (welfare >= 0 ? '+' : '') + welfare.toFixed(1) + '点';
+      document.getElementById('ptsTraining').innerText = (training >= 0 ? '+' : '') + training.toFixed(1) + '点';
+
+      // Base sum
+      let total = salary + trade + overtime + holidays + tech + education + remote + welfare + training;
+
+      // Multiplier
+      if (bonusMultiplier) {
+        total = total * 1.05;
+      }
+
+      // Clamp between 1.0 and 10.0
+      if (total > 10.0) total = 10.0;
+      if (total < 1.0) total = 1.0;
+
+      // Danger Cap
+      if (dangerCap && total > 3.5) {
+        total = 3.5;
+      }
+
+      const score = Math.round(total * 10) / 10;
+      document.getElementById('simScoreDisplay').innerText = score.toFixed(1);
+
+      // Tier, Stars, Verdict, Advice
+      let verdict = '';
+      let verdictClass = '';
+      let starsCount = 1;
+      let advice = '';
+
+      if (score >= 9.0) {
+        starsCount = 5;
+        verdict = `【${score.toFixed(1)}】最高峰・理想枠 / トップティア ★★★★★`;
+        verdictClass = 'bg-purple-500/20 text-purple-300 border-purple-500/40';
+        advice = '全ての希望条件を完璧にクリア。自社開発100%、高給与水準、C++自作エンジン技術がダイレクトに刺さる最高峰の理想企業です。最優先で本選考・インターンに挑むべき枠です。';
+      } else if (score >= 7.5) {
+        starsCount = 4;
+        verdict = `【${score.toFixed(1)}】高評価・本命併願 / 滑り止め最有力 ★★★★☆`;
+        verdictClass = 'bg-emerald-500/20 text-emerald-300 border-emerald-500/40';
+        advice = '4大必須条件をクリア。基本給21万以上、自社内受託またはプライム直取引で案件ガチャリスクが極小。内定を確保すべき最有力ホワイト企業です。';
+      } else if (score >= 6.0) {
+        starsCount = 3;
+        verdict = `【${score.toFixed(1)}】中位・条件付き検討枠（セーフティネット） ★★★☆☆`;
+        verdictClass = 'bg-indigo-500/20 text-indigo-300 border-indigo-500/40';
+        advice = '基本給単体が20万円台前半でわずかに届かない、または一部客先常駐の可能性あり。開発上流に関われるため、安全弁の滑り止めとしてキープ推奨です。';
+      } else if (score >= 4.5) {
+        starsCount = 2;
+        verdict = `【${score.toFixed(1)}】注意・リスク大の懸念枠（面接練習用のみ） ★★☆☆☆`;
+        verdictClass = 'bg-amber-500/20 text-amber-300 border-amber-500/40';
+        advice = '基本給単体が20万未満で固定残業代に依存している、または客先常駐（SES）率が高く下流工程リスク大。本命にはせず、面接練習用として割り切るべき枠です。';
+      } else {
+        starsCount = 1;
+        verdict = `【${score.toFixed(1)}】地雷・完全ミスマッチ枠（自動削除対象） ★☆☆☆☆`;
+        verdictClass = 'bg-rose-500/20 text-rose-300 border-rose-500/40';
+        advice = '自社IT開発なし（文系営業等）、多重下請けSES、新卒使い捨て構造。新基準によりオファー画面から自動削除され「自動削除ログ」に残すのみとする対象です。';
+      }
+
+      const badge = document.getElementById('simVerdictBadge');
+      badge.innerText = verdict;
+      badge.className = `px-3 py-1 rounded-full font-bold text-xs border ${verdictClass}`;
+      document.getElementById('simAdviceText').innerText = advice;
+
+      // Stars
+      let starsHtml = '';
+      for (let i = 1; i <= 5; i++) {
+        if (i <= starsCount) {
+          starsHtml += '<i data-lucide="star" class="w-4 h-4 fill-amber-400 text-amber-400"></i>';
+        } else {
+          starsHtml += '<i data-lucide="star" class="w-4 h-4 text-slate-600"></i>';
+        }
+      }
+      document.getElementById('simStarsDisplay').innerHTML = starsHtml;
+      lucide.createIcons();
+    }
+
+    function resetSimulatorDefaults() {
+      document.getElementById('simSalary').value = '1.5';
+      document.getElementById('simTrade').value = '1.5';
+      document.getElementById('simOvertime').value = '1.0';
+      document.getElementById('simHolidays').value = '1.0';
+      document.getElementById('simTech').value = '1.0';
+      document.getElementById('simEducation').value = '0.5';
+      document.getElementById('simRemote').value = '0.5';
+      document.getElementById('simWelfare').value = '0.5';
+      document.getElementById('simTraining').value = '0.5';
+      document.getElementById('simBonusMultiplier').checked = false;
+      document.getElementById('simDangerCap').checked = false;
+      runSimulatorCalc();
     }
 
     window.addEventListener('DOMContentLoaded', () => {
