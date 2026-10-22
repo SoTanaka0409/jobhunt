@@ -88,6 +88,13 @@
       min-width: 300px;
       max-width: 330px;
     }
+    @media (max-width: 640px) {
+      .kanban-col {
+        min-width: 82vw !important;
+        max-width: 86vw !important;
+        min-height: 480px !important;
+      }
+    }
     .dragging {
       opacity: 0.4;
       transform: scale(0.98);
@@ -455,163 +462,214 @@
   </div>
 
   <!-- Header Navigation -->
-  <header class="sticky top-0 z-30 bg-slate-900/95 backdrop-blur-md border-b border-slate-800 px-4 sm:px-8 py-3.5 flex flex-wrap items-center justify-between gap-4">
-    <div class="flex items-center gap-3">
-      <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-indigo-600 via-indigo-500 to-sky-400 flex items-center justify-center shadow-lg shadow-indigo-500/20">
-        <i data-lucide="shield-check" class="w-5 h-5 text-white"></i>
-      </div>
-      <div>
-        <div class="flex items-center gap-2">
-          <h1 class="text-lg font-bold tracking-tight text-white">就活統合ダッシュボード</h1>
-          <span class="text-xs px-2 py-0.5 rounded-full bg-indigo-500/20 text-indigo-300 border border-indigo-500/40 font-semibold flex items-center gap-1">
-            <i data-lucide="user-check" class="w-3 h-3"></i> 田中 壮 様 専用
-          </span>
-          <span class="text-[11px] px-2 py-0.5 rounded-full bg-slate-800 text-slate-400 border border-slate-700">新スコアリング基準適用済</span>
+  <header class="sticky top-0 z-30 bg-slate-900/95 backdrop-blur-md border-b border-slate-800 px-3 sm:px-8 py-2 sm:py-3.5">
+    <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-2.5 sm:gap-4 max-w-[1850px] mx-auto">
+      
+      <!-- Top Row on Mobile / Left Column on Desktop -->
+      <div class="flex items-center justify-between gap-2">
+        <div class="flex items-center gap-2 sm:gap-3 min-w-0">
+          <div class="w-8 h-8 sm:w-10 sm:h-10 rounded-xl bg-gradient-to-tr from-indigo-600 via-indigo-500 to-sky-400 flex items-center justify-center shadow-lg shadow-indigo-500/20 shrink-0">
+            <i data-lucide="shield-check" class="w-4 h-4 sm:w-5 sm:h-5 text-white"></i>
+          </div>
+          <div class="min-w-0">
+            <div class="flex items-center gap-1.5 sm:gap-2 flex-wrap">
+              <h1 class="text-sm sm:text-lg font-bold tracking-tight text-white truncate">就活統合ダッシュボード</h1>
+              <span class="text-[10px] sm:text-xs px-1.5 sm:px-2 py-0.5 rounded-full bg-indigo-500/20 text-indigo-300 border border-indigo-500/40 font-semibold flex items-center gap-1 shrink-0">
+                <i data-lucide="user-check" class="w-2.5 h-2.5 sm:w-3 sm:h-3"></i> 田中 壮 様
+              </span>
+              <span class="hidden lg:inline-block text-[11px] px-2 py-0.5 rounded-full bg-slate-800 text-slate-400 border border-slate-700">新スコアリング基準</span>
+            </div>
+            <p class="hidden sm:block text-xs text-slate-400 truncate">「4大必須条件」＆「5段階ルーブリック」完全連動アナリストシステム</p>
+          </div>
         </div>
-        <p class="text-xs text-slate-400">「4大必須条件」＆「5段階スコアリング・ルーブリック」完全連動アナリストシステム</p>
+
+        <!-- Mobile Right Controls (Compact Icon Buttons on mobile) -->
+        <div class="flex md:hidden items-center gap-1 shrink-0">
+          <!-- 再読み込み -->
+          <button onclick="handleDataReload()" title="データを再読み込み" class="p-2 rounded-lg bg-emerald-500/15 border border-emerald-500/40 text-emerald-300 active:scale-95 transition">
+            <i data-lucide="refresh-cw" class="w-3.5 h-3.5 refresh-data-icon"></i>
+          </button>
+          <!-- リログ -->
+          <button onclick="handleAuthLogout()" title="リログ（画面ロック）" class="p-2 rounded-lg bg-slate-800 border border-slate-700 text-slate-300 hover:text-rose-400 active:scale-95 transition">
+            <i data-lucide="lock" class="w-3.5 h-3.5 text-rose-400"></i>
+          </button>
+          <!-- 設定 -->
+          <button onclick="openSettingsModal('ui')" title="設定ハブ" class="p-2 rounded-lg bg-slate-800 border border-slate-700 text-slate-200 active:scale-95 transition">
+            <i data-lucide="settings" class="w-3.5 h-3.5 text-indigo-400"></i>
+          </button>
+          <!-- 新規追加 -->
+          <button onclick="openCreateModal()" title="新規追加" class="p-2 rounded-lg bg-gradient-to-r from-indigo-500 to-sky-500 text-white shadow-md active:scale-95 transition">
+            <i data-lucide="plus" class="w-3.5 h-3.5"></i>
+          </button>
+        </div>
       </div>
-    </div>
 
-    <!-- Center Navigation Tabs -->
-    <nav class="flex items-center bg-slate-800/80 p-1 rounded-xl border border-slate-700/60 shadow-inner">
-      <button id="tabOffersBtn" onclick="switchTab('offers')" class="flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-semibold transition-all duration-150 text-slate-400 hover:text-slate-200">
-        <i data-lucide="mail-check" class="w-4 h-4"></i>
-        <span>オファー・スカウト管理</span>
-        <span id="offersBadgeCount" class="text-xs px-1.5 py-0.2 rounded-full bg-slate-700 text-slate-300">0</span>
-      </button>
-      <button id="tabPipelineBtn" onclick="switchTab('pipeline')" class="flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-semibold transition-all duration-150 bg-indigo-600 text-white shadow-sm">
-        <i data-lucide="kanban-square" class="w-4 h-4"></i>
-        <span>選考パイプライン (全日程反映済)</span>
-        <span id="pipelineBadgeCount" class="text-xs px-1.5 py-0.2 rounded-full bg-indigo-800/80 text-indigo-200">0</span>
-      </button>
-      <button id="tabArchivedBtn" onclick="switchTab('archived')" class="flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-semibold transition-all duration-150 text-slate-400 hover:text-slate-200">
-        <i data-lucide="archive" class="w-4 h-4"></i>
-        <span>選考除外・ゴミ箱 (保管庫)</span>
-        <span id="archivedBadgeCount" class="text-xs px-1.5 py-0.2 rounded-full bg-slate-700 text-slate-300">0</span>
-      </button>
-    </nav>
+      <!-- Center Navigation Tabs: 3-column equal grid on mobile, flex on desktop -->
+      <nav class="grid grid-cols-3 md:flex items-center bg-slate-800/80 p-0.5 sm:p-1 rounded-xl border border-slate-700/60 shadow-inner w-full md:w-auto">
+        <button id="tabOffersBtn" onclick="switchTab('offers')" class="flex items-center justify-center gap-1 sm:gap-2 px-2 sm:px-4 py-1.5 sm:py-2 rounded-lg text-xs sm:text-sm font-semibold transition-all duration-150 text-slate-400 hover:text-slate-200 text-center">
+          <i data-lucide="mail-check" class="w-3.5 h-3.5 sm:w-4 sm:h-4 shrink-0"></i>
+          <span class="hidden sm:inline">オファー・スカウト管理</span>
+          <span class="sm:hidden">オファー</span>
+          <span id="offersBadgeCount" class="text-[10px] sm:text-xs px-1.5 py-0.2 rounded-full bg-slate-700 text-slate-300 shrink-0">0</span>
+        </button>
+        <button id="tabPipelineBtn" onclick="switchTab('pipeline')" class="flex items-center justify-center gap-1 sm:gap-2 px-2 sm:px-4 py-1.5 sm:py-2 rounded-lg text-xs sm:text-sm font-semibold transition-all duration-150 bg-indigo-600 text-white shadow-sm text-center">
+          <i data-lucide="kanban-square" class="w-3.5 h-3.5 sm:w-4 sm:h-4 shrink-0"></i>
+          <span class="hidden sm:inline">選考パイプライン (全日程反映済)</span>
+          <span class="sm:hidden">選考中</span>
+          <span id="pipelineBadgeCount" class="text-[10px] sm:text-xs px-1.5 py-0.2 rounded-full bg-indigo-800/80 text-indigo-200 shrink-0">0</span>
+        </button>
+        <button id="tabArchivedBtn" onclick="switchTab('archived')" class="flex items-center justify-center gap-1 sm:gap-2 px-2 sm:px-4 py-1.5 sm:py-2 rounded-lg text-xs sm:text-sm font-semibold transition-all duration-150 text-slate-400 hover:text-slate-200 text-center">
+          <i data-lucide="archive" class="w-3.5 h-3.5 sm:w-4 sm:h-4 shrink-0"></i>
+          <span class="hidden sm:inline">選考除外・ゴミ箱 (保管庫)</span>
+          <span class="sm:hidden">保管庫</span>
+          <span id="archivedBadgeCount" class="text-[10px] sm:text-xs px-1.5 py-0.2 rounded-full bg-slate-700 text-slate-300 shrink-0">0</span>
+        </button>
+      </nav>
 
-    <!-- Right Controls: Clean, Non-overlapping, Categorized -->
-    <div class="flex items-center gap-2">
-      <!-- 1. 再読み込み（データ同期） -->
-      <button id="refreshDataBtn" onclick="handleDataReload()" title="データを最新状態に再読み込み（リログ不要）" class="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-emerald-500/15 hover:bg-emerald-500/25 border border-emerald-500/40 text-emerald-300 text-xs font-semibold shadow-sm transition active:scale-95 group">
-        <i id="refreshDataIcon" data-lucide="refresh-cw" class="w-3.5 h-3.5 text-emerald-400 group-hover:rotate-180 transition-transform duration-500"></i>
-        <span class="hidden sm:inline">再読み込み</span>
-      </button>
+      <!-- Desktop Right Controls (hidden on mobile, shown on md:) -->
+      <div class="hidden md:flex items-center gap-2">
+        <!-- 1. 再読み込み（データ同期） -->
+        <button id="refreshDataBtn" onclick="handleDataReload()" title="データを最新状態に再読み込み（リログ不要）" class="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-emerald-500/15 hover:bg-emerald-500/25 border border-emerald-500/40 text-emerald-300 text-xs font-semibold shadow-sm transition active:scale-95 group">
+          <i id="refreshDataIcon" data-lucide="refresh-cw" class="w-3.5 h-3.5 text-emerald-400 group-hover:rotate-180 transition-transform duration-500 refresh-data-icon"></i>
+          <span class="hidden sm:inline">再読み込み</span>
+        </button>
 
-      <!-- 2. 🔒 リログ機能（見失わないよう常設・ワンクリックで画面ロック） -->
-      <button onclick="handleAuthLogout()" title="ログアウトして画面をロック（リログ）" class="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-slate-800 hover:bg-rose-500/20 border border-slate-700 hover:border-rose-500/50 text-slate-300 hover:text-rose-400 text-xs font-semibold transition active:scale-95 shadow-sm group">
-        <i data-lucide="lock" class="w-3.5 h-3.5 text-rose-400 group-hover:scale-110 transition-transform"></i>
-        <span>リログ</span>
-      </button>
+        <!-- 2. 🔒 リログ機能 -->
+        <button onclick="handleAuthLogout()" title="ログアウトして画面をロック（リログ）" class="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-slate-800 hover:bg-rose-500/20 border border-slate-700 hover:border-rose-500/50 text-slate-300 hover:text-rose-400 text-xs font-semibold transition active:scale-95 shadow-sm group">
+          <i data-lucide="lock" class="w-3.5 h-3.5 text-rose-400 group-hover:scale-110 transition-transform"></i>
+          <span>リログ</span>
+        </button>
 
-      <!-- 3. ⚙️ 設定（明るさ設定・UI・自身の希望する条件・データをリスト化） -->
-      <button onclick="openSettingsModal('ui')" title="設定ハブ（明るさ設定、UI外観、自身の希望する条件、データ管理）" class="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 border border-slate-700 hover:border-indigo-500/50 text-slate-200 hover:text-white text-xs font-semibold transition active:scale-95 shadow-sm">
-        <i data-lucide="settings" class="w-3.5 h-3.5 text-indigo-400"></i>
-        <span>設定</span>
-      </button>
+        <!-- 3. ⚙️ 設定 -->
+        <button onclick="openSettingsModal('ui')" title="設定ハブ（明るさ設定、UI外観、自身の希望する条件、データ管理）" class="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 border border-slate-700 hover:border-indigo-500/50 text-slate-200 hover:text-white text-xs font-semibold transition active:scale-95 shadow-sm">
+          <i data-lucide="settings" class="w-3.5 h-3.5 text-indigo-400"></i>
+          <span>設定</span>
+        </button>
 
-      <!-- 4. ＋ 新規追加 -->
-      <button onclick="openCreateModal()" class="flex items-center gap-2 px-3.5 py-2 rounded-xl bg-gradient-to-r from-indigo-500 to-sky-500 hover:from-indigo-600 hover:to-sky-600 text-white font-medium text-xs sm:text-sm shadow-lg shadow-indigo-500/25 transition-all transform active:scale-95">
-        <i data-lucide="plus-circle" class="w-4 h-4"></i>
-        <span class="hidden xs:inline">新規追加</span>
-      </button>
+        <!-- 4. ＋ 新規追加 -->
+        <button onclick="openCreateModal()" class="flex items-center gap-2 px-3.5 py-2 rounded-xl bg-gradient-to-r from-indigo-500 to-sky-500 hover:from-indigo-600 hover:to-sky-600 text-white font-medium text-xs sm:text-sm shadow-lg shadow-indigo-500/25 transition-all transform active:scale-95">
+          <i data-lucide="plus-circle" class="w-4 h-4"></i>
+          <span class="hidden xs:inline">新規追加</span>
+        </button>
+      </div>
+
     </div>
   </header>
 
   <!-- Main Container -->
-  <main class="flex-1 max-w-[1850px] w-full mx-auto p-4 sm:p-6 lg:p-8 flex flex-col">
+  <main class="flex-1 max-w-[1850px] w-full mx-auto p-2.5 sm:p-6 lg:p-8 flex flex-col">
 
     <!-- ============================================== -->
     <!-- VIEW 1: オファー・スカウト管理ビュー -->
     <!-- ============================================== -->
-    <section id="viewOffers" class="flex-1 flex flex-col space-y-6 hidden">
+    <section id="viewOffers" class="flex-1 flex flex-col space-y-4 hidden">
       <!-- Sub header & Filter Controls -->
-      <div class="flex flex-col md:flex-row items-start md:items-center justify-between gap-4 bg-slate-800/40 border border-slate-800 p-4 rounded-2xl">
-        <div>
-          <h2 class="text-lg font-bold text-white flex items-center gap-2">
-            <span>受信オファー・検討中リスト</span>
-            <span id="offersStatsCount" class="text-xs px-2.5 py-0.5 rounded-full bg-slate-800 text-slate-300 border border-slate-700">0件</span>
-          </h2>
-          <p class="text-xs text-slate-400 mt-0.5">届いたスカウトの返信期限とアピール内容を管理。「🎓 診断」で新スコアリング（7.5点以上の4大条件チェック）を即時確認できます</p>
-        </div>
-
-        <div class="flex flex-wrap items-center gap-3 w-full md:w-auto">
-          <!-- Filter: Media -->
-          <select id="offerFilterMedia" onchange="renderOffers()" class="text-xs bg-slate-800 border border-slate-700 text-slate-200 rounded-lg px-3 py-2 focus:outline-none focus:border-indigo-500">
-            <option value="ALL">全媒体</option>
-            <option value="OfferBox">OfferBox</option>
-            <option value="paiza新卒">paiza新卒</option>
-            <option value="Re就活キャンパス">Re就活キャンパス</option>
-            <option value="その他">その他</option>
-          </select>
-
-          <!-- Filter: Status -->
-          <select id="offerFilterStatus" onchange="renderOffers()" class="text-xs bg-slate-800 border border-slate-700 text-slate-200 rounded-lg px-3 py-2 focus:outline-none focus:border-indigo-500">
-            <option value="ALL">全ステータス</option>
-            <option value="検討中">検討中</option>
-            <option value="やり取り中">やり取り中</option>
-            <option value="辞退">辞退</option>
-            <option value="選考移行済">選考移行済</option>
-          </select>
-
-          <!-- Search Input -->
-          <div class="relative flex-1 md:w-56">
-            <i data-lucide="search" class="w-3.5 h-3.5 absolute left-3 top-2.5 text-slate-400"></i>
-            <input type="text" id="offerSearchQuery" oninput="renderOffers()" placeholder="企業名・評価点検索..." class="w-full text-xs pl-8 pr-3 py-2 rounded-lg bg-slate-800 border border-slate-700 text-slate-200 placeholder-slate-500 focus:outline-none focus:border-indigo-500">
+      <div class="bg-slate-800/40 border border-slate-800 p-3 sm:p-4 rounded-2xl space-y-3">
+        <!-- Top Row: Title, Stats Badge & Layout Switcher -->
+        <div class="flex items-center justify-between gap-2 flex-wrap">
+          <div>
+            <div class="flex items-center gap-2">
+              <h2 class="text-sm sm:text-lg font-bold text-white flex items-center gap-1.5">
+                <i data-lucide="mail-check" class="w-4 h-4 text-indigo-400"></i>
+                <span>受信オファー・検討中</span>
+              </h2>
+              <span id="offersStatsCount" class="text-[11px] sm:text-xs px-2 py-0.5 rounded-full bg-slate-800 text-slate-300 border border-slate-700 font-bold">0件</span>
+            </div>
+            <p class="hidden sm:block text-xs text-slate-400 mt-0.5">届いたスカウトの返信期限とアピール内容を管理。「🎓 診断」で新スコアリング（7.5点以上の4大条件チェック）を即時確認</p>
           </div>
 
           <!-- View Switch (Grid / Table) -->
-          <div class="flex items-center bg-slate-800 border border-slate-700 rounded-lg p-0.5">
-            <button id="offersViewGridBtn" onclick="toggleOffersLayout('grid')" class="p-1.5 rounded text-indigo-400 bg-slate-700 transition" title="カードグリッド表示">
-              <i data-lucide="layout-grid" class="w-4 h-4"></i>
+          <div class="flex items-center bg-slate-800/90 border border-slate-700/80 rounded-xl p-0.5 shadow-inner">
+            <button id="offersViewGridBtn" onclick="toggleOffersLayout('grid')" class="p-1.5 px-2.5 rounded-lg text-indigo-400 bg-slate-700 transition flex items-center gap-1 text-xs font-semibold" title="カードグリッド表示">
+              <i data-lucide="layout-grid" class="w-3.5 h-3.5"></i>
+              <span class="hidden sm:inline">グリッド</span>
             </button>
-            <button id="offersViewTableBtn" onclick="toggleOffersLayout('table')" class="p-1.5 rounded text-slate-400 hover:text-slate-200 transition" title="テーブル一覧表示">
-              <i data-lucide="list" class="w-4 h-4"></i>
+            <button id="offersViewTableBtn" onclick="toggleOffersLayout('table')" class="p-1.5 px-2.5 rounded-lg text-slate-400 hover:text-slate-200 transition flex items-center gap-1 text-xs font-semibold" title="テーブル一覧表示">
+              <i data-lucide="list" class="w-3.5 h-3.5"></i>
+              <span class="hidden sm:inline">リスト</span>
             </button>
+          </div>
+        </div>
+
+        <!-- Filter & Search Controls -->
+        <div class="space-y-2">
+          <!-- Row 1: Search Input + Mobile Filter Toggle Button -->
+          <div class="flex items-center gap-2">
+            <div class="relative flex-1">
+              <i data-lucide="search" class="w-3.5 h-3.5 absolute left-3 top-2.5 text-slate-400"></i>
+              <input type="text" id="offerSearchQuery" oninput="renderOffers()" placeholder="企業名・評価点検索..." class="w-full text-xs pl-8 pr-3 py-2 rounded-xl bg-slate-800 border border-slate-700 text-slate-200 placeholder-slate-500 focus:outline-none focus:border-indigo-500 shadow-inner">
+            </div>
+
+            <!-- Mobile Filter Toggle Button -->
+            <button type="button" id="offerFilterToggleBtn" onclick="toggleOfferMobileFilters()" class="md:hidden flex items-center gap-1 px-3 py-2 rounded-xl bg-slate-800 border border-slate-700 hover:border-indigo-500/50 text-slate-300 text-xs font-semibold shrink-0 active:scale-95 transition">
+              <i data-lucide="sliders-horizontal" class="w-3.5 h-3.5 text-indigo-400"></i>
+              <span>絞込</span>
+            </button>
+          </div>
+
+          <!-- Row 2: Filter Selects (Hidden on mobile unless opened, inline on desktop) -->
+          <div id="offerFiltersDropdown" class="hidden md:grid md:grid-cols-2 gap-2 pt-1 border-t border-slate-800/80 md:border-0 md:pt-0">
+            <!-- Filter: Media -->
+            <select id="offerFilterMedia" onchange="renderOffers()" class="text-xs bg-slate-800 border border-slate-700 text-slate-200 rounded-lg px-2.5 py-1.5 focus:outline-none focus:border-indigo-500">
+              <option value="ALL">全媒体</option>
+              <option value="OfferBox">OfferBox</option>
+              <option value="paiza新卒">paiza新卒</option>
+              <option value="Re就活キャンパス">Re就活キャンパス</option>
+              <option value="その他">その他</option>
+            </select>
+
+            <!-- Filter: Status -->
+            <select id="offerFilterStatus" onchange="renderOffers()" class="text-xs bg-slate-800 border border-slate-700 text-slate-200 rounded-lg px-2.5 py-1.5 focus:outline-none focus:border-indigo-500">
+              <option value="ALL">全ステータス</option>
+              <option value="検討中">検討中</option>
+              <option value="やり取り中">やり取り中</option>
+              <option value="辞退">辞退</option>
+              <option value="選考移行済">選考移行済</option>
+            </select>
           </div>
         </div>
       </div>
 
       <!-- Quick Summary Cards for Offers -->
-      <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 sm:gap-4">
-        <div class="bg-slate-800/60 border border-slate-800/90 rounded-xl p-3.5 flex items-center gap-3">
-          <div class="p-2.5 rounded-lg bg-rose-500/10 border border-rose-500/20 text-rose-400">
-            <i data-lucide="alert-circle" class="w-5 h-5"></i>
+      <div class="grid grid-cols-2 sm:grid-cols-4 gap-2 sm:gap-4">
+        <div class="bg-slate-800/60 border border-slate-800/90 rounded-xl p-2.5 sm:p-3.5 flex items-center gap-2.5 sm:gap-3">
+          <div class="p-2 sm:p-2.5 rounded-lg bg-rose-500/10 border border-rose-500/20 text-rose-400 shrink-0">
+            <i data-lucide="alert-circle" class="w-4 h-4 sm:w-5 sm:h-5"></i>
           </div>
           <div>
-            <div class="text-xs text-slate-400">期限迫る (3日以内)</div>
-            <div id="statUrgentOffers" class="text-xl font-bold text-rose-400">0</div>
+            <div class="text-[11px] sm:text-xs text-slate-400">期限迫る</div>
+            <div id="statUrgentOffers" class="text-base sm:text-xl font-bold text-rose-400">0</div>
           </div>
         </div>
-        <div class="bg-slate-800/60 border border-slate-800/90 rounded-xl p-3.5 flex items-center gap-3">
-          <div class="p-2.5 rounded-lg bg-amber-500/10 border border-amber-500/20 text-amber-400">
-            <i data-lucide="clock" class="w-5 h-5"></i>
+        <div class="bg-slate-800/60 border border-slate-800/90 rounded-xl p-2.5 sm:p-3.5 flex items-center gap-2.5 sm:gap-3">
+          <div class="p-2 sm:p-2.5 rounded-lg bg-amber-500/10 border border-amber-500/20 text-amber-400 shrink-0">
+            <i data-lucide="clock" class="w-4 h-4 sm:w-5 sm:h-5"></i>
           </div>
           <div>
-            <div class="text-xs text-slate-400">検討中</div>
-            <div id="statReviewingOffers" class="text-xl font-bold text-amber-400">0</div>
+            <div class="text-[11px] sm:text-xs text-slate-400">検討中</div>
+            <div id="statReviewingOffers" class="text-base sm:text-xl font-bold text-amber-400">0</div>
           </div>
         </div>
-        <div class="bg-slate-800/60 border border-slate-800/90 rounded-xl p-3.5 flex items-center gap-3">
-          <div class="p-2.5 rounded-lg bg-indigo-500/10 border border-indigo-500/20 text-indigo-400">
-            <i data-lucide="sparkles" class="w-5 h-5"></i>
+        <div class="bg-slate-800/60 border border-slate-800/90 rounded-xl p-2.5 sm:p-3.5 flex items-center gap-2.5 sm:gap-3">
+          <div class="p-2 sm:p-2.5 rounded-lg bg-indigo-500/10 border border-indigo-500/20 text-indigo-400 shrink-0">
+            <i data-lucide="sparkles" class="w-4 h-4 sm:w-5 sm:h-5"></i>
           </div>
           <div>
-            <div class="text-xs text-slate-400">特別オファー枠</div>
-            <div id="statSpecialOffers" class="text-xl font-bold text-indigo-300">0</div>
+            <div class="text-[11px] sm:text-xs text-slate-400">特別枠</div>
+            <div id="statSpecialOffers" class="text-base sm:text-xl font-bold text-indigo-300">0</div>
           </div>
         </div>
-        <div class="bg-slate-800/60 border border-slate-800/90 rounded-xl p-3.5 flex items-center gap-3">
-          <div class="p-2.5 rounded-lg bg-emerald-500/10 border border-emerald-500/20 text-emerald-400">
-            <i data-lucide="check-circle-2" class="w-5 h-5"></i>
+        <div class="bg-slate-800/60 border border-slate-800/90 rounded-xl p-2.5 sm:p-3.5 flex items-center gap-2.5 sm:gap-3">
+          <div class="p-2 sm:p-2.5 rounded-lg bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 shrink-0">
+            <i data-lucide="check-circle-2" class="w-4 h-4 sm:w-5 sm:h-5"></i>
           </div>
           <div>
-            <div class="text-xs text-slate-400">選考移行済</div>
-            <div id="statConvertedOffers" class="text-xl font-bold text-emerald-400">0</div>
+            <div class="text-[11px] sm:text-xs text-slate-400">選考移行</div>
+            <div id="statConvertedOffers" class="text-base sm:text-xl font-bold text-emerald-400">0</div>
           </div>
         </div>
       </div>
+
 
       <!-- 就活サイト別優先キーワードルール＆自動削除通知 -->
       <div class="space-y-3">
@@ -678,68 +736,107 @@
     </section>
 
     <!-- ============================================== -->
-    <!-- VIEW 2: 選考パイプライン管理ビュー（カンバン） -->
+    <!-- VIEW 2: 選考パイプライン管理ビュー（カンバン / 全体リスト） -->
     <!-- ============================================== -->
-    <section id="viewPipeline" class="flex-1 flex flex-col space-y-4">
-      <!-- Pipeline Header & Filter -->
-      <div class="flex flex-col md:flex-row items-start md:items-center justify-between gap-4 bg-slate-800/40 border border-slate-800 p-4 rounded-2xl">
-        <div>
-          <h2 class="text-lg font-bold text-white flex items-center gap-2">
-            <span>田中壮さんの選考カンバンボード</span>
-            <span id="pipelineStatsTotal" class="text-xs px-2.5 py-0.5 rounded-full bg-slate-800 text-slate-300 border border-slate-700">0社</span>
-          </h2>
-          <p class="text-xs text-slate-400 mt-0.5">スコアリング基準（最高峰9.0〜 / 強力併願7.5〜 / 中位6.0〜 / 懸念4.5〜 / 地雷1.0〜）によるバッジ付与済</p>
+    <section id="viewPipeline" class="flex-1 flex flex-col space-y-3 sm:space-y-4">
+      <!-- Pipeline Header & Filter Controls -->
+      <div class="bg-slate-800/40 border border-slate-800 p-3 sm:p-4 rounded-2xl space-y-3">
+        <!-- Top Row: Title, Stats Badge & View Mode Switcher -->
+        <div class="flex items-center justify-between gap-2 flex-wrap">
+          <div>
+            <div class="flex items-center gap-2">
+              <h2 class="text-sm sm:text-lg font-bold text-white flex items-center gap-1.5">
+                <i data-lucide="kanban-square" class="w-4 h-4 text-indigo-400"></i>
+                <span>選考パイプライン</span>
+              </h2>
+              <span id="pipelineStatsTotal" class="text-[11px] sm:text-xs px-2 py-0.5 rounded-full bg-slate-800 text-slate-300 border border-slate-700 font-bold">0社</span>
+            </div>
+            <p class="hidden sm:block text-xs text-slate-400 mt-0.5">スコアリング基準（最高峰9.0〜 / 強力併願7.5〜 / 中位6.0〜 / 懸念4.5〜）完全連動</p>
+          </div>
+
+          <!-- View Mode Switch (Kanban vs Overall List) -->
+          <div class="flex items-center bg-slate-800/90 border border-slate-700/80 rounded-xl p-0.5 shadow-inner">
+            <button id="pipelineViewKanbanBtn" onclick="setPipelineViewMode('kanban')" title="カンバンボード表示" class="flex items-center gap-1 px-2.5 py-1 rounded-lg text-xs font-semibold bg-indigo-600 text-white transition shadow-sm">
+              <i data-lucide="kanban" class="w-3.5 h-3.5"></i>
+              <span>カンバン</span>
+            </button>
+            <button id="pipelineViewListBtn" onclick="setPipelineViewMode('list')" title="全体俯瞰リスト表示（スマホで全体を一望）" class="flex items-center gap-1 px-2.5 py-1 rounded-lg text-xs font-semibold text-slate-400 hover:text-slate-200 transition">
+              <i data-lucide="list-tree" class="w-3.5 h-3.5"></i>
+              <span>全体リスト</span>
+            </button>
+          </div>
         </div>
 
-        <div class="flex flex-wrap items-center gap-3 w-full md:w-auto">
-          <!-- Filter: Selection Type (早期選考 / 本選考) -->
-          <select id="pipelineFilterSelectionType" onchange="renderPipeline()" class="text-xs bg-slate-800 border border-slate-700 text-slate-200 rounded-lg px-3 py-2 focus:outline-none focus:border-indigo-500 font-semibold">
-            <option value="ALL">全選考種別（すべて）</option>
-            <option value="早期選考">⚡ 早期選考のみ</option>
-            <option value="本選考">📋 本選考のみ</option>
-          </select>
+        <!-- Filter & Search Controls -->
+        <div class="space-y-2">
+          <!-- Row 1: Search Input + Mobile Filter Toggle Button -->
+          <div class="flex items-center gap-2">
+            <div class="relative flex-1">
+              <i data-lucide="search" class="w-3.5 h-3.5 absolute left-3 top-2.5 text-slate-400"></i>
+              <input type="text" id="pipelineSearchQuery" oninput="renderPipeline()" placeholder="企業名・日程・メモ検索..." class="w-full text-xs pl-8 pr-3 py-2 rounded-xl bg-slate-800 border border-slate-700 text-slate-200 placeholder-slate-500 focus:outline-none focus:border-indigo-500 shadow-inner">
+            </div>
 
-          <!-- Filter: Score Tier -->
-          <select id="pipelineFilterScoreTier" onchange="renderPipeline()" class="text-xs bg-slate-800 border border-slate-700 text-slate-200 rounded-lg px-3 py-2 focus:outline-none focus:border-indigo-500">
-            <option value="ALL">全スコアランク</option>
-            <option value="TIER_TOP">【9.0〜10.0】最高峰・理想枠</option>
-            <option value="TIER_TARGET">【7.5〜8.5】強力な併願/滑り止め ★推奨</option>
-            <option value="TIER_MID">【6.0〜7.0】中位・条件付き検討</option>
-            <option value="TIER_WARN">【4.5〜5.5】注意・リスク大の懸念枠</option>
-          </select>
+            <!-- Mobile Filter Toggle Button -->
+            <button type="button" id="pipelineFilterToggleBtn" onclick="togglePipelineMobileFilters()" class="md:hidden flex items-center gap-1 px-3 py-2 rounded-xl bg-slate-800 border border-slate-700 hover:border-indigo-500/50 text-slate-300 text-xs font-semibold shrink-0 active:scale-95 transition">
+              <i data-lucide="sliders-horizontal" class="w-3.5 h-3.5 text-indigo-400"></i>
+              <span>絞込</span>
+              <span id="pipelineFilterActiveBadge" class="hidden w-2 h-2 rounded-full bg-indigo-500"></span>
+            </button>
+          </div>
 
-          <!-- Filter: Priority -->
-          <select id="pipelineFilterPriority" onchange="renderPipeline()" class="text-xs bg-slate-800 border border-slate-700 text-slate-200 rounded-lg px-3 py-2 focus:outline-none focus:border-indigo-500">
-            <option value="ALL">全志望度</option>
-            <option value="高">志望度: 高</option>
-            <option value="中">志望度: 中</option>
-            <option value="低">志望度: 低</option>
-          </select>
+          <!-- Row 2: Filter Selects (Hidden by default on mobile unless opened, inline on desktop) -->
+          <div id="pipelineFiltersDropdown" class="hidden md:grid md:grid-cols-3 gap-2 pt-1 border-t border-slate-800/80 md:border-0 md:pt-0">
+            <!-- Filter: Selection Type -->
+            <select id="pipelineFilterSelectionType" onchange="renderPipeline(); updateFilterActiveBadge();" class="text-xs bg-slate-800 border border-slate-700 text-slate-200 rounded-lg px-2.5 py-1.5 focus:outline-none focus:border-indigo-500 font-semibold">
+              <option value="ALL">選考種別: すべて</option>
+              <option value="早期選考">⚡ 早期選考のみ</option>
+              <option value="本選考">📋 本選考のみ</option>
+            </select>
 
-          <!-- Search Input -->
-          <div class="relative flex-1 md:w-60">
-            <i data-lucide="search" class="w-3.5 h-3.5 absolute left-3 top-2.5 text-slate-400"></i>
-            <input type="text" id="pipelineSearchQuery" oninput="renderPipeline()" placeholder="企業名・日程・説明会メモ..." class="w-full text-xs pl-8 pr-3 py-2 rounded-lg bg-slate-800 border border-slate-700 text-slate-200 placeholder-slate-500 focus:outline-none focus:border-indigo-500">
+            <!-- Filter: Score Tier -->
+            <select id="pipelineFilterScoreTier" onchange="renderPipeline(); updateFilterActiveBadge();" class="text-xs bg-slate-800 border border-slate-700 text-slate-200 rounded-lg px-2.5 py-1.5 focus:outline-none focus:border-indigo-500">
+              <option value="ALL">全スコアランク</option>
+              <option value="TIER_TOP">【9.0〜10.0】最高峰・理想枠</option>
+              <option value="TIER_TARGET">【7.5〜8.5】強力併願 ★推奨</option>
+              <option value="TIER_MID">【6.0〜7.0】中位・条件付き</option>
+              <option value="TIER_WARN">【4.5〜5.5】懸念枠</option>
+            </select>
+
+            <!-- Filter: Priority -->
+            <select id="pipelineFilterPriority" onchange="renderPipeline(); updateFilterActiveBadge();" class="text-xs bg-slate-800 border border-slate-700 text-slate-200 rounded-lg px-2.5 py-1.5 focus:outline-none focus:border-indigo-500">
+              <option value="ALL">全志望度</option>
+              <option value="高">志望度: 高</option>
+              <option value="中">志望度: 中</option>
+              <option value="低">志望度: 低</option>
+            </select>
           </div>
         </div>
       </div>
 
-            <!-- モバイル・タブレット向け：選考ステージ クイックナビ（横スクロールジャンプ） -->
-      <div class="bg-slate-800/50 border border-slate-800/90 rounded-xl p-2 flex items-center gap-1.5 overflow-x-auto custom-scrollbar text-xs">
-        <span class="text-[11px] text-slate-400 font-bold shrink-0 px-2 flex items-center gap-1">
-          <i data-lucide="compass" class="w-3.5 h-3.5 text-indigo-400"></i>
-          <span class="hidden sm:inline">ステージジャンプ:</span>
-        </span>
-        <div id="pipelineStageQuickNav" class="flex items-center gap-1.5 shrink-0">
-          <!-- Dynamically populated or stage pills -->
+      <!-- 全ステージ進捗フロー鳥瞰図（全ステージの社数を一目で把握＆即ジャンプ） -->
+      <div class="bg-slate-800/50 border border-slate-800/90 rounded-2xl p-2 sm:p-2.5 space-y-1.5">
+        <div class="flex items-center justify-between px-1">
+          <span class="text-[11px] text-slate-400 font-bold flex items-center gap-1">
+            <i data-lucide="compass" class="w-3.5 h-3.5 text-indigo-400"></i>
+            <span>選考進捗フロー (全ステージ鳥瞰図):</span>
+          </span>
+          <span class="text-[10px] text-slate-500">タップで移動</span>
+        </div>
+        <div id="pipelineStageQuickNav" class="flex items-center gap-1.5 overflow-x-auto custom-scrollbar pb-1 text-xs">
+          <!-- Dynamically populated stage pills -->
         </div>
       </div>
 
-      <!-- Kanban Board Container (Horizontal Scroll) -->
-      <div class="flex-1 overflow-x-auto pb-6 custom-scrollbar">
-        <div class="flex items-start gap-4 min-w-max pb-2" id="kanbanBoardWrapper">
-          <!-- 8 Kanban Columns will be generated here -->
+      <!-- VIEW MODE A: Kanban Board Container (Horizontal Scroll) -->
+      <div id="kanbanBoardContainer" class="flex-1 overflow-x-auto pb-6 custom-scrollbar">
+        <div class="flex items-start gap-3 sm:gap-4 min-w-max pb-2" id="kanbanBoardWrapper">
+          <!-- Kanban Columns will be generated here -->
         </div>
+      </div>
+
+      <!-- VIEW MODE B: Overall List View Container (Vertical Scroll, perfect for mobile overview) -->
+      <div id="pipelineListViewContainer" class="flex-1 space-y-3 pb-6 hidden">
+        <!-- List sections per stage will be generated here -->
       </div>
     </section>
 
@@ -3592,25 +3689,29 @@
       const viewPipeline = document.getElementById('viewPipeline');
       const viewArchived = document.getElementById('viewArchived');
 
+      const baseInactive = 'flex items-center justify-center gap-1 sm:gap-2 px-2 sm:px-4 py-1.5 sm:py-2 rounded-lg text-xs sm:text-sm font-semibold transition-all duration-150 text-slate-400 hover:text-slate-200 text-center';
+      const baseActiveIndigo = 'flex items-center justify-center gap-1 sm:gap-2 px-2 sm:px-4 py-1.5 sm:py-2 rounded-lg text-xs sm:text-sm font-semibold transition-all duration-150 bg-indigo-600 text-white shadow-sm text-center';
+      const baseActiveSlate = 'flex items-center justify-center gap-1 sm:gap-2 px-2 sm:px-4 py-1.5 sm:py-2 rounded-lg text-xs sm:text-sm font-semibold transition-all duration-150 bg-slate-700 text-white shadow-sm text-center';
+
       // Reset tabs
-      tabOffersBtn.className = 'flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-semibold text-slate-400 hover:text-slate-200 transition-all duration-150';
-      tabPipelineBtn.className = 'flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-semibold text-slate-400 hover:text-slate-200 transition-all duration-150';
-      if (tabArchivedBtn) tabArchivedBtn.className = 'flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-semibold text-slate-400 hover:text-slate-200 transition-all duration-150';
+      tabOffersBtn.className = baseInactive;
+      tabPipelineBtn.className = baseInactive;
+      if (tabArchivedBtn) tabArchivedBtn.className = baseInactive;
 
       viewOffers.classList.add('hidden');
       viewPipeline.classList.add('hidden');
       if (viewArchived) viewArchived.classList.add('hidden');
 
       if (tab === 'offers') {
-        tabOffersBtn.className = 'flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-semibold transition-all duration-150 bg-indigo-600 text-white shadow-sm';
+        tabOffersBtn.className = baseActiveIndigo;
         viewOffers.classList.remove('hidden');
         renderOffers();
       } else if (tab === 'pipeline') {
-        tabPipelineBtn.className = 'flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-semibold transition-all duration-150 bg-indigo-600 text-white shadow-sm';
+        tabPipelineBtn.className = baseActiveIndigo;
         viewPipeline.classList.remove('hidden');
         renderPipeline();
       } else if (tab === 'archived') {
-        if (tabArchivedBtn) tabArchivedBtn.className = 'flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-semibold transition-all duration-150 bg-slate-700 text-white shadow-sm';
+        if (tabArchivedBtn) tabArchivedBtn.className = baseActiveSlate;
         if (viewArchived) viewArchived.classList.remove('hidden');
         renderArchived();
       }
@@ -4281,16 +4382,97 @@
       lucide.createIcons();
     }
 
+    // ==========================================
+    // パイプライン表示モード（カンバン ⇔ 全体俯瞰リスト）制御
+    // ==========================================
+    let pipelineViewMode = localStorage.getItem('jobhunt_pipeline_view_mode') || (window.innerWidth < 640 ? 'list' : 'kanban');
+
+    function setPipelineViewMode(mode) {
+      pipelineViewMode = mode;
+      localStorage.setItem('jobhunt_pipeline_view_mode', mode);
+
+      const kanbanBtn = document.getElementById('pipelineViewKanbanBtn');
+      const listBtn = document.getElementById('pipelineViewListBtn');
+
+      if (mode === 'kanban') {
+        if (kanbanBtn) kanbanBtn.className = 'flex items-center gap-1 px-2.5 py-1 rounded-lg text-xs font-semibold bg-indigo-600 text-white transition shadow-sm';
+        if (listBtn) listBtn.className = 'flex items-center gap-1 px-2.5 py-1 rounded-lg text-xs font-semibold text-slate-400 hover:text-slate-200 transition';
+      } else {
+        if (kanbanBtn) kanbanBtn.className = 'flex items-center gap-1 px-2.5 py-1 rounded-lg text-xs font-semibold text-slate-400 hover:text-slate-200 transition';
+        if (listBtn) listBtn.className = 'flex items-center gap-1 px-2.5 py-1 rounded-lg text-xs font-semibold bg-indigo-600 text-white transition shadow-sm';
+      }
+
+      renderPipeline();
+    }
+
+    function togglePipelineMobileFilters() {
+      const dropdown = document.getElementById('pipelineFiltersDropdown');
+      if (!dropdown) return;
+      dropdown.classList.toggle('hidden');
+    }
+
+    function toggleOfferMobileFilters() {
+      const dropdown = document.getElementById('offerFiltersDropdown');
+      if (!dropdown) return;
+      dropdown.classList.toggle('hidden');
+    }
+
+    function updateFilterActiveBadge() {
+      const type = document.getElementById('pipelineFilterSelectionType')?.value || 'ALL';
+      const tier = document.getElementById('pipelineFilterScoreTier')?.value || 'ALL';
+      const prio = document.getElementById('pipelineFilterPriority')?.value || 'ALL';
+      const badge = document.getElementById('pipelineFilterActiveBadge');
+      if (!badge) return;
+
+      if (type !== 'ALL' || tier !== 'ALL' || prio !== 'ALL') {
+        badge.classList.remove('hidden');
+      } else {
+        badge.classList.add('hidden');
+      }
+    }
+
     // Mobile / Tablet Stage Quick Scroll
     function scrollToKanbanStage(stageIndex) {
+      if (pipelineViewMode === 'list') {
+        scrollToStageListSection(stageIndex);
+        return;
+      }
       const col = document.getElementById('kanban-col-' + stageIndex);
       if (col) {
         col.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' });
-        // Pulse effect
         col.classList.add('ring-2', 'ring-indigo-500');
         setTimeout(() => {
           col.classList.remove('ring-2', 'ring-indigo-500');
         }, 1200);
+      }
+    }
+
+    function scrollToStageListSection(stageIndex) {
+      const sec = document.getElementById('stage-list-sec-' + stageIndex);
+      if (sec) {
+        // Ensure section is open
+        const body = document.getElementById('stage-list-body-' + stageIndex);
+        const icon = document.getElementById('stage-list-icon-' + stageIndex);
+        if (body && body.classList.contains('hidden')) {
+          body.classList.remove('hidden');
+          if (icon) icon.classList.remove('rotate-180');
+        }
+        sec.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        sec.classList.add('ring-2', 'ring-indigo-500');
+        setTimeout(() => {
+          sec.classList.remove('ring-2', 'ring-indigo-500');
+        }, 1200);
+      }
+    }
+
+    function toggleStageListSection(stageIndex) {
+      const body = document.getElementById('stage-list-body-' + stageIndex);
+      const icon = document.getElementById('stage-list-icon-' + stageIndex);
+      if (body) {
+        body.classList.toggle('hidden');
+        if (icon) {
+          icon.classList.toggle('rotate-180');
+        }
       }
     }
 
@@ -4305,32 +4487,131 @@
         if (stage.includes('説明会 (参加予定)')) shortName = '説明会予';
         else if (stage.includes('説明会 (参加済)')) shortName = '説明会済';
         else if (stage.includes('面談')) shortName = '🤝面談';
-        else if (stage.includes('一次面接')) shortName = '一次面接';
-        else if (stage.includes('二次')) shortName = '二次面接';
+        else if (stage.includes('一次面接')) shortName = '1次面接';
+        else if (stage.includes('二次')) shortName = '2次面接';
         else if (stage.includes('最終面接')) shortName = '最終面接';
         else if (stage.includes('内定')) shortName = '🎉内定';
 
+        let activeColor = count > 0 ? 'bg-indigo-500/20 text-indigo-200 border-indigo-500/40 font-bold' : 'bg-slate-800 text-slate-400 border-slate-700/80';
+        let badgeColor = count > 0 ? 'bg-indigo-600 text-white font-bold' : 'bg-slate-700 text-slate-400';
+
+        if (stage.includes('内定') && count > 0) {
+          activeColor = 'bg-emerald-500/20 text-emerald-300 border-emerald-500/50 font-bold';
+          badgeColor = 'bg-emerald-600 text-white font-bold';
+        } else if (stage.includes('面談') && count > 0) {
+          activeColor = 'bg-teal-500/20 text-teal-300 border-teal-500/40 font-bold';
+          badgeColor = 'bg-teal-600 text-white font-bold';
+        }
+
         pillsHtml += `
-          <button onclick="scrollToKanbanStage(${idx})" class="px-2.5 py-1 rounded-lg bg-slate-800 hover:bg-slate-700 border border-slate-700 hover:border-indigo-500/50 text-slate-300 hover:text-white transition flex items-center gap-1.5 shrink-0 text-[11px] active:scale-95">
+          <button onclick="scrollToKanbanStage(${idx})" class="px-2.5 py-1.5 rounded-xl border ${activeColor} hover:border-indigo-400/60 transition flex items-center gap-1.5 shrink-0 text-xs active:scale-95 shadow-sm">
             <span>${shortName}</span>
-            <span class="px-1.5 py-0.2 rounded-full ${count > 0 ? 'bg-indigo-500/30 text-indigo-200 font-bold' : 'bg-slate-700 text-slate-400'} text-[10px]">${count}</span>
+            <span class="px-1.5 py-0.2 rounded-full ${badgeColor} text-[10px] min-w-[18px] text-center">${count}</span>
           </button>
         `;
       });
       container.innerHTML = pillsHtml;
     }
 
+    function renderCompanyCardHtml(item) {
+      return `
+        <div id="card-${item.id}"
+             draggable="true"
+             ondragstart="handleCardDragStart(event, '${item.id}')"
+             ondragend="handleCardDragEnd(event)"
+             onclick="openPipelineDetailModal('${item.id}')"
+             class="bg-slate-800/80 hover:bg-slate-750 border border-slate-700/80 hover:border-indigo-500/70 rounded-xl p-3 sm:p-3.5 shadow-md shadow-black/20 cursor-pointer transition-all duration-150 transform hover:-translate-y-0.5 group">
+          
+          <!-- Top Badges -->
+          <div class="flex items-center justify-between gap-1.5 mb-2 flex-wrap">
+            <div class="flex items-center gap-1 flex-wrap">
+              ${getSelectionTypeBadgeHtml(item.selectionType)}
+              ${getMediaBadgeHtml(item.media)}
+              ${getInfoSessionBadgeHtml(item.infoSessionStatus)}
+              ${getScoreBadgeSmallHtml(item.companyName)}
+            </div>
+            ${getPriorityBadgeHtml(item.priority)}
+          </div>
+
+          <!-- Company Name -->
+          <h4 class="text-sm font-bold text-white group-hover:text-indigo-300 transition-colors tracking-tight line-clamp-1 mb-1.5">
+            ${escapeHtml(item.companyName)}
+          </h4>
+
+          <!-- Next Schedule / Info Session Schedule -->
+          ${item.nextSchedule ? `
+            <div class="flex items-start gap-1.5 text-xs text-amber-300/90 font-medium bg-amber-500/10 border border-amber-500/20 px-2.5 py-1.5 rounded-lg mb-2">
+              <i data-lucide="calendar" class="w-3.5 h-3.5 flex-shrink-0 mt-0.5"></i>
+              <span class="leading-snug break-all">${escapeHtml(item.nextSchedule)}</span>
+            </div>
+          ` : ''}
+
+          <!-- Required Action -->
+          ${item.action ? `
+            <div class="flex items-center gap-1.5 text-[11px] text-slate-300 mb-2">
+              <i data-lucide="check-circle" class="w-3 h-3 text-sky-400 flex-shrink-0"></i>
+              <span class="font-medium truncate">${escapeHtml(item.action)}</span>
+            </div>
+          ` : ''}
+
+          <!-- Footer: Actions & Links -->
+          <div class="pt-2 border-t border-slate-700/50 flex items-center justify-between text-[11px] text-slate-400">
+            <span class="truncate max-w-[140px] sm:max-w-[150px]" title="${escapeHtml(item.infoSessionNotes || item.webTestType || '')}">
+              ${item.infoSessionNotes ? `<i data-lucide="file-text" class="w-3 h-3 inline mr-1 text-sky-400"></i>メモ有` : (item.webTestType ? `<i data-lucide="file-code" class="w-3 h-3 inline mr-1 text-slate-400"></i>${escapeHtml(item.webTestType)}` : '詳細あり')}
+            </span>
+            
+            <div class="flex items-center gap-1" onclick="event.stopPropagation()">
+              <button onclick="revertPipelineToOffer('${item.id}')" title="オファー管理へ戻す" class="p-1 rounded hover:bg-amber-500/20 text-slate-400 hover:text-amber-300 transition">
+                <i data-lucide="undo-2" class="w-3.5 h-3.5"></i>
+              </button>
+              <button onclick="moveToTrash('${item.id}')" title="選考から外してゴミ箱（保管庫）へ退避" class="p-1 rounded hover:bg-rose-500/20 text-slate-400 hover:text-rose-400 transition">
+                <i data-lucide="archive" class="w-3.5 h-3.5"></i>
+              </button>
+
+              ${item.mypageUrl ? `
+                <a href="${escapeHtml(item.mypageUrl)}" target="_blank" rel="noopener noreferrer" title="マイページへ直行" class="p-1 rounded hover:bg-slate-700 text-indigo-400 hover:text-indigo-300 transition">
+                  <i data-lucide="external-link" class="w-3.5 h-3.5"></i>
+                </a>
+              ` : ''}
+              <button onclick="openPipelineDetailModal('${item.id}')" title="詳細・アナリスト診断" class="p-1 rounded hover:bg-slate-700 text-slate-400 hover:text-white transition">
+                <i data-lucide="more-horizontal" class="w-3.5 h-3.5"></i>
+              </button>
+            </div>
+          </div>
+
+        </div>
+      `;
+    }
+
     // Render Kanban Pipeline View
     // ==========================================
     function renderPipeline() {
       const wrapper = document.getElementById('kanbanBoardWrapper');
-      const priorityFilter = document.getElementById('pipelineFilterPriority').value;
-      const scoreTierFilter = document.getElementById('pipelineFilterScoreTier').value;
+      const kanbanContainer = document.getElementById('kanbanBoardContainer');
+      const listContainer = document.getElementById('pipelineListViewContainer');
+      const priorityFilter = document.getElementById('pipelineFilterPriority')?.value || 'ALL';
+      const scoreTierFilter = document.getElementById('pipelineFilterScoreTier')?.value || 'ALL';
       const selectionTypeFilter = document.getElementById('pipelineFilterSelectionType')?.value || 'ALL';
-      const search = document.getElementById('pipelineSearchQuery').value.toLowerCase().trim();
+      const search = (document.getElementById('pipelineSearchQuery')?.value || '').toLowerCase().trim();
+
+      // View mode styling
+      const kanbanBtn = document.getElementById('pipelineViewKanbanBtn');
+      const listBtn = document.getElementById('pipelineViewListBtn');
+      if (pipelineViewMode === 'kanban') {
+        if (kanbanBtn) kanbanBtn.className = 'flex items-center gap-1 px-2.5 py-1 rounded-lg text-xs font-semibold bg-indigo-600 text-white transition shadow-sm';
+        if (listBtn) listBtn.className = 'flex items-center gap-1 px-2.5 py-1 rounded-lg text-xs font-semibold text-slate-400 hover:text-slate-200 transition';
+        if (kanbanContainer) kanbanContainer.classList.remove('hidden');
+        if (listContainer) listContainer.classList.add('hidden');
+      } else {
+        if (kanbanBtn) kanbanBtn.className = 'flex items-center gap-1 px-2.5 py-1 rounded-lg text-xs font-semibold text-slate-400 hover:text-slate-200 transition';
+        if (listBtn) listBtn.className = 'flex items-center gap-1 px-2.5 py-1 rounded-lg text-xs font-semibold bg-indigo-600 text-white transition shadow-sm';
+        if (kanbanContainer) kanbanContainer.classList.add('hidden');
+        if (listContainer) listContainer.classList.remove('hidden');
+      }
 
       const filtered = pipeline.filter(item => {
         if (priorityFilter !== 'ALL' && item.priority !== priorityFilter) return false;
+        if (selectionTypeFilter !== 'ALL' && (item.selectionType || '早期選考') !== selectionTypeFilter) return false;
         
         // Filter by Score Tier
         if (scoreTierFilter !== 'ALL') {
@@ -4355,140 +4636,141 @@
         return true;
       });
 
-      document.getElementById('pipelineStatsTotal').innerText = `${filtered.length}社（新基準反映済）`;
+      const totalEl = document.getElementById('pipelineStatsTotal');
+      if (totalEl) totalEl.innerText = `${filtered.length}社`;
 
-      let columnsHtml = '';
-      PIPELINE_STAGES.forEach((stage, stageIdx) => {
-        const stageItems = filtered.filter(i => i.stage === stage);
+      renderStageQuickNav();
 
-        let headerColorClass = 'text-indigo-400';
-        let stagePillClass = 'bg-indigo-500/10 text-indigo-300 border-indigo-500/30';
-        let colDotColor = 'bg-indigo-500';
+      if (pipelineViewMode === 'kanban') {
+        let columnsHtml = '';
+        PIPELINE_STAGES.forEach((stage, stageIdx) => {
+          const stageItems = filtered.filter(i => i.stage === stage);
 
-        if (stage.includes('説明会 (参加予定)')) {
-          headerColorClass = 'text-sky-400';
-          stagePillClass = 'bg-sky-500/15 text-sky-300 border-sky-500/40';
-          colDotColor = 'bg-sky-400';
-        } else if (stage.includes('説明会 (参加済')) {
-          headerColorClass = 'text-cyan-400';
-          stagePillClass = 'bg-cyan-500/15 text-cyan-300 border-cyan-500/40';
-          colDotColor = 'bg-cyan-400';
-        } else if (stage.includes('内定')) {
-          headerColorClass = 'text-emerald-400 font-black';
-          stagePillClass = 'bg-emerald-500/25 text-emerald-300 border-emerald-500/50 font-black animate-pulse';
-          colDotColor = 'bg-emerald-400';
-        } else if (stage.includes('終了') || stage.includes('辞退')) {
-          headerColorClass = 'text-slate-400';
-          stagePillClass = 'bg-slate-800 text-slate-400 border-slate-700 font-medium';
-          colDotColor = 'bg-slate-500';
-        } else if (stage.includes('面談')) {
-          headerColorClass = 'text-teal-400 font-bold';
-          stagePillClass = 'bg-teal-500/20 text-teal-300 border-teal-500/40 font-bold';
-          colDotColor = 'bg-teal-400';
-        } else if (stage.includes('最終')) {
-          headerColorClass = 'text-amber-400';
-          stagePillClass = 'bg-amber-500/15 text-amber-300 border-amber-500/40';
-          colDotColor = 'bg-amber-400';
-        }
+          let headerColorClass = 'text-indigo-400';
+          let stagePillClass = 'bg-indigo-500/10 text-indigo-300 border-indigo-500/30';
+          let colDotColor = 'bg-indigo-500';
 
-        columnsHtml += `
-          <div id="kanban-col-${stageIdx}" class="kanban-col flex-1 bg-slate-800/40 border border-slate-800/90 rounded-2xl p-3.5 flex flex-col min-h-[660px] max-h-[840px] transition-all"
-               ondragover="handleKanbanDragOver(event)"
-               ondragleave="handleKanbanDragLeave(event)"
-               ondrop="handleKanbanDrop(event, '${stage}')">
-            
-            <!-- Column Header -->
-            <div class="flex items-center justify-between pb-3 mb-3 border-b border-slate-800">
-              <div class="flex items-center gap-2">
-                <span class="w-2 h-2 rounded-full ${colDotColor}"></span>
-                <h3 class="text-xs font-bold ${headerColorClass} uppercase tracking-wider">${stage}</h3>
+          if (stage.includes('説明会 (参加予定)')) {
+            headerColorClass = 'text-sky-400';
+            stagePillClass = 'bg-sky-500/15 text-sky-300 border-sky-500/40';
+            colDotColor = 'bg-sky-400';
+          } else if (stage.includes('説明会 (参加済')) {
+            headerColorClass = 'text-cyan-400';
+            stagePillClass = 'bg-cyan-500/15 text-cyan-300 border-cyan-500/40';
+            colDotColor = 'bg-cyan-400';
+          } else if (stage.includes('内定')) {
+            headerColorClass = 'text-emerald-400 font-black';
+            stagePillClass = 'bg-emerald-500/25 text-emerald-300 border-emerald-500/50 font-black animate-pulse';
+            colDotColor = 'bg-emerald-400';
+          } else if (stage.includes('終了') || stage.includes('辞退')) {
+            headerColorClass = 'text-slate-400';
+            stagePillClass = 'bg-slate-800 text-slate-400 border-slate-700 font-medium';
+            colDotColor = 'bg-slate-500';
+          } else if (stage.includes('面談')) {
+            headerColorClass = 'text-teal-400 font-bold';
+            stagePillClass = 'bg-teal-500/20 text-teal-300 border-teal-500/40 font-bold';
+            colDotColor = 'bg-teal-400';
+          } else if (stage.includes('最終')) {
+            headerColorClass = 'text-amber-400';
+            stagePillClass = 'bg-amber-500/15 text-amber-300 border-amber-500/40';
+            colDotColor = 'bg-amber-400';
+          }
+
+          columnsHtml += `
+            <div id="kanban-col-${stageIdx}" class="kanban-col flex-1 bg-slate-800/40 border border-slate-800/90 rounded-2xl p-3 sm:p-3.5 flex flex-col min-h-[580px] max-h-[840px] transition-all"
+                 ondragover="handleKanbanDragOver(event)"
+                 ondragleave="handleKanbanDragLeave(event)"
+                 ondrop="handleKanbanDrop(event, '${stage}')">
+              
+              <!-- Column Header -->
+              <div class="flex items-center justify-between pb-2.5 mb-2.5 border-b border-slate-800">
+                <div class="flex items-center gap-2">
+                  <span class="w-2 h-2 rounded-full ${colDotColor}"></span>
+                  <h3 class="text-xs font-bold ${headerColorClass} uppercase tracking-wider">${stage}</h3>
+                </div>
+                <span class="text-xs font-bold px-2 py-0.5 rounded-full ${stagePillClass}">${stageItems.length}</span>
               </div>
-              <span class="text-xs font-bold px-2 py-0.5 rounded-full ${stagePillClass}">${stageItems.length}</span>
-            </div>
 
-            <!-- Card List Container -->
-            <div class="flex-1 overflow-y-auto space-y-3 custom-scrollbar pr-1">
-              ${stageItems.length === 0 ? `
-                <div class="h-32 flex flex-col items-center justify-center text-slate-600 border border-dashed border-slate-800/80 rounded-xl">
-                  <span class="text-[11px]">企業カードなし</span>
-                </div>
-              ` : ''}
-
-              ${stageItems.map(item => `
-                <div id="card-${item.id}"
-                     draggable="true"
-                     ondragstart="handleCardDragStart(event, '${item.id}')"
-                     ondragend="handleCardDragEnd(event)"
-                     onclick="openPipelineDetailModal('${item.id}')"
-                     class="bg-slate-800/80 hover:bg-slate-750 border border-slate-700/80 hover:border-indigo-500/70 rounded-xl p-3.5 shadow-md shadow-black/20 cursor-pointer transition-all duration-150 transform hover:-translate-y-0.5 group">
-                  
-                  <!-- Top Badges -->
-                  <div class="flex items-center justify-between gap-1.5 mb-2 flex-wrap">
-                    <div class="flex items-center gap-1 flex-wrap">
-                      ${getSelectionTypeBadgeHtml(item.selectionType)}
-                      ${getMediaBadgeHtml(item.media)}
-                      ${getInfoSessionBadgeHtml(item.infoSessionStatus)}
-                      ${getScoreBadgeSmallHtml(item.companyName)}
-                    </div>
-                    ${getPriorityBadgeHtml(item.priority)}
+              <!-- Card List Container -->
+              <div class="flex-1 overflow-y-auto space-y-3 custom-scrollbar pr-1">
+                ${stageItems.length === 0 ? `
+                  <div class="h-28 flex flex-col items-center justify-center text-slate-600 border border-dashed border-slate-800/80 rounded-xl">
+                    <span class="text-[11px]">企業カードなし</span>
                   </div>
+                ` : ''}
 
-                  <!-- Company Name -->
-                  <h4 class="text-sm font-bold text-white group-hover:text-indigo-300 transition-colors tracking-tight line-clamp-1 mb-2">
-                    ${escapeHtml(item.companyName)}
-                  </h4>
+                ${stageItems.map(item => renderCompanyCardHtml(item)).join('')}
+              </div>
 
-                  <!-- Next Schedule / Info Session Schedule -->
-                  ${item.nextSchedule ? `
-                    <div class="flex items-start gap-1.5 text-xs text-amber-300/90 font-medium bg-amber-500/10 border border-amber-500/20 px-2.5 py-1.5 rounded-lg mb-2">
-                      <i data-lucide="calendar" class="w-3.5 h-3.5 flex-shrink-0 mt-0.5"></i>
-                      <span class="leading-snug break-all">${escapeHtml(item.nextSchedule)}</span>
-                    </div>
-                  ` : ''}
-
-                  <!-- Required Action -->
-                  ${item.action ? `
-                    <div class="flex items-center gap-1.5 text-[11px] text-slate-300 mb-2">
-                      <i data-lucide="check-circle" class="w-3 h-3 text-sky-400 flex-shrink-0"></i>
-                      <span class="font-medium truncate">${escapeHtml(item.action)}</span>
-                    </div>
-                  ` : ''}
-
-                  <!-- Footer: Actions & Links -->
-                  <div class="pt-2 border-t border-slate-700/50 flex items-center justify-between text-[11px] text-slate-400">
-                    <span class="truncate max-w-[150px]" title="${escapeHtml(item.infoSessionNotes || item.webTestType || '')}">
-                      ${item.infoSessionNotes ? `<i data-lucide="file-text" class="w-3 h-3 inline mr-1 text-sky-400"></i>メモ有` : (item.webTestType ? `<i data-lucide="file-code" class="w-3 h-3 inline mr-1 text-slate-400"></i>${escapeHtml(item.webTestType)}` : '詳細あり')}
-                    </span>
-                    
-                    <div class="flex items-center gap-1" onclick="event.stopPropagation()">
-                      <button onclick="revertPipelineToOffer('${item.id}')" title="オファー管理へ戻す" class="p-1 rounded hover:bg-amber-500/20 text-slate-400 hover:text-amber-300 transition">
-                        <i data-lucide="undo-2" class="w-3.5 h-3.5"></i>
-                      </button>
-                      <button onclick="moveToTrash('${item.id}')" title="選考から外してゴミ箱（保管庫）へ退避" class="p-1 rounded hover:bg-rose-500/20 text-slate-400 hover:text-rose-400 transition">
-                        <i data-lucide="archive" class="w-3.5 h-3.5"></i>
-                      </button>
-
-                      ${item.mypageUrl ? `
-                        <a href="${escapeHtml(item.mypageUrl)}" target="_blank" rel="noopener noreferrer" title="マイページへ直行" class="p-1 rounded hover:bg-slate-700 text-indigo-400 hover:text-indigo-300 transition">
-                          <i data-lucide="external-link" class="w-3.5 h-3.5"></i>
-                        </a>
-                      ` : ''}
-                      <button onclick="openPipelineDetailModal('${item.id}')" title="詳細・アナリスト診断" class="p-1 rounded hover:bg-slate-700 text-slate-400 hover:text-white transition">
-                        <i data-lucide="more-horizontal" class="w-3.5 h-3.5"></i>
-                      </button>
-                    </div>
-                  </div>
-
-                </div>
-              `).join('')}
             </div>
+          `;
+        });
 
-          </div>
-        `;
-      });
+        if (wrapper) wrapper.innerHTML = columnsHtml;
+      } else {
+        // OVERALL LIST VIEW: Render each stage as a clean block/accordion
+        let listHtml = '';
+        PIPELINE_STAGES.forEach((stage, stageIdx) => {
+          const stageItems = filtered.filter(i => i.stage === stage);
+          const hasItems = stageItems.length > 0;
 
-      wrapper.innerHTML = columnsHtml;
-      lucide.createIcons();
+          let headerColorClass = 'text-indigo-400';
+          let stagePillClass = 'bg-indigo-500/10 text-indigo-300 border-indigo-500/30';
+          let colDotColor = 'bg-indigo-500';
+
+          if (stage.includes('説明会 (参加予定)')) {
+            headerColorClass = 'text-sky-400';
+            stagePillClass = 'bg-sky-500/15 text-sky-300 border-sky-500/40';
+            colDotColor = 'bg-sky-400';
+          } else if (stage.includes('説明会 (参加済')) {
+            headerColorClass = 'text-cyan-400';
+            stagePillClass = 'bg-cyan-500/15 text-cyan-300 border-cyan-500/40';
+            colDotColor = 'bg-cyan-400';
+          } else if (stage.includes('内定')) {
+            headerColorClass = 'text-emerald-400 font-black';
+            stagePillClass = 'bg-emerald-500/25 text-emerald-300 border-emerald-500/50 font-black';
+            colDotColor = 'bg-emerald-400';
+          } else if (stage.includes('面談')) {
+            headerColorClass = 'text-teal-400 font-bold';
+            stagePillClass = 'bg-teal-500/20 text-teal-300 border-teal-500/40 font-bold';
+            colDotColor = 'bg-teal-400';
+          } else if (stage.includes('最終')) {
+            headerColorClass = 'text-amber-400';
+            stagePillClass = 'bg-amber-500/15 text-amber-300 border-amber-500/40';
+            colDotColor = 'bg-amber-400';
+          }
+
+          listHtml += `
+            <div id="stage-list-sec-${stageIdx}" class="bg-slate-800/40 border border-slate-800/90 rounded-2xl p-3 sm:p-4 space-y-3 transition-all ${hasItems ? '' : 'opacity-70'}">
+              <!-- Section Header -->
+              <div class="flex items-center justify-between cursor-pointer select-none" onclick="toggleStageListSection(${stageIdx})">
+                <div class="flex items-center gap-2">
+                  <span class="w-2.5 h-2.5 rounded-full ${colDotColor}"></span>
+                  <h3 class="text-xs sm:text-sm font-bold ${headerColorClass}">${stage}</h3>
+                  <span class="text-xs font-bold px-2 py-0.5 rounded-full ${stagePillClass}">${stageItems.length}社</span>
+                </div>
+                <div class="flex items-center gap-1 text-slate-400 hover:text-white transition">
+                  <span class="text-[10px] sm:text-xs text-slate-500">${hasItems ? '開閉' : '0件'}</span>
+                  <i id="stage-list-icon-${stageIdx}" data-lucide="chevron-down" class="w-4 h-4 transition-transform ${hasItems ? '' : 'rotate-180'}"></i>
+                </div>
+              </div>
+
+              <!-- Cards Grid (1 column on mobile, 2 on tablet, 3 on desktop) -->
+              <div id="stage-list-body-${stageIdx}" class="${hasItems ? '' : 'hidden'} grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-2.5">
+                ${stageItems.length === 0 ? `
+                  <div class="col-span-full py-4 text-center text-slate-600 text-xs border border-dashed border-slate-800/60 rounded-xl">
+                    現在このステージの企業はありません
+                  </div>
+                ` : stageItems.map(item => renderCompanyCardHtml(item)).join('')}
+              </div>
+            </div>
+          `;
+        });
+
+        if (listContainer) listContainer.innerHTML = listHtml;
+      }
+
+      if (window.lucide) lucide.createIcons();
     }
 
     // ==========================================
@@ -5577,8 +5859,8 @@
 
     // 🔄 最新データ再読み込み（リログ不要）
     function handleDataReload() {
-      const icon = document.getElementById('refreshDataIcon');
-      if (icon) icon.classList.add('animate-spin');
+      const icons = document.querySelectorAll('.refresh-data-icon, #refreshDataIcon');
+      icons.forEach(icon => icon.classList.add('animate-spin'));
 
       // ログイン状態を確実に保持
       localStorage.setItem('job_hunt_auth', 'true');
@@ -5591,7 +5873,7 @@
       renderArchived();
 
       setTimeout(() => {
-        if (icon) icon.classList.remove('animate-spin');
+        icons.forEach(icon => icon.classList.remove('animate-spin'));
         showToast('データを最新状態に再読み込みしました（リログ不要）', 'success');
       }, 400);
     }
