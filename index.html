@@ -1207,7 +1207,7 @@
                   <option value="2.0">自社IP・自社ゲーム/プロダクト開発100% [+2.0点]</option>
                   <option value="1.5" selected>プライム一次請け・自社内受託 70%以上（常駐極小） [+1.5点]</option>
                   <option value="0.8">二次請け自社内受託メイン [+0.8点]</option>
-                  <option value="-2.0">客先常駐（SES）メイン / 案件ガチャ大 [-2.0点 減点]</option>
+                  <option value="-2.0">客先常駐（SES）メイン または ⚠️隠れSES・偽装自社受託（準委任9割） [-2.0点 減点]</option>
                 </select>
               </div>
 
@@ -1250,30 +1250,32 @@
                 <span class="text-[10px] text-slate-400">※強みが活きる度合い</span>
               </div>
 
-              <!-- 5. 担当工程・C++直結度 -->
+              <!-- 5. 担当工程・C++直結度 & レガシー回避 -->
               <div>
                 <label class="block text-slate-300 font-semibold mb-1 flex items-center justify-between">
-                  <span>⑤ 担当工程・技術直結度（C++ / エンジン / 3D物理）</span>
+                  <span>⑤ 担当工程・技術直結度（C++ / エンジン / モダン技術）</span>
                   <span id="ptsTech" class="text-sky-400 font-mono font-bold">+1.0点</span>
                 </label>
                 <select id="simTech" onchange="runSimulatorCalc()" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-white text-xs focus:border-indigo-500">
                   <option value="1.0" selected>C/C++、ゲームエンジン、3D数学、物理演算直結 [+1.0点]</option>
                   <option value="0.8">制御系・組込系・インフラ基盤（C言語親和性） [+0.8点]</option>
-                  <option value="0.7">Web・アプリ・DX受託開発（プログラミング工程確約） [+0.7点]</option>
+                  <option value="0.7">Web・アプリ・DX受託開発（モダン技術確約） [+0.7点]</option>
+                  <option value="-1.0">⚠️他社で通用しないレガシー技術（COBOL・古い独自基盤保守）固定 [-1.0点 減点]</option>
                   <option value="-1.5">プログラミングなし（運用監視・マニュアルテスト） [-1.5点 減点]</option>
                 </select>
               </div>
 
-              <!-- 6. 学歴公平性 -->
+              <!-- 6. 学歴公平性 & 実態採用実績 -->
               <div>
                 <label class="block text-slate-300 font-semibold mb-1 flex items-center justify-between">
-                  <span>⑥ 学歴公平性（専門卒3年制の実力主義評価）</span>
+                  <span>⑥ 学歴公平性・実態採用実績（専門卒3年制の扱い）</span>
                   <span id="ptsEducation" class="text-sky-400 font-mono font-bold">+0.5点</span>
                 </label>
                 <select id="simEducation" onchange="runSimulatorCalc()" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-white text-xs focus:border-indigo-500">
                   <option value="0.5" selected>専門生も大卒と同等待遇・実力作品主義 [+0.5点]</option>
                   <option value="0.3">専門卒採用実績多数（給与差わずか） [+0.3点]</option>
-                  <option value="0.0">大卒限定・学歴フィルターあり / 昇進格差 [0.0点]</option>
+                  <option value="-0.5">⚠️【注意】要項に専門可とあっても直近実績ゼロ（実質大卒中心・要確認） [-0.5点 減点]</option>
+                  <option value="danger">🚫 そもそも専門不採用（大卒・院卒限定、専門応募不可） [除外・地雷上限3.5点]</option>
                 </select>
               </div>
 
@@ -1298,9 +1300,9 @@
                     <span id="ptsWelfare" class="text-sky-400 font-mono font-bold">+0.5点</span>
                   </label>
                   <select id="simWelfare" onchange="runSimulatorCalc()" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-2.5 py-2 text-white text-xs focus:border-indigo-500">
-                    <option value="0.5" selected>住宅手当＋資格手当 [+0.5点]</option>
-                    <option value="0.3">いずれか一方あり [+0.3点]</option>
-                    <option value="0.0">手当なし [0.0点]</option>
+                    <option value="1.0">【超充実】住宅手当（月3万↑）または格安独身寮・社宅 ＋ 資格手当 ＋ 退職金 [+1.0点]</option>
+                    <option value="0.5" selected>【標準充実】住宅手当（月1〜2万）または資格手当あり [+0.5点]</option>
+                    <option value="0.0">手当なし（法定福利のみ・家賃全額自腹） [0.0点]</option>
                   </select>
                 </div>
                 <div>
@@ -1309,7 +1311,7 @@
                     <span id="ptsTraining" class="text-sky-400 font-mono font-bold">+0.5点</span>
                   </label>
                   <select id="simTraining" onchange="runSimulatorCalc()" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-2.5 py-2 text-white text-xs focus:border-indigo-500">
-                    <option value="0.5" selected>3ヶ月以上研修＋専任メンター [+0.5点]</option>
+                    <option value="0.5" selected>3ヶ月以上研修＋専任メンター（給与100%全額支給・違約金なし） [+0.5点]</option>
                     <option value="0.3">標準的新卒研修（1〜2ヶ月） [+0.3点]</option>
                     <option value="0.0">研修なし・現場丸投げ [0.0点]</option>
                   </select>
@@ -1324,7 +1326,7 @@
                 </label>
                 <label class="flex items-center gap-2 cursor-pointer select-none text-[11px] text-rose-400">
                   <input type="checkbox" id="simDangerCap" onchange="runSimulatorCalc()" class="rounded bg-slate-800 border-slate-700 text-rose-500">
-                  <span>⚠️ 地雷検知（文系営業・新卒使い捨て構造・見かけ月給詐欺）：上限3.5点キャップ</span>
+                  <span>⚠️ 地雷・除外検知（研修違約金/給与減額・専門応募不可・文系営業・新卒使い捨て構造・見かけ月給詐欺）：上限3.5点キャップ</span>
                 </label>
               </div>
 
@@ -1354,7 +1356,7 @@
                   <td class="py-2.5 px-3 font-bold text-indigo-400">優先度 1位</td>
                   <td class="py-2.5 px-3 font-bold text-white">① 基本給単体<br><span class="text-[10px] text-slate-400">（3年制専門卒ベース）</span></td>
                   <td class="py-2.5 px-3 font-mono font-bold text-emerald-400">0.0 〜 +2.0点</td>
-                  <td class="py-2.5 px-3">・基本給単体 24万円以上: +2.0点<br>・基本給単体 21.0〜23.9万円: +1.5点</td>
+                  <td class="py-2.5 px-3">・基本給単体 24万円以上: +2.0点<br>・基本給単体 21.0〜23.9万円: +1.5点<br><span class="text-[10px] text-slate-400">※住宅手当月3万以上等の手厚い補助がある場合は実質ベースで合算評価可</span></td>
                   <td class="py-2.5 px-3 text-rose-300">20万円未満は0点。大卒と専門卒で減額される場合は専門卒テーブルを強制適用。</td>
                 </tr>
                 <tr>
@@ -1362,7 +1364,7 @@
                   <td class="py-2.5 px-3 font-bold text-white">② 商流・配属先<br><span class="text-[10px] text-slate-400">（客先常駐SES排除）</span></td>
                   <td class="py-2.5 px-3 font-mono font-bold text-emerald-400">-2.0 〜 +2.0点</td>
                   <td class="py-2.5 px-3">・自社IP/プロダクト開発100%: +2.0点<br>・プライム直受託70%以上: +1.5点</td>
-                  <td class="py-2.5 px-3 text-rose-300">客先常駐（SES）メインは-2.0点ペナルティ（案件ガチャ・下流固定リスク）。</td>
+                  <td class="py-2.5 px-3 text-rose-300">客先常駐SESメイン、または⚠️「隠れSES・偽装自社受託（自社フロアでの準委任作業9割）」は-2.0点ペナルティ＆4大条件不合格。</td>
                 </tr>
                 <tr>
                   <td class="py-2.5 px-3 font-bold text-indigo-400">優先度 3位</td>
@@ -1379,41 +1381,41 @@
                   <td class="py-2.5 px-3 text-rose-300">年間休日110日未満は-1.0点ペナルティ。</td>
                 </tr>
                 <tr class="bg-sky-950/20 font-semibold text-white">
-                  <td colspan="5" class="py-2 px-3 text-sky-300">【第2グループ：就活軸・スキル適合加点（加点：最大 3.0点）】※強み発揮度</td>
+                  <td colspan="5" class="py-2 px-3 text-sky-300">【第2グループ：就活軸・スキル＆待遇加点（加点：最大 3.0点）】※手取り豊かさ＆強み発揮度</td>
                 </tr>
                 <tr>
                   <td class="py-2.5 px-3 font-bold text-sky-400">優先度 5位</td>
-                  <td class="py-2.5 px-3 font-bold text-white">⑤ C++・ゲーム技術直結</td>
-                  <td class="py-2.5 px-3 font-mono font-bold text-emerald-400">-1.5 〜 +1.0点</td>
-                  <td class="py-2.5 px-3">C/C++、3D物理、ゲームエンジン開発が直結: +1.0点（Web/DX受託は+0.7点）</td>
-                  <td class="py-2.5 px-3 text-rose-300">プログラミングなし（運用監視・マニュアルテスト）は-1.5点ペナルティ。</td>
+                  <td class="py-2.5 px-3 font-bold text-white">⑤ 福利厚生（住宅/資格）<br><span class="text-[10px] text-emerald-400">★大手・隠れ優良の強み</span></td>
+                  <td class="py-2.5 px-3 font-mono font-bold text-emerald-400">0.0 〜 +1.0点</td>
+                  <td class="py-2.5 px-3">・【超充実】手厚い住宅手当（月3万↑）または格安独身寮・社宅（月1〜2万負担） ＋ 資格手当・一時金 ＋ 退職金: +1.0点<br>・【標準充実】住宅手当（月1〜2万）または資格手当: +0.5点</td>
+                  <td class="py-2.5 px-3 text-slate-400">手当なし（家賃全額自腹）は加点0点。</td>
                 </tr>
                 <tr>
                   <td class="py-2.5 px-3 font-bold text-sky-400">優先度 6位</td>
-                  <td class="py-2.5 px-3 font-bold text-white">⑥ 学歴公平性</td>
-                  <td class="py-2.5 px-3 font-mono font-bold text-emerald-400">0.0 〜 +0.5点</td>
-                  <td class="py-2.5 px-3">専門生も大卒と同等待遇・実力作品主義: +0.5点（実績多数は+0.3点）</td>
-                  <td class="py-2.5 px-3 text-slate-400">大卒限定または昇進格差ありは加点0点。</td>
+                  <td class="py-2.5 px-3 font-bold text-white">⑥ 技術直結・モダン設計<br><span class="text-[10px] text-slate-400">（市場価値保護）</span></td>
+                  <td class="py-2.5 px-3 font-mono font-bold text-emerald-400">-1.5 〜 +1.0点</td>
+                  <td class="py-2.5 px-3">C/C++、3D物理、ゲームエンジン開発が直結: +1.0点（Web/DXモダン受託は+0.7点）</td>
+                  <td class="py-2.5 px-3 text-rose-300">・プログラミングなし（運用監視）は-1.5点<br>・⚠️他社で通用しないレガシー技術（COBOL・古い独自基盤保守）固定は-1.0点</td>
                 </tr>
                 <tr>
                   <td class="py-2.5 px-3 font-bold text-sky-400">優先度 7位</td>
-                  <td class="py-2.5 px-3 font-bold text-white">⑦ リモート・ハイブリッド</td>
+                  <td class="py-2.5 px-3 font-bold text-white">⑦ 学歴公平性・実態実績<br><span class="text-[10px] text-slate-400">（実質学歴フィルター検知）</span></td>
+                  <td class="py-2.5 px-3 font-mono font-bold text-emerald-400">-0.5 〜 +0.5点</td>
+                  <td class="py-2.5 px-3">専門生も大卒と同等待遇・実力作品主義: +0.5点（採用実績多数は+0.3点）</td>
+                  <td class="py-2.5 px-3 text-rose-300">⚠️募集要項に専門可とあっても直近採用実績ゼロ（実質大卒中心・見せかけ）は-0.5点減点＆診断に警告明記（受けるかは本人判断）。※そもそも専門不採用は大卒限定フィルターで即時除外（地雷キャップ適用）。</td>
+                </tr>
+                <tr>
+                  <td class="py-2.5 px-3 font-bold text-sky-400">優先度 8位</td>
+                  <td class="py-2.5 px-3 font-bold text-white">⑧ リモート・ハイブリッド</td>
                   <td class="py-2.5 px-3 font-mono font-bold text-emerald-400">0.0 〜 +0.5点</td>
                   <td class="py-2.5 px-3">週2〜3日以上のハイブリッドまたはフル在宅制度あり: +0.5点</td>
                   <td class="py-2.5 px-3 text-slate-400">完全出社固定は加点0点。</td>
                 </tr>
                 <tr>
-                  <td class="py-2.5 px-3 font-bold text-sky-400">優先度 8位</td>
-                  <td class="py-2.5 px-3 font-bold text-white">⑧ 福利厚生（住宅/資格）</td>
-                  <td class="py-2.5 px-3 font-mono font-bold text-emerald-400">0.0 〜 +0.5点</td>
-                  <td class="py-2.5 px-3">住宅手当（月2〜3万等）または寮 ＋ 資格取得祝い金・手当あり: +0.5点</td>
-                  <td class="py-2.5 px-3 text-slate-400">手当なしは加点0点。</td>
-                </tr>
-                <tr>
                   <td class="py-2.5 px-3 font-bold text-sky-400">優先度 9位</td>
                   <td class="py-2.5 px-3 font-bold text-white">⑨ 研修体制・定着率</td>
                   <td class="py-2.5 px-3 font-mono font-bold text-emerald-400">0.0 〜 +0.5点</td>
-                  <td class="py-2.5 px-3">3ヶ月以上研修 ＋ 専任メンター ＋ 平均勤続10年以上: +0.5点</td>
+                  <td class="py-2.5 px-3">3ヶ月以上研修 ＋ 専任メンター（研修中も給与全額支給・違約金なし） ＋ 平均勤続10年以上: +0.5点</td>
                   <td class="py-2.5 px-3 text-slate-400">研修丸投げは加点0点。</td>
                 </tr>
                 <tr class="bg-amber-950/20 font-semibold text-white">
@@ -1427,9 +1429,9 @@
                 </tr>
                 <tr>
                   <td class="py-2.5 px-3 font-bold text-rose-400">地雷キャップ</td>
-                  <td class="py-2.5 px-3 font-bold text-white">⚠️ 地雷・ブラック判定</td>
+                  <td class="py-2.5 px-3 font-bold text-white">⚠️ 地雷・除外判定</td>
                   <td class="py-2.5 px-3 font-mono font-bold text-rose-400">上限 3.5点</td>
-                  <td class="py-2.5 px-3" colspan="2">自社開発なし文系営業職（OA機器等）、新卒使い捨て、見かけ月給詐欺は無条件で3.5点以下とし【自動削除ログ】へ移送。</td>
+                  <td class="py-2.5 px-3" colspan="2">以下のいずれかに該当する場合は無条件で3.5点以下とし【自動削除ログ】へ移送：<br>① 自社IT開発なし文系営業職、② 新卒使い捨て構造、③ 見かけ月給詐欺、④ <strong>【NEW】研修費自己負担・早期退職違約金・研修中給与減額</strong>、⑤ <strong>【NEW】専門卒応募不可（大卒・院卒限定学歴フィルター）</strong></td>
                 </tr>
               </tbody>
             </table>
@@ -5518,8 +5520,9 @@
       let safe = escapeHtml(text);
       safe = safe.replace(/【(.*?)】/g, '<span class="text-indigo-300 font-bold block mb-0.5">【$1】</span>');
       safe = safe.replace(/(基本給：.*?[円|万])/g, '<span class="text-emerald-400 font-bold">$1</span>');
+      safe = safe.replace(/(住宅手当.*?|独身寮.*?|社宅.*?|手厚い福利厚生)/g, '<span class="text-emerald-300 font-semibold">$1</span>');
       safe = safe.replace(/(固定残業代：.*?[分|なし])/g, '<span class="text-amber-300 font-semibold">$1</span>');
-      safe = safe.replace(/(危険|注意|カラクリ|裏の顔|地雷|ガチャ)/g, '<span class="text-rose-400 font-bold underline">$1</span>');
+      safe = safe.replace(/(危険|注意|カラクリ|裏の顔|地雷|ガチャ|違約金|減額|隠れSES|社内SES|偽装|レガシー|COBOL|採用実績ゼロ|専門卒実績なし|実績ゼロ|学歴フィルター)/g, '<span class="text-rose-400 font-bold underline">$1</span>');
       return safe;
     }
 
@@ -6084,13 +6087,16 @@
       const holidays = parseFloat(document.getElementById('simHolidays').value) || 0;
 
       const tech = parseFloat(document.getElementById('simTech').value) || 0;
-      const education = parseFloat(document.getElementById('simEducation').value) || 0;
+      const eduVal = document.getElementById('simEducation').value;
+      const isEduBlocked = eduVal === 'danger';
+      const education = isEduBlocked ? 0 : (parseFloat(eduVal) || 0);
+
       const remote = parseFloat(document.getElementById('simRemote').value) || 0;
       const welfare = parseFloat(document.getElementById('simWelfare').value) || 0;
       const training = parseFloat(document.getElementById('simTraining').value) || 0;
 
       const bonusMultiplier = document.getElementById('simBonusMultiplier').checked;
-      const dangerCap = document.getElementById('simDangerCap').checked;
+      let dangerCap = document.getElementById('simDangerCap').checked || isEduBlocked;
 
       // Update badge points
       document.getElementById('ptsSalary').innerText = (salary >= 0 ? '+' : '') + salary.toFixed(1) + '点';
@@ -6098,7 +6104,16 @@
       document.getElementById('ptsOvertime').innerText = (overtime >= 0 ? '+' : '') + overtime.toFixed(1) + '点';
       document.getElementById('ptsHolidays').innerText = (holidays >= 0 ? '+' : '') + holidays.toFixed(1) + '点';
       document.getElementById('ptsTech').innerText = (tech >= 0 ? '+' : '') + tech.toFixed(1) + '点';
-      document.getElementById('ptsEducation').innerText = (education >= 0 ? '+' : '') + education.toFixed(1) + '点';
+      
+      const ptsEduEl = document.getElementById('ptsEducation');
+      if (isEduBlocked) {
+        ptsEduEl.innerText = '🚫除外';
+        ptsEduEl.className = 'text-rose-400 font-mono font-bold';
+      } else {
+        ptsEduEl.innerText = (education >= 0 ? '+' : '') + education.toFixed(1) + '点';
+        ptsEduEl.className = (education < 0 ? 'text-rose-400' : 'text-sky-400') + ' font-mono font-bold';
+      }
+
       document.getElementById('ptsRemote').innerText = (remote >= 0 ? '+' : '') + remote.toFixed(1) + '点';
       document.getElementById('ptsWelfare').innerText = (welfare >= 0 ? '+' : '') + welfare.toFixed(1) + '点';
       document.getElementById('ptsTraining').innerText = (training >= 0 ? '+' : '') + training.toFixed(1) + '点';
@@ -6129,7 +6144,17 @@
       let starsCount = 1;
       let advice = '';
 
-      if (score >= 9.0) {
+      if (isEduBlocked) {
+        starsCount = 1;
+        verdict = `【${score.toFixed(1)}】🚫 専門卒応募不可（学歴フィルターで自動除外） ★☆☆☆☆`;
+        verdictClass = 'bg-rose-500/20 text-rose-300 border-rose-500/40';
+        advice = '大卒・院卒限定採用であり専門卒の応募枠がありません。無駄なエントリーを避けるためシステムより自動除外します。';
+      } else if (dangerCap) {
+        starsCount = 1;
+        verdict = `【${score.toFixed(1)}】⚠️ 地雷・ブラック判定枠（自動削除対象） ★☆☆☆☆`;
+        verdictClass = 'bg-rose-500/20 text-rose-300 border-rose-500/40';
+        advice = '研修費違約金・研修中給与減額・新卒使い捨て構造・文系営業等の致命的リスクを検知。オファー画面から自動削除対象となります。';
+      } else if (score >= 9.0) {
         starsCount = 5;
         verdict = `【${score.toFixed(1)}】最高峰・理想枠 / トップティア ★★★★★`;
         verdictClass = 'bg-purple-500/20 text-purple-300 border-purple-500/40';
@@ -6138,7 +6163,7 @@
         starsCount = 4;
         verdict = `【${score.toFixed(1)}】高評価・本命併願 / 滑り止め最有力 ★★★★☆`;
         verdictClass = 'bg-emerald-500/20 text-emerald-300 border-emerald-500/40';
-        advice = '4大必須条件をクリア。基本給21万以上、自社内受託またはプライム直取引で案件ガチャリスクが極小。内定を確保すべき最有力ホワイト企業です。';
+        advice = '4大必須条件をクリア。基本給21万以上（または手厚い住宅手当・社宅）、自社内受託またはプライム直取引で案件ガチャリスクが極小。内定を確保すべき最有力ホワイト企業です。';
       } else if (score >= 6.0) {
         starsCount = 3;
         verdict = `【${score.toFixed(1)}】中位・条件付き検討枠（セーフティネット） ★★★☆☆`;
@@ -6148,12 +6173,17 @@
         starsCount = 2;
         verdict = `【${score.toFixed(1)}】注意・リスク大の懸念枠（面接練習用のみ） ★★☆☆☆`;
         verdictClass = 'bg-amber-500/20 text-amber-300 border-amber-500/40';
-        advice = '基本給単体が20万未満で固定残業代に依存している、または客先常駐（SES）率が高く下流工程リスク大。本命にはせず、面接練習用として割り切るべき枠です。';
+        advice = '基本給単体が20万未満で固定残業代に依存、客先常駐（SES）率が高い、または他社で通用しないレガシー技術への閉じ込めリスクあり。本命にはせず、面接練習用として割り切るべき枠です。';
       } else {
         starsCount = 1;
         verdict = `【${score.toFixed(1)}】地雷・完全ミスマッチ枠（自動削除対象） ★☆☆☆☆`;
         verdictClass = 'bg-rose-500/20 text-rose-300 border-rose-500/40';
         advice = '自社IT開発なし（文系営業等）、多重下請けSES、新卒使い捨て構造。新基準によりオファー画面から自動削除され「自動削除ログ」に残すのみとする対象です。';
+      }
+
+      // 専門卒実績ゼロの警告注記
+      if (eduVal === '-0.5' && !isEduBlocked && !dangerCap) {
+        advice += ' 【⚠️注意】募集要項に専門卒可とあっても直近採用実績ゼロ（実質大卒中心・学歴フィルターの疑いあり）。受けるかどうかはポートフォリオの適合度を踏まえ田中さん自身で判断してください。';
       }
 
       const badge = document.getElementById('simVerdictBadge');
