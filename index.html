@@ -403,7 +403,7 @@
 <body class="bg-slate-900 text-slate-100 min-h-screen flex flex-col transition-colors duration-200">
 
   <!-- ============================================== -->
-  <!-- 🔒 パスワード認証ロック画面 (Password: Sou180409ts) -->
+  <!-- 🔒 パスワード認証ロック画面（パスワードは各端末で初回に設定し、ハッシュ化して保存） -->
   <!-- ============================================== -->
   <script>
     // ログイン保持チェック：リロード（F5）時にロック画面が一瞬でも表示されるのを完全防止
@@ -423,7 +423,7 @@
         田中 壮 様 専用 就活管理PWA
       </span>
       <h2 class="text-xl font-bold text-white mb-1">就活統合ダッシュボード</h2>
-      <p class="text-xs text-slate-400 mb-6 leading-relaxed">
+      <p id="authLockDescription" class="text-xs text-slate-400 mb-6 leading-relaxed">
         安全のためパスワードで保護されています。<br>設定したパスワードを入力してログインしてください。
       </p>
 
@@ -436,9 +436,12 @@
           </button>
         </div>
 
+        <!-- 初回設定時のみ表示：確認用にもう一度入力 -->
+        <input type="password" id="authPasswordConfirm" placeholder="確認のためもう一度入力" class="hidden w-full text-sm rounded-xl bg-slate-800 border border-slate-700 px-4 py-3 text-white focus:outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20 text-center tracking-wider font-mono">
+
         <div id="authErrorMessage" class="text-xs text-rose-400 font-semibold hidden flex items-center justify-center gap-1.5">
           <i data-lucide="alert-circle" class="w-4 h-4"></i>
-          <span>パスワードが正しくありません</span>
+          <span id="authErrorText">パスワードが正しくありません</span>
         </div>
 
         <div class="flex items-center justify-between text-xs text-slate-400 px-1">
@@ -448,7 +451,7 @@
           </label>
         </div>
 
-        <button type="submit" class="w-full py-3 rounded-xl bg-gradient-to-r from-indigo-500 to-sky-500 hover:from-indigo-600 hover:to-sky-600 text-white font-semibold text-sm shadow-lg shadow-indigo-500/30 transition-all transform active:scale-[0.98]">
+        <button type="submit" id="authSubmitBtn" class="w-full py-3 rounded-xl bg-gradient-to-r from-indigo-500 to-sky-500 hover:from-indigo-600 hover:to-sky-600 text-white font-semibold text-sm shadow-lg shadow-indigo-500/30 transition-all transform active:scale-[0.98]">
           ダッシュボードを開く
         </button>
       </form>
@@ -1463,6 +1466,32 @@
       </div>
 
       
+        </div>
+
+        <!-- CATEGORY 4: セキュリティ（パスワード変更） -->
+        <div id="setCatContent-auth" class="space-y-6 hidden">
+          <div class="bg-slate-800/40 border border-slate-700/70 p-4 rounded-xl space-y-3">
+            <h4 class="text-sm font-bold text-white flex items-center gap-2">
+              <i data-lucide="key-round" class="w-4 h-4 text-indigo-400"></i>
+              <span>パスワードの変更</span>
+            </h4>
+            <p class="text-slate-400 leading-relaxed">
+              パスワードはこの端末（ブラウザ）の中にだけ、元に戻せない形（ハッシュ）で保存されます。スマホとPCでは別々に設定してください。
+            </p>
+            <form onsubmit="handleChangePassword(event)" class="space-y-2">
+              <input type="password" id="authChangeCurrent" placeholder="現在のパスワード" class="w-full rounded-lg bg-slate-800 border border-slate-700 px-3 py-2 text-white focus:outline-none focus:border-indigo-500">
+              <input type="password" id="authChangeNew" required placeholder="新しいパスワード（8文字以上）" class="w-full rounded-lg bg-slate-800 border border-slate-700 px-3 py-2 text-white focus:outline-none focus:border-indigo-500">
+              <input type="password" id="authChangeConfirm" required placeholder="新しいパスワード（確認）" class="w-full rounded-lg bg-slate-800 border border-slate-700 px-3 py-2 text-white focus:outline-none focus:border-indigo-500">
+              <button type="submit" class="px-4 py-2 rounded-lg bg-indigo-600 hover:bg-indigo-500 text-white font-semibold transition">パスワードを変更する</button>
+            </form>
+          </div>
+          <div class="bg-slate-800/40 border border-slate-700/70 p-4 rounded-xl space-y-2">
+            <h4 class="text-sm font-bold text-white">このロックについて</h4>
+            <p class="text-slate-400 leading-relaxed">
+              このパスワードは「端末をのぞき見されないための画面ロック」です。データは各端末のブラウザ内にしか保存されないため、他の人の端末からあなたのデータが見えることはありません。
+            </p>
+            <button type="button" onclick="handleAuthLogout()" class="px-4 py-2 rounded-lg bg-slate-700 hover:bg-slate-600 text-white font-semibold transition">今すぐロックする</button>
+          </div>
         </div>
 
         <!-- CATEGORY 2: 自身の希望する条件 ＆ 評価基準 -->
@@ -4356,6 +4385,102 @@
       syncFromGoogleCalendar({ manual: true });
     }
 
+    // ==========================================
+    // サンプル（コード内に書かれた初期データ）の取り込み管理
+    // 「どのサンプルをすでに取り込んだか」を記録し、
+    // ユーザーが削除・編集したデータを、次回起動時に復活・上書きしないようにする。
+    // ==========================================
+    const STORAGE_KEY_SEED_STATE = 'jobhunt_seed_state_v1';
+    const CAL_SEED_FIELDS = ['title', 'startDate', 'endDate', 'startTime', 'endTime', 'eventType', 'locationType', 'notes'];
+    let seedState = null;
+
+    function cloneData(obj) {
+      return JSON.parse(JSON.stringify(obj));
+    }
+
+    // 予定の中身を比較用の1本の文字列にする（同じ内容なら同じ文字列になる）
+    function calSeedFingerprint(evt) {
+      return JSON.stringify(CAL_SEED_FIELDS.map(k => evt[k] || ''));
+    }
+
+    // 「今あるサンプルはすべて取り込み済み」という状態を作る
+    function createSeedStateFromCurrentSamples() {
+      const calendar = {};
+      SAMPLE_CALENDAR_EVENTS.forEach(s => { calendar[s.id] = calSeedFingerprint(s); });
+      return { offers: SAMPLE_OFFERS.map(s => s.id), calendar, migrations: [] };
+    }
+
+    function loadSeedState() {
+      try {
+        const s = JSON.parse(localStorage.getItem(STORAGE_KEY_SEED_STATE));
+        if (s && Array.isArray(s.offers) && s.calendar) {
+          if (!Array.isArray(s.migrations)) s.migrations = [];
+          return s;
+        }
+      } catch (e) {
+        console.error('Failed to load seed state', e);
+      }
+      return null;
+    }
+
+    function saveSeedState() {
+      localStorage.setItem(STORAGE_KEY_SEED_STATE, JSON.stringify(seedState));
+    }
+
+    // コードに新しく追加されたサンプル予定だけを取り込む。
+    // 取り込み済みの予定は、ユーザーが編集していない場合に限りコード側の最新内容へ更新する。
+    function mergeSeedCalendarEvents() {
+      let changed = 0;
+      SAMPLE_CALENDAR_EVENTS.forEach(s => {
+        const seedFp = calSeedFingerprint(s);
+        const appliedFp = seedState.calendar[s.id];
+        const existing = calendarEvents.find(c => c.id === s.id);
+        if (appliedFp === undefined) {
+          if (!existing) {
+            calendarEvents.push(cloneData(s));
+            changed++;
+          }
+        } else if (existing && appliedFp !== seedFp && calSeedFingerprint(existing) === appliedFp) {
+          CAL_SEED_FIELDS.forEach(k => { existing[k] = s[k]; });
+          if (s.meetingUrl && !existing.meetingUrl) existing.meetingUrl = s.meetingUrl;
+          changed++;
+        }
+        // それ以外（ユーザーが削除した・編集した予定）は触らない
+        seedState.calendar[s.id] = seedFp;
+      });
+      return changed;
+    }
+
+    // コードに新しく追加されたサンプルのオファーだけを取り込む（削除したものは復活させない）
+    function mergeSeedOffers() {
+      SAMPLE_OFFERS.forEach(s => {
+        if (seedState.offers.includes(s.id)) return;
+        seedState.offers.push(s.id);
+        if (isCompanyInPipeline(s.companyName)) return;
+        const exists = offers.some(o => o.id === s.id || normalizeCompanyName(o.companyName) === normalizeCompanyName(s.companyName));
+        if (!exists) offers.unshift(cloneData(s));
+      });
+    }
+
+    // 一度だけ実行するデータ修正（毎回実行するとユーザーが変えた選考段階を戻してしまうため）
+    function applyOneTimeMigrations() {
+      if (!seedState.migrations.includes('computermind-stage-202610')) {
+        pipeline.forEach(p => {
+          if ((p.companyName || '').includes('コンピュータマインド') && (p.stage.includes('説明会') || !p.stage.includes('面談'))) {
+            p.stage = '面談 (カジュアル / リクルーター)';
+          }
+        });
+        seedState.migrations.push('computermind-stage-202610');
+      }
+    }
+
+    function parseStoredList(raw) {
+      if (raw === null) return [];
+      const parsed = JSON.parse(raw);
+      if (!Array.isArray(parsed)) throw new Error('stored data is not an array');
+      return parsed;
+    }
+
     function loadState() {
       loadGCalConfig();
       let storedOffers = localStorage.getItem(STORAGE_KEY_OFFERS);
@@ -4363,55 +4488,46 @@
       let storedArchived = localStorage.getItem(STORAGE_KEY_ARCHIVED);
       let storedCalendar = localStorage.getItem(STORAGE_KEY_CALENDAR);
 
-      // カレンダー初期化＆完全網羅自動同期
-      if (!storedCalendar || storedCalendar === '[]') {
-        calendarEvents = JSON.parse(JSON.stringify(SAMPLE_CALENDAR_EVENTS));
+      // 取り込み記録が無い = 初回起動、またはこの仕組みを入れる前のバージョンから更新した直後
+      seedState = loadSeedState();
+      if (!seedState) {
+        seedState = createSeedStateFromCurrentSamples();
+      }
+
+      // カレンダー：保存データが一度も無いときだけサンプルで始める（0件に消した場合はそのまま）
+      if (storedCalendar === null) {
+        calendarEvents = cloneData(SAMPLE_CALENDAR_EVENTS);
       } else {
         try {
-          calendarEvents = JSON.parse(storedCalendar);
-          // サンプルイベント（全26件）の不足分・更新分を強制自動マージ
-          SAMPLE_CALENDAR_EVENTS.forEach(s => {
-            const existingIdx = calendarEvents.findIndex(c => c.id === s.id);
-            if (existingIdx === -1) {
-              calendarEvents.push(JSON.parse(JSON.stringify(s)));
-            } else {
-              // 時刻や日付、タイトル、メモが最新定義と異なる場合は自動最新化
-              const ex = calendarEvents[existingIdx];
-              ex.title = s.title;
-              ex.startDate = s.startDate;
-              ex.endDate = s.endDate;
-              ex.startTime = s.startTime;
-              ex.endTime = s.endTime;
-              ex.eventType = s.eventType;
-              ex.locationType = s.locationType;
-              if (s.meetingUrl && !ex.meetingUrl) ex.meetingUrl = s.meetingUrl;
-              if (s.notes) ex.notes = s.notes;
-            }
-          });
+          calendarEvents = parseStoredList(storedCalendar);
+          mergeSeedCalendarEvents();
         } catch (e) {
           console.error("Failed to parse calendar events", e);
-          calendarEvents = JSON.parse(JSON.stringify(SAMPLE_CALENDAR_EVENTS));
+          // 壊れたデータは上書きせず、別の場所に退避してからサンプルで起動する
+          localStorage.setItem('jobhunt_corrupt_backup_calendar', storedCalendar);
+          calendarEvents = cloneData(SAMPLE_CALENDAR_EVENTS);
         }
       }
 
-      if (!storedOffers || !storedPipeline || !storedArchived || storedOffers === '[]') {
-        pipeline = JSON.parse(JSON.stringify(SAMPLE_PIPELINE));
-        archivedPipeline = JSON.parse(JSON.stringify(SAMPLE_ARCHIVED));
-        offers = JSON.parse(JSON.stringify(SAMPLE_OFFERS)).filter(o => !isCompanyInPipeline(o.companyName));
+      if (storedOffers === null && storedPipeline === null) {
+        // 初回起動
+        pipeline = cloneData(SAMPLE_PIPELINE);
+        archivedPipeline = cloneData(SAMPLE_ARCHIVED);
+        offers = cloneData(SAMPLE_OFFERS).filter(o => !isCompanyInPipeline(o.companyName));
+        applyOneTimeMigrations();
+        saveSeedState();
         saveState();
       } else {
         try {
-          pipeline = JSON.parse(storedPipeline);
-          archivedPipeline = JSON.parse(storedArchived);
-          offers = JSON.parse(storedOffers);
+          pipeline = parseStoredList(storedPipeline);
+          archivedPipeline = parseStoredList(storedArchived);
+          offers = parseStoredList(storedOffers);
 
           // 全データに早期選考タグをデフォルト付与（既存データの自動アップグレード）
           pipeline.forEach(p => {
             if (!p.selectionType) p.selectionType = '早期選考';
-            if (p.companyName.includes('コンピュータマインド') && (p.stage.includes('説明会') || !p.stage.includes('面談'))) {
-              p.stage = '面談 (カジュアル / リクルーター)';
-            }
           });
+          applyOneTimeMigrations();
           offers.forEach((o, idx) => {
             if (!o.selectionType) o.selectionType = '早期選考';
             if (typeof o.isViewed === 'undefined') {
@@ -4432,25 +4548,21 @@
           // 【重複防止ルール】選考パイプラインにすでに存在する企業はオファー一覧から完全自動削除
           offers = offers.filter(o => !isCompanyInPipeline(o.companyName));
 
-          if (!offers || offers.length === 0) {
-            offers = JSON.parse(JSON.stringify(SAMPLE_OFFERS)).filter(o => !isCompanyInPipeline(o.companyName));
-          } else if (typeof SAMPLE_OFFERS !== 'undefined' && Array.isArray(SAMPLE_OFFERS)) {
-            // 新規追加された優先スカウト実データを自動マージ（選考中企業は絶対にオファーに入れない）
-            SAMPLE_OFFERS.forEach(s => {
-              if (isCompanyInPipeline(s.companyName)) return;
-              const exists = offers.some(o => o.id === s.id || normalizeCompanyName(o.companyName) === normalizeCompanyName(s.companyName));
-              if (!exists) {
-                offers.unshift(JSON.parse(JSON.stringify(s)));
-              }
-            });
-          }
+          // コードに新しく追加されたスカウトだけを取り込む（選考中企業は絶対にオファーに入れない）
+          mergeSeedOffers();
+          saveSeedState();
           saveState();
         } catch(e) {
           console.error("Failed to parse storage data", e);
-          pipeline = SAMPLE_PIPELINE;
-          archivedPipeline = SAMPLE_ARCHIVED;
-          offers = JSON.parse(JSON.stringify(SAMPLE_OFFERS)).filter(o => !isCompanyInPipeline(o.companyName));
+          // 壊れたデータは上書きせず、別の場所に退避してからサンプルで起動する
+          localStorage.setItem('jobhunt_corrupt_backup_main', JSON.stringify({
+            offers: storedOffers, pipeline: storedPipeline, archived: storedArchived, savedAt: new Date().toISOString()
+          }));
+          pipeline = cloneData(SAMPLE_PIPELINE);
+          archivedPipeline = cloneData(SAMPLE_ARCHIVED);
+          offers = cloneData(SAMPLE_OFFERS).filter(o => !isCompanyInPipeline(o.companyName));
           saveState();
+          setTimeout(() => showToast('保存データの読み込みに失敗しました。元のデータは退避してあります', 'error'), 500);
         }
       }
 
@@ -4576,8 +4688,8 @@
     // ==========================================
     function getGmailUrl(item) {
       if (!item) return 'https://mail.google.com/mail/u/0/#inbox';
-      if (item.gmailUrl && item.gmailUrl.trim()) {
-        return item.gmailUrl.trim();
+      if (safeUrl(item.gmailUrl)) {
+        return safeUrl(item.gmailUrl);
       }
       const cleanName = (item.companyName || '')
         .replace(/株式会社|\(株\)|（株）/g, '')
@@ -4966,8 +5078,8 @@
                   <button onclick="openOfferEditModal('${item.id}')" title="オファー編集（Gmail URL登録など）" class="p-2 rounded-lg bg-slate-700/50 hover:bg-slate-700 text-slate-300 hover:text-white transition">
                     <i data-lucide="edit" class="w-4 h-4"></i>
                   </button>
-                  ${item.url ? `
-                    <a href="${escapeHtml(item.url)}" target="_blank" rel="noopener noreferrer" title="オファーリンク・マイページを開く" class="p-2 rounded-lg bg-slate-700/50 hover:bg-slate-700 text-slate-300 hover:text-white transition">
+                  ${safeUrl(item.url) ? `
+                    <a href="${escapeHtml(safeUrl(item.url))}" target="_blank" rel="noopener noreferrer" title="オファーリンク・マイページを開く" class="p-2 rounded-lg bg-slate-700/50 hover:bg-slate-700 text-slate-300 hover:text-white transition">
                       <i data-lucide="external-link" class="w-4 h-4"></i>
                     </a>
                   ` : ''}
@@ -5527,7 +5639,7 @@
               </button>
 
               ${item.mypageUrl ? `
-                <a href="${escapeHtml(item.mypageUrl)}" target="_blank" rel="noopener noreferrer" title="マイページへ直行" class="p-1 rounded hover:bg-slate-700 text-indigo-400 hover:text-indigo-300 transition">
+                <a href="${escapeHtml(safeUrl(item.mypageUrl))}" target="_blank" rel="noopener noreferrer" title="マイページへ直行" class="p-1 rounded hover:bg-slate-700 text-indigo-400 hover:text-indigo-300 transition">
                   <i data-lucide="external-link" class="w-3.5 h-3.5"></i>
                 </a>
               ` : ''}
@@ -6221,8 +6333,8 @@
       document.getElementById('detailInterviewReview').value = item.interviewReview || '';
 
       const portalBtn = document.getElementById('detailPortalDirectLink');
-      if (item.mypageUrl) {
-        portalBtn.href = item.mypageUrl;
+      if (safeUrl(item.mypageUrl)) {
+        portalBtn.href = safeUrl(item.mypageUrl);
         portalBtn.classList.remove('hidden');
       } else {
         portalBtn.classList.add('hidden');
@@ -6773,11 +6885,13 @@
       reader.onload = function(e) {
         try {
           const parsed = JSON.parse(e.target.result);
-          if (parsed.offers && parsed.pipeline) {
-            offers = parsed.offers;
-            pipeline = parsed.pipeline;
-            if (parsed.archivedPipeline) {
-              archivedPipeline = parsed.archivedPipeline;
+          if (Array.isArray(parsed.offers) && Array.isArray(parsed.pipeline)) {
+            // 読み込んだファイルのIDに危険な文字が含まれていても画面で実行されないよう整える
+            const cleanIds = list => list.map((x, i) => ({ ...x, id: safeId(x.id) || `import-${Date.now()}-${i}` }));
+            offers = cleanIds(parsed.offers);
+            pipeline = cleanIds(parsed.pipeline);
+            if (Array.isArray(parsed.archivedPipeline)) {
+              archivedPipeline = cleanIds(parsed.archivedPipeline);
             }
             if (parsed.analystReports) {
               Object.assign(ANALYST_REPORTS, parsed.analystReports);
@@ -6803,6 +6917,8 @@
       offers = JSON.parse(JSON.stringify(SAMPLE_OFFERS));
       pipeline = JSON.parse(JSON.stringify(SAMPLE_PIPELINE));
       archivedPipeline = JSON.parse(JSON.stringify(SAMPLE_ARCHIVED));
+      seedState = createSeedStateFromCurrentSamples();
+      saveSeedState();
       saveState();
       attachAnalystReports();
       renderOffers();
@@ -6853,16 +6969,94 @@
         .replace(/'/g, '&#039;');
     }
 
+    // リンク先として安全なURL（http / https / mailto）だけを通す。
+    // 「javascript:」などのURLはクリック時にプログラムが動いてしまうため空にする。
+    function safeUrl(url) {
+      const s = String(url || '').trim();
+      return /^(https?:|mailto:)/i.test(s) ? s : '';
+    }
+
+    // onclick="関数('ここ')" の引数に埋め込むID用。英数字・_・- 以外を取り除く
+    function safeId(id) {
+      return String(id || '').replace(/[^a-zA-Z0-9_-]/g, '');
+    }
+
     // ==========================================
-    // 🔒 Security & Password Auth (Sou180409ts)
+    // 🔒 Security & Password Auth
+    // パスワードそのものはコードにもGitHubにも置かない。
+    // 各端末で初回に設定し、PBKDF2でハッシュ化（元に戻せない形に変換）して localStorage に保存する。
     // ==========================================
-    const AUTH_PASS_HASH = 'Sou180409ts'; // User designated password
+    const AUTH_PW_KEY = 'jobhunt_auth_pw_v1';
+    const AUTH_MIN_LENGTH = 8;
+
+    function getStoredPassword() {
+      try {
+        const s = JSON.parse(localStorage.getItem(AUTH_PW_KEY));
+        return (s && s.salt && s.hash) ? s : null;
+      } catch (e) {
+        return null;
+      }
+    }
+
+    // crypto.subtle は https または localhost でのみ使える（file:// で開いた場合は使えない）
+    function canUseCrypto() {
+      return !!(window.crypto && window.crypto.subtle);
+    }
+
+    async function hashPassword(password, salt) {
+      const enc = new TextEncoder();
+      const key = await crypto.subtle.importKey('raw', enc.encode(password), 'PBKDF2', false, ['deriveBits']);
+      const bits = await crypto.subtle.deriveBits(
+        { name: 'PBKDF2', salt: enc.encode(salt), iterations: 150000, hash: 'SHA-256' },
+        key,
+        256
+      );
+      return Array.from(new Uint8Array(bits)).map(b => b.toString(16).padStart(2, '0')).join('');
+    }
+
+    async function savePassword(password) {
+      const saltBytes = crypto.getRandomValues(new Uint8Array(16));
+      const salt = Array.from(saltBytes).map(b => b.toString(16).padStart(2, '0')).join('');
+      const hash = await hashPassword(password, salt);
+      localStorage.setItem(AUTH_PW_KEY, JSON.stringify({ salt, hash }));
+    }
+
+    async function verifyPassword(password) {
+      const stored = getStoredPassword();
+      if (!stored) return false;
+      return (await hashPassword(password, stored.salt)) === stored.hash;
+    }
+
+    function showAuthError(message) {
+      const errorMsg = document.getElementById('authErrorMessage');
+      document.getElementById('authErrorText').innerText = message;
+      errorMsg.classList.remove('hidden');
+      const inputEl = document.getElementById('authPasswordInput');
+      inputEl.classList.add('border-rose-500', 'animate-shake');
+      setTimeout(() => {
+        inputEl.classList.remove('border-rose-500', 'animate-shake');
+      }, 500);
+    }
+
+    // パスワード未設定なら「初回設定」モード、設定済みなら「ログイン」モードに画面を切り替える
+    function updateLockScreenMode() {
+      const isSetup = !getStoredPassword();
+      const confirmEl = document.getElementById('authPasswordConfirm');
+      confirmEl.classList.toggle('hidden', !isSetup);
+      confirmEl.required = isSetup;
+      document.getElementById('authPasswordInput').placeholder = isSetup ? `新しいパスワード（${AUTH_MIN_LENGTH}文字以上）` : 'パスワードを入力';
+      document.getElementById('authLockDescription').innerHTML = isSetup
+        ? 'この端末ではまだパスワードが設定されていません。<br>このダッシュボード用のパスワードを決めてください。'
+        : '安全のためパスワードで保護されています。<br>設定したパスワードを入力してログインしてください。';
+      document.getElementById('authSubmitBtn').innerText = isSetup ? 'パスワードを設定して開く' : 'ダッシュボードを開く';
+    }
 
     function checkAuth() {
       const isAuthLocal = localStorage.getItem('job_hunt_auth') === 'true';
       const isAuthSession = sessionStorage.getItem('job_hunt_auth') === 'true';
       const lockScreen = document.getElementById('authLockScreen');
 
+      updateLockScreenMode();
       if (isAuthLocal || isAuthSession) {
         lockScreen.classList.add('hidden');
       } else {
@@ -6873,44 +7067,95 @@
       }
     }
 
-    function handleAuthLogin(e) {
+    async function handleAuthLogin(e) {
       e.preventDefault();
       const input = document.getElementById('authPasswordInput').value;
       const remember = document.getElementById('authRememberMe').checked;
       const errorMsg = document.getElementById('authErrorMessage');
-      const lockScreen = document.getElementById('authLockScreen');
 
-      if (input === AUTH_PASS_HASH) {
+      if (!canUseCrypto()) {
+        // file:// で直接開いた場合など。端末内のファイルなのでロックなしで開く
+        showToast('この開き方ではパスワード機能が使えないため、ロックなしで開きます', 'info');
+        unlockDashboard(remember);
+        return;
+      }
+
+      if (!getStoredPassword()) {
+        // 初回設定
+        const confirmValue = document.getElementById('authPasswordConfirm').value;
+        if (input.length < AUTH_MIN_LENGTH) {
+          showAuthError(`パスワードは${AUTH_MIN_LENGTH}文字以上にしてください`);
+          return;
+        }
+        if (input !== confirmValue) {
+          showAuthError('確認用のパスワードが一致しません');
+          return;
+        }
+        await savePassword(input);
         errorMsg.classList.add('hidden');
-        if (remember) {
-          localStorage.setItem('job_hunt_auth', 'true');
-        } else {
-          sessionStorage.setItem('job_hunt_auth', 'true');
-        }
-        
-        switchTab('offers');
+        unlockDashboard(remember);
+        return;
+      }
 
-        lockScreen.classList.add('opacity-0');
-        setTimeout(() => {
-          lockScreen.classList.add('hidden');
-          lockScreen.classList.remove('opacity-0');
-        }, 300);
-
-        showToast('認証に成功しました。おかえりなさい！', 'success');
-
-        // リログ時Googleカレンダー自動同期
-        if (gcalConfig && gcalConfig.autoSyncOnRelog) {
-          setTimeout(() => {
-            syncFromGoogleCalendar({ source: 'relog' });
-          }, 350);
-        }
+      if (await verifyPassword(input)) {
+        errorMsg.classList.add('hidden');
+        unlockDashboard(remember);
       } else {
-        errorMsg.classList.remove('hidden');
-        const inputEl = document.getElementById('authPasswordInput');
-        inputEl.classList.add('border-rose-500', 'animate-shake');
+        showAuthError('パスワードが正しくありません');
+      }
+    }
+
+    async function handleChangePassword(e) {
+      e.preventDefault();
+      if (!canUseCrypto()) {
+        showToast('この開き方（ファイルを直接開く）ではパスワードを設定できません', 'error');
+        return;
+      }
+      const current = document.getElementById('authChangeCurrent').value;
+      const next = document.getElementById('authChangeNew').value;
+      const confirmValue = document.getElementById('authChangeConfirm').value;
+
+      if (getStoredPassword() && !(await verifyPassword(current))) {
+        showToast('現在のパスワードが正しくありません', 'error');
+        return;
+      }
+      if (next.length < AUTH_MIN_LENGTH) {
+        showToast(`新しいパスワードは${AUTH_MIN_LENGTH}文字以上にしてください`, 'error');
+        return;
+      }
+      if (next !== confirmValue) {
+        showToast('確認用のパスワードが一致しません', 'error');
+        return;
+      }
+      await savePassword(next);
+      e.target.reset();
+      updateLockScreenMode();
+      showToast('パスワードを変更しました', 'success');
+    }
+
+    function unlockDashboard(remember) {
+      const lockScreen = document.getElementById('authLockScreen');
+      if (remember) {
+        localStorage.setItem('job_hunt_auth', 'true');
+      } else {
+        sessionStorage.setItem('job_hunt_auth', 'true');
+      }
+
+      switchTab('offers');
+
+      lockScreen.classList.add('opacity-0');
+      setTimeout(() => {
+        lockScreen.classList.add('hidden');
+        lockScreen.classList.remove('opacity-0');
+      }, 300);
+
+      showToast('認証に成功しました。おかえりなさい！', 'success');
+
+      // リログ時Googleカレンダー自動同期
+      if (gcalConfig && gcalConfig.autoSyncOnRelog) {
         setTimeout(() => {
-          inputEl.classList.remove('border-rose-500', 'animate-shake');
-        }, 500);
+          syncFromGoogleCalendar({ source: 'relog' });
+        }, 350);
       }
     }
 
@@ -6948,7 +7193,9 @@
       if (persistentStyle) persistentStyle.remove();
       const lockScreen = document.getElementById('authLockScreen');
       document.getElementById('authPasswordInput').value = '';
+      document.getElementById('authPasswordConfirm').value = '';
       document.getElementById('authErrorMessage').classList.add('hidden');
+      updateLockScreenMode();
       lockScreen.classList.remove('hidden');
       showToast('ログアウトしました', 'info');
     }
@@ -7213,24 +7460,9 @@
     function syncCalendarFromPipelineAndOffers() {
       let addedOrUpdatedCount = 0;
 
-      // 1. マスター初期スケジュール（26件）をマージ・最新化
-      SAMPLE_CALENDAR_EVENTS.forEach(sampleEvt => {
-        const existing = calendarEvents.find(e => e.id === sampleEvt.id);
-        if (!existing) {
-          calendarEvents.push(JSON.parse(JSON.stringify(sampleEvt)));
-          addedOrUpdatedCount++;
-        } else {
-          existing.title = sampleEvt.title;
-          existing.startDate = sampleEvt.startDate;
-          existing.endDate = sampleEvt.endDate;
-          existing.startTime = sampleEvt.startTime;
-          existing.endTime = sampleEvt.endTime;
-          existing.eventType = sampleEvt.eventType;
-          existing.locationType = sampleEvt.locationType;
-          if (sampleEvt.meetingUrl) existing.meetingUrl = sampleEvt.meetingUrl;
-          if (sampleEvt.notes) existing.notes = sampleEvt.notes;
-        }
-      });
+      // 1. コード側で追加・更新されたサンプル予定を反映（ユーザーが削除・編集した予定はそのまま）
+      addedOrUpdatedCount += mergeSeedCalendarEvents();
+      saveSeedState();
 
       // 2. オファー一覧の締切日（セガ、コーエーテクモ、バンダイナムコ、エスピック等）を自動統合
       offers.forEach(o => {
@@ -7645,10 +7877,10 @@
           }
 
           eventsHtml += `
-            <div onclick="event.stopPropagation(); openCalendarEventDetail('${evt.id}')"
+            <div onclick="event.stopPropagation(); openCalendarEventDetail('${safeId(evt.id)}')"
                  class="p-1 rounded-md text-[10px] sm:text-[11px] leading-tight truncate font-medium ${badgeBorder} hover:brightness-125 transition active:scale-95 flex items-center justify-between gap-1 shadow-xs"
-                 title="${evt.companyName} (${evt.title || evt.eventType}) ${evt.startTime ? evt.startTime : ''}">
-              <span class="truncate font-bold">${evt.startTime ? `<span class="opacity-80">${evt.startTime}</span> ` : ''}${evt.companyName}</span>
+                 title="${escapeHtml(evt.companyName)} (${escapeHtml(evt.title || evt.eventType)}) ${escapeHtml(evt.startTime || '')}">
+              <span class="truncate font-bold">${evt.startTime ? `<span class="opacity-80">${escapeHtml(evt.startTime)}</span> ` : ''}${escapeHtml(evt.companyName)}</span>
             </div>
           `;
         });
@@ -7719,8 +7951,10 @@
         }
 
         const badgeClass = getEventTypeBadgeClass(evt.eventType);
-        const gcalUrl = generateGoogleCalendarUrl(evt);
-        const gmailUrl = evt.gmailUrl || `https://mail.google.com/mail/u/0/#search/${encodeURIComponent(evt.companyName)}`;
+        const gcalUrl = escapeHtml(generateGoogleCalendarUrl(evt));
+        const gmailUrl = escapeHtml(safeUrl(evt.gmailUrl) || `https://mail.google.com/mail/u/0/#search/${encodeURIComponent(evt.companyName || '')}`);
+        const meetingUrl = escapeHtml(safeUrl(evt.meetingUrl));
+        const evtId = safeId(evt.id);
 
         html += `
           <div class="bg-slate-900/90 border border-slate-800 hover:border-slate-700/80 rounded-2xl p-4 transition-all duration-200 hover:shadow-lg space-y-3 group">
@@ -7728,11 +7962,11 @@
               <div class="flex items-center gap-2.5 flex-wrap">
                 <span class="px-2.5 py-1 rounded-lg bg-sky-500/15 text-sky-300 font-mono font-bold text-xs flex items-center gap-1.5 border border-sky-500/30">
                   <i data-lucide="calendar" class="w-3.5 h-3.5"></i>
-                  <span>${evt.startDate || '日程未定'} ${dayOfWeekStr}</span>
-                  <span class="text-white">${evt.startTime ? `${evt.startTime}〜${evt.endTime || ''}` : ''}</span>
+                  <span>${escapeHtml(evt.startDate || '日程未定')} ${dayOfWeekStr}</span>
+                  <span class="text-white">${evt.startTime ? `${escapeHtml(evt.startTime)}〜${escapeHtml(evt.endTime || '')}` : ''}</span>
                 </span>
                 <span class="px-2.5 py-0.5 rounded-full text-xs font-bold border ${badgeClass}">
-                  ${evt.eventType || '選考'}
+                  ${escapeHtml(evt.eventType || '選考')}
                 </span>
               </div>
               <div class="flex items-center gap-1.5">
@@ -7751,7 +7985,7 @@
                   <span class="hidden sm:inline">Gmail</span>
                 </a>
                 <!-- 詳細ボタン -->
-                <button onclick="openCalendarEventDetail('${evt.id}')"
+                <button onclick="openCalendarEventDetail('${evtId}')"
                         class="px-2.5 py-1 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white text-xs font-semibold flex items-center gap-1 transition">
                   <i data-lucide="info" class="w-3.5 h-3.5"></i>
                   <span>詳細</span>
@@ -7762,17 +7996,17 @@
             <div class="flex flex-col md:flex-row md:items-center justify-between gap-2">
               <div class="space-y-1">
                 <h4 class="text-base font-black text-white hover:text-indigo-300 cursor-pointer transition flex items-center gap-2"
-                    onclick="openCalendarEventDetail('${evt.id}')">
-                  <span>${evt.companyName}</span>
-                  <span class="text-xs font-normal text-slate-400">— ${evt.title || ''}</span>
+                    onclick="openCalendarEventDetail('${evtId}')">
+                  <span>${escapeHtml(evt.companyName)}</span>
+                  <span class="text-xs font-normal text-slate-400">— ${escapeHtml(evt.title || '')}</span>
                 </h4>
                 <div class="flex items-center gap-3 text-xs text-slate-400 flex-wrap">
                   <span class="flex items-center gap-1 text-slate-300">
                     <i data-lucide="map-pin" class="w-3.5 h-3.5 text-slate-500"></i>
-                    <span>${evt.locationType || 'オンライン'}</span>
+                    <span>${escapeHtml(evt.locationType || 'オンライン')}</span>
                   </span>
-                  ${evt.meetingUrl ? `
-                    <a href="${evt.meetingUrl}" target="_blank" rel="noopener noreferrer" class="flex items-center gap-1 text-indigo-400 hover:underline">
+                  ${meetingUrl ? `
+                    <a href="${meetingUrl}" target="_blank" rel="noopener noreferrer" class="flex items-center gap-1 text-indigo-400 hover:underline">
                       <i data-lucide="video" class="w-3.5 h-3.5"></i>
                       <span>参加URLを開く</span>
                     </a>
@@ -7782,7 +8016,7 @@
 
               ${evt.notes ? `
                 <div class="text-xs text-slate-400 max-w-md bg-slate-950/60 p-2 rounded-xl border border-slate-800/80 line-clamp-2">
-                  <span class="text-slate-500 font-semibold">メモ:</span> ${evt.notes}
+                  <span class="text-slate-500 font-semibold">メモ:</span> ${escapeHtml(evt.notes)}
                 </div>
               ` : ''}
             </div>
@@ -7819,16 +8053,16 @@
       const timeStr = evt.startTime ? `${evt.startTime} 〜 ${evt.endTime || ''}` : '終日・締切日';
       document.getElementById('calDetailDateTimeText').innerHTML = `
         <i data-lucide="calendar" class="w-4 h-4 text-sky-400"></i>
-        <span>${evt.startDate || ''} （${timeStr}）</span>
+        <span>${escapeHtml(evt.startDate || '')} （${escapeHtml(timeStr)}）</span>
       `;
 
       document.getElementById('calDetailLocationText').innerText = evt.locationType || '指定なし（オンライン等）';
 
       const urlRow = document.getElementById('calDetailUrlRow');
       const urlLink = document.getElementById('calDetailUrlLink');
-      if (evt.meetingUrl) {
+      if (safeUrl(evt.meetingUrl)) {
         urlRow.classList.remove('hidden');
-        urlLink.href = evt.meetingUrl;
+        urlLink.href = safeUrl(evt.meetingUrl);
         urlLink.innerText = evt.meetingUrl;
       } else {
         urlRow.classList.add('hidden');
@@ -7842,7 +8076,7 @@
 
       // Gmailリンク
       const gmailBtn = document.getElementById('calDetailGmailBtn');
-      gmailBtn.href = evt.gmailUrl || `https://mail.google.com/mail/u/0/#search/${encodeURIComponent(evt.companyName)}`;
+      gmailBtn.href = safeUrl(evt.gmailUrl) || `https://mail.google.com/mail/u/0/#search/${encodeURIComponent(evt.companyName || '')}`;
 
       modal.classList.remove('hidden');
       modal.classList.add('flex');
