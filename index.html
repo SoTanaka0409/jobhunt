@@ -504,31 +504,38 @@
         </div>
       </div>
 
-      <!-- Center Navigation Tabs: 4-column equal grid on mobile, flex on desktop -->
-      <nav class="grid grid-cols-4 md:flex items-center bg-slate-800/80 p-0.5 sm:p-1 rounded-xl border border-slate-700/60 shadow-inner w-full md:w-auto">
-        <button id="tabOffersBtn" onclick="switchTab('offers')" class="flex items-center justify-center gap-1 sm:gap-2 px-1.5 sm:px-3 py-1.5 sm:py-2 rounded-lg text-xs sm:text-sm font-semibold transition-all duration-150 bg-indigo-600 text-white shadow-sm text-center">
+      <!-- Center Navigation Tabs: 5-column grid on mobile, flex on desktop -->
+      <nav class="grid grid-cols-5 md:flex items-center bg-slate-800/80 p-0.5 sm:p-1 rounded-xl border border-slate-700/60 shadow-inner w-full md:w-auto">
+        <button id="tabOffersBtn" onclick="switchTab('offers')" class="flex items-center justify-center gap-1 sm:gap-2 px-1 sm:px-3 py-1.5 sm:py-2 rounded-lg text-[11px] sm:text-sm font-semibold transition-all duration-150 bg-indigo-600 text-white shadow-sm text-center">
           <i data-lucide="mail-check" class="w-3.5 h-3.5 sm:w-4 sm:h-4 shrink-0"></i>
-          <span class="hidden sm:inline">オファー・スカウト管理</span>
+          <span class="hidden sm:inline">オファー管理</span>
           <span class="sm:hidden">オファー</span>
-          <span id="offersBadgeCount" class="text-[10px] sm:text-xs px-1.5 py-0.2 rounded-full bg-indigo-800/80 text-indigo-200 shrink-0">0</span>
+          <span id="offersBadgeCount" class="text-[10px] sm:text-xs px-1 sm:px-1.5 py-0.2 rounded-full bg-indigo-800/80 text-indigo-200 shrink-0">0</span>
         </button>
-        <button id="tabPipelineBtn" onclick="switchTab('pipeline')" class="flex items-center justify-center gap-1 sm:gap-2 px-1.5 sm:px-3 py-1.5 sm:py-2 rounded-lg text-xs sm:text-sm font-semibold transition-all duration-150 text-slate-400 hover:text-slate-200 text-center">
+        <button id="tabPipelineBtn" onclick="switchTab('pipeline')" class="flex items-center justify-center gap-1 sm:gap-2 px-1 sm:px-3 py-1.5 sm:py-2 rounded-lg text-[11px] sm:text-sm font-semibold transition-all duration-150 text-slate-400 hover:text-slate-200 text-center">
           <i data-lucide="kanban-square" class="w-3.5 h-3.5 sm:w-4 sm:h-4 shrink-0"></i>
-          <span class="hidden sm:inline">選考パイプライン (全日程反映済)</span>
+          <span class="hidden sm:inline">選考パイプライン</span>
           <span class="sm:hidden">選考中</span>
-          <span id="pipelineBadgeCount" class="text-[10px] sm:text-xs px-1.5 py-0.2 rounded-full bg-slate-700 text-slate-300 shrink-0">0</span>
+          <span id="pipelineBadgeCount" class="text-[10px] sm:text-xs px-1 sm:px-1.5 py-0.2 rounded-full bg-slate-700 text-slate-300 shrink-0">0</span>
         </button>
-        <button id="tabCalendarBtn" onclick="switchTab('calendar')" class="flex items-center justify-center gap-1 sm:gap-2 px-1.5 sm:px-3 py-1.5 sm:py-2 rounded-lg text-xs sm:text-sm font-semibold transition-all duration-150 text-slate-400 hover:text-slate-200 text-center">
+        <button id="tabCalendarBtn" onclick="switchTab('calendar')" class="flex items-center justify-center gap-1 sm:gap-2 px-1 sm:px-3 py-1.5 sm:py-2 rounded-lg text-[11px] sm:text-sm font-semibold transition-all duration-150 text-slate-400 hover:text-slate-200 text-center">
           <i data-lucide="calendar" class="w-3.5 h-3.5 sm:w-4 sm:h-4 shrink-0 text-sky-400"></i>
-          <span class="hidden sm:inline">📅 選考カレンダー (Google同期)</span>
+          <span class="hidden sm:inline">📅 選考カレンダー</span>
           <span class="sm:hidden">カレンダー</span>
-          <span id="calendarBadgeCount" class="text-[10px] sm:text-xs px-1.5 py-0.2 rounded-full bg-sky-500/20 text-sky-300 border border-sky-500/30 shrink-0">0</span>
+          <span id="calendarBadgeCount" class="text-[10px] sm:text-xs px-1 sm:px-1.5 py-0.2 rounded-full bg-sky-500/20 text-sky-300 border border-sky-500/30 shrink-0">0</span>
         </button>
-        <button id="tabArchivedBtn" onclick="switchTab('archived')" class="flex items-center justify-center gap-1 sm:gap-2 px-1.5 sm:px-3 py-1.5 sm:py-2 rounded-lg text-xs sm:text-sm font-semibold transition-all duration-150 text-slate-400 hover:text-slate-200 text-center">
+        <!-- NEW: 🎯 逆質問・事前知識カンペ -->
+        <button id="tabQuestionsBtn" onclick="switchTab('questions')" class="flex items-center justify-center gap-1 sm:gap-2 px-1 sm:px-3 py-1.5 sm:py-2 rounded-lg text-[11px] sm:text-sm font-semibold transition-all duration-150 text-slate-400 hover:text-amber-300 text-center">
+          <i data-lucide="help-circle" class="w-3.5 h-3.5 sm:w-4 sm:h-4 shrink-0 text-amber-400"></i>
+          <span class="hidden sm:inline">🎯 逆質問・事前知識</span>
+          <span class="sm:hidden">逆質問</span>
+          <span class="text-[9px] sm:text-[10px] px-1 sm:px-1.5 py-0.2 rounded-full bg-amber-500/20 text-amber-300 border border-amber-500/30 shrink-0 font-bold">カンペ</span>
+        </button>
+        <button id="tabArchivedBtn" onclick="switchTab('archived')" class="flex items-center justify-center gap-1 sm:gap-2 px-1 sm:px-3 py-1.5 sm:py-2 rounded-lg text-[11px] sm:text-sm font-semibold transition-all duration-150 text-slate-400 hover:text-slate-200 text-center">
           <i data-lucide="archive" class="w-3.5 h-3.5 sm:w-4 sm:h-4 shrink-0"></i>
-          <span class="hidden sm:inline">選考除外・ゴミ箱 (保管庫)</span>
+          <span class="hidden sm:inline">保管庫</span>
           <span class="sm:hidden">保管庫</span>
-          <span id="archivedBadgeCount" class="text-[10px] sm:text-xs px-1.5 py-0.2 rounded-full bg-slate-700 text-slate-300 shrink-0">0</span>
+          <span id="archivedBadgeCount" class="text-[10px] sm:text-xs px-1 sm:px-1.5 py-0.2 rounded-full bg-slate-700 text-slate-300 shrink-0">0</span>
         </button>
       </nav>
 
@@ -1099,6 +1106,126 @@
       <div id="archivedCardsContainer" class="flex-1">
         <!-- Injected via JS -->
       </div>
+    </section>
+
+    <!-- ============================================== -->
+    <!-- VIEW 5: 企業別・説明会/座談会用 逆質問＆事前知識ジェネレーター（カンペ） -->
+    <!-- ============================================== -->
+    <section id="viewQuestions" class="flex-1 flex flex-col space-y-4 hidden">
+      
+      <!-- Top Hero Banner: 検索・選択・シチュエーション切り替え -->
+      <div class="bg-gradient-to-r from-slate-900 via-indigo-950/40 to-slate-900 border border-slate-700/80 rounded-2xl p-4 sm:p-5 shadow-xl space-y-4">
+        
+        <div class="flex flex-col md:flex-row md:items-center justify-between gap-3 border-b border-slate-800 pb-3">
+          <div class="flex items-center gap-3">
+            <div class="p-2.5 rounded-2xl bg-amber-500/15 text-amber-400 border border-amber-500/30 shadow-inner">
+              <i data-lucide="help-circle" class="w-6 h-6"></i>
+            </div>
+            <div>
+              <div class="flex items-center gap-2 flex-wrap">
+                <h2 class="text-base sm:text-lg font-bold text-white tracking-tight">
+                  説明会・座談会・面接用 逆質問＆事前知識ジェネレーター
+                </h2>
+                <span class="text-[11px] px-2.5 py-0.5 rounded-full bg-amber-500/20 text-amber-300 border border-amber-500/40 font-bold">
+                  田中壮さんの就活主軸連動
+                </span>
+              </div>
+              <p class="text-xs text-slate-400 mt-0.5">
+                企業名を入力すると、企業の真のビジネスモデル・客先常駐リスク・4大条件適合性・座談会で角を立てずに実態を暴くプロの逆質問を即座に展開します。
+              </p>
+            </div>
+          </div>
+
+          <!-- Quick Action Buttons -->
+          <div class="flex items-center gap-2 self-end md:self-center">
+            <button type="button" onclick="copyAllCurrentQuestions()" class="px-3.5 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 border border-slate-700 hover:border-amber-500/50 text-amber-300 font-bold text-xs flex items-center gap-1.5 shadow-sm transition active:scale-95">
+              <i data-lucide="copy" class="w-3.5 h-3.5"></i>
+              <span>📋 全逆質問を一括コピー</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- Search Input & Pre-selected Chips -->
+        <div class="space-y-3">
+          <div class="flex flex-col sm:flex-row items-stretch sm:items-center gap-2">
+            <div class="relative flex-1">
+              <i data-lucide="search" class="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2"></i>
+              <input type="text" id="questionCompanyInput" list="companySuggestionsList" oninput="handleQuestionSearchInput(this.value)" placeholder="企業名を入力（例：NCD株式会社、コーエーテクモ、セガ、または任意の企業名）..." class="w-full text-xs pl-10 pr-10 py-2.5 rounded-xl bg-slate-900 border border-slate-700 text-white placeholder-slate-500 focus:outline-none focus:border-amber-500 font-medium">
+              <datalist id="companySuggestionsList">
+                <!-- Dynamically populated -->
+              </datalist>
+              <button type="button" onclick="clearQuestionCompanyInput()" class="absolute right-3 top-1/2 -translate-y-1/2 text-slate-500 hover:text-white text-xs p-1">
+                <i data-lucide="x" class="w-3.5 h-3.5"></i>
+              </button>
+            </div>
+            
+            <button type="button" onclick="runQuestionGenerate()" class="px-5 py-2.5 rounded-xl bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-400 hover:to-orange-400 text-slate-950 font-bold text-xs flex items-center justify-center gap-2 shadow-lg shadow-amber-500/20 transition active:scale-95 shrink-0">
+              <i data-lucide="sparkles" class="w-4 h-4"></i>
+              <span>カンペを即時生成</span>
+            </button>
+          </div>
+
+          <!-- Quick Selector Chips -->
+          <div class="flex items-center gap-1.5 flex-wrap pt-1 text-xs">
+            <span class="text-slate-400 text-[11px] font-semibold mr-1 shrink-0">📌 クイック選択:</span>
+            <button type="button" onclick="selectCompanyForQuestions('NCD株式会社')" class="px-2.5 py-1 rounded-lg bg-amber-500/20 hover:bg-amber-500/30 text-amber-300 border border-amber-500/40 text-[11px] font-bold flex items-center gap-1 transition active:scale-95 shadow-sm">
+              <i data-lucide="flame" class="w-3 h-3 text-amber-400"></i>
+              <span>NCD株式会社 (本日10:00)</span>
+            </button>
+            <button type="button" onclick="selectCompanyForQuestions('株式会社コーエーテクモホールディングス')" class="px-2.5 py-1 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white border border-slate-700 text-[11px] transition active:scale-95">
+              <span>コーエーテクモHD</span>
+            </button>
+            <button type="button" onclick="selectCompanyForQuestions('株式会社セガ フェイブ')" class="px-2.5 py-1 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white border border-slate-700 text-[11px] transition active:scale-95">
+              <span>セガ フェイブ</span>
+            </button>
+            <button type="button" onclick="selectCompanyForQuestions('株式会社アトラス')" class="px-2.5 py-1 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white border border-slate-700 text-[11px] transition active:scale-95">
+              <span>アトラス</span>
+            </button>
+            <button type="button" onclick="selectCompanyForQuestions('株式会社エムスリーインテック')" class="px-2.5 py-1 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white border border-slate-700 text-[11px] transition active:scale-95">
+              <span>エムスリーインテック</span>
+            </button>
+            <button type="button" onclick="selectCompanyForQuestions('株式会社アトミテック')" class="px-2.5 py-1 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white border border-slate-700 text-[11px] transition active:scale-95">
+              <span>アトミテック</span>
+            </button>
+            <button type="button" onclick="selectCompanyForQuestions('日本NonStopイノベーション株式会社')" class="px-2.5 py-1 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white border border-slate-700 text-[11px] transition active:scale-95">
+              <span>日本NonStopイノベーション</span>
+            </button>
+            <button type="button" onclick="selectCompanyForQuestions('パーソルクロステクノロジー株式会社')" class="px-2.5 py-1 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white border border-slate-700 text-[11px] transition active:scale-95">
+              <span>パーソルクロステクノロジー</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- Situation Filter Switcher -->
+        <div class="flex items-center justify-between border-t border-slate-800/80 pt-3 flex-wrap gap-2">
+          <div class="flex items-center gap-1.5 p-1 bg-slate-900 rounded-xl border border-slate-700/80 text-xs">
+            <button type="button" id="qFilterAll" onclick="setQuestionSituation('all')" class="px-3 py-1.5 rounded-lg bg-amber-500 text-slate-950 font-bold transition shadow-sm">
+              すべて表示
+            </button>
+            <button type="button" id="qFilterSession" onclick="setQuestionSituation('session')" class="px-3 py-1.5 rounded-lg text-slate-300 hover:text-white font-medium transition">
+              ① 会社説明会（人事・概要向け）
+            </button>
+            <button type="button" id="qFilterZadankai" onclick="setQuestionSituation('zadankai')" class="px-3 py-1.5 rounded-lg text-slate-300 hover:text-white font-medium transition flex items-center gap-1">
+              <span>② 先輩社員座談会（現場若手向け）</span>
+              <span class="text-[9px] px-1 py-0.2 rounded bg-amber-500/20 text-amber-300 font-bold">推奨</span>
+            </button>
+            <button type="button" id="qFilterInterview" onclick="setQuestionSituation('interview')" class="px-3 py-1.5 rounded-lg text-slate-300 hover:text-white font-medium transition">
+              ③ 面接・個人面談（現場リーダー向け）
+            </button>
+          </div>
+
+          <div class="text-[11px] text-slate-400">
+            ※各質問の右側アイコンを押すと、その質問文を個別コピーできます。
+          </div>
+        </div>
+
+      </div>
+
+      <!-- Generated Result Container (Injected via JS) -->
+      <div id="questionsResultContainer" class="space-y-4">
+        <!-- Rendered by renderQuestionsView() -->
+      </div>
+
     </section>
 
   </main>
@@ -2116,6 +2243,11 @@
             <i data-lucide="mail" class="w-3.5 h-3.5 text-rose-400"></i>
             <span>✉️ Gmailを開く</span>
           </a>
+          <!-- 🎯 逆質問・事前知識カンペボタン -->
+          <button type="button" onclick="openQuestionsFromPipelineDetail()" title="この企業の逆質問＆事前知識カンペを開く" class="px-3 py-1.5 rounded-lg bg-amber-500/20 hover:bg-amber-500/30 border border-amber-500/40 text-amber-300 text-xs font-bold flex items-center gap-1.5 transition shadow-sm hover:scale-105 active:scale-95">
+            <i data-lucide="help-circle" class="w-3.5 h-3.5 text-amber-400"></i>
+            <span>🎯 逆質問カンペ</span>
+          </button>
           <!-- Revert to offer button -->
           <button id="modalRevertBtn" type="button" onclick="revertActiveDetailToOffer()" title="オファー管理へ戻す（誤って選考に入れた場合）" class="px-3 py-1.5 rounded-lg bg-amber-500/15 hover:bg-amber-500/25 border border-amber-500/30 text-amber-300 text-xs font-medium flex items-center gap-1.5 transition">
             <i data-lucide="undo-2" class="w-3.5 h-3.5"></i>
@@ -2760,6 +2892,12 @@
             <i data-lucide="calendar" class="w-4 h-4"></i>
             <span>📅 Googleカレンダーに追加（ワンクリック同期）</span>
           </a>
+
+          <!-- 🎯 この企業の説明会 逆質問＆事前知識を開く（カンペ） -->
+          <button type="button" onclick="openQuestionsFromCalendarDetail()" class="w-full py-2.5 rounded-xl bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-400 hover:to-orange-400 text-slate-950 font-bold text-xs flex items-center justify-center gap-2 shadow-lg shadow-amber-500/20 transition active:scale-95">
+            <i data-lucide="help-circle" class="w-4 h-4 text-slate-950"></i>
+            <span>🎯 この企業の説明会 逆質問＆事前知識を開く（カンペ）</span>
+          </button>
 
           <div class="grid grid-cols-2 gap-2">
             <!-- ✉️ Gmailを開く -->
@@ -4367,26 +4505,31 @@
       const tabOffersBtn = document.getElementById('tabOffersBtn');
       const tabPipelineBtn = document.getElementById('tabPipelineBtn');
       const tabCalendarBtn = document.getElementById('tabCalendarBtn');
+      const tabQuestionsBtn = document.getElementById('tabQuestionsBtn');
       const tabArchivedBtn = document.getElementById('tabArchivedBtn');
       const viewOffers = document.getElementById('viewOffers');
       const viewPipeline = document.getElementById('viewPipeline');
       const viewCalendar = document.getElementById('viewCalendar');
+      const viewQuestions = document.getElementById('viewQuestions');
       const viewArchived = document.getElementById('viewArchived');
 
-      const baseInactive = 'flex items-center justify-center gap-1 sm:gap-2 px-2 sm:px-4 py-1.5 sm:py-2 rounded-lg text-xs sm:text-sm font-semibold transition-all duration-150 text-slate-400 hover:text-slate-200 text-center';
-      const baseActiveIndigo = 'flex items-center justify-center gap-1 sm:gap-2 px-2 sm:px-4 py-1.5 sm:py-2 rounded-lg text-xs sm:text-sm font-semibold transition-all duration-150 bg-indigo-600 text-white shadow-sm text-center';
-      const baseActiveSky = 'flex items-center justify-center gap-1 sm:gap-2 px-2 sm:px-4 py-1.5 sm:py-2 rounded-lg text-xs sm:text-sm font-semibold transition-all duration-150 bg-sky-600 text-white shadow-sm text-center';
-      const baseActiveSlate = 'flex items-center justify-center gap-1 sm:gap-2 px-2 sm:px-4 py-1.5 sm:py-2 rounded-lg text-xs sm:text-sm font-semibold transition-all duration-150 bg-slate-700 text-white shadow-sm text-center';
+      const baseInactive = 'flex items-center justify-center gap-1 sm:gap-2 px-1 sm:px-3 py-1.5 sm:py-2 rounded-lg text-[11px] sm:text-sm font-semibold transition-all duration-150 text-slate-400 hover:text-slate-200 text-center';
+      const baseActiveIndigo = 'flex items-center justify-center gap-1 sm:gap-2 px-1 sm:px-3 py-1.5 sm:py-2 rounded-lg text-[11px] sm:text-sm font-semibold transition-all duration-150 bg-indigo-600 text-white shadow-sm text-center';
+      const baseActiveSky = 'flex items-center justify-center gap-1 sm:gap-2 px-1 sm:px-3 py-1.5 sm:py-2 rounded-lg text-[11px] sm:text-sm font-semibold transition-all duration-150 bg-sky-600 text-white shadow-sm text-center';
+      const baseActiveAmber = 'flex items-center justify-center gap-1 sm:gap-2 px-1 sm:px-3 py-1.5 sm:py-2 rounded-lg text-[11px] sm:text-sm font-semibold transition-all duration-150 bg-gradient-to-r from-amber-500 to-orange-500 text-slate-950 font-bold shadow-md text-center';
+      const baseActiveSlate = 'flex items-center justify-center gap-1 sm:gap-2 px-1 sm:px-3 py-1.5 sm:py-2 rounded-lg text-[11px] sm:text-sm font-semibold transition-all duration-150 bg-slate-700 text-white shadow-sm text-center';
 
       // Reset tabs
       if (tabOffersBtn) tabOffersBtn.className = baseInactive;
       if (tabPipelineBtn) tabPipelineBtn.className = baseInactive;
       if (tabCalendarBtn) tabCalendarBtn.className = baseInactive;
+      if (tabQuestionsBtn) tabQuestionsBtn.className = baseInactive;
       if (tabArchivedBtn) tabArchivedBtn.className = baseInactive;
 
       if (viewOffers) viewOffers.classList.add('hidden');
       if (viewPipeline) viewPipeline.classList.add('hidden');
       if (viewCalendar) viewCalendar.classList.add('hidden');
+      if (viewQuestions) viewQuestions.classList.add('hidden');
       if (viewArchived) viewArchived.classList.add('hidden');
 
       if (tab === 'offers') {
@@ -4401,6 +4544,10 @@
         if (tabCalendarBtn) tabCalendarBtn.className = baseActiveSky;
         if (viewCalendar) viewCalendar.classList.remove('hidden');
         renderCalendar();
+      } else if (tab === 'questions') {
+        if (tabQuestionsBtn) tabQuestionsBtn.className = baseActiveAmber;
+        if (viewQuestions) viewQuestions.classList.remove('hidden');
+        initQuestionsView();
       } else if (tab === 'archived') {
         if (tabArchivedBtn) tabArchivedBtn.className = baseActiveSlate;
         if (viewArchived) viewArchived.classList.remove('hidden');
@@ -8089,6 +8236,787 @@ URL: https://www.ncd.co.jp/
       document.getElementById('simBonusMultiplier').checked = false;
       document.getElementById('simDangerCap').checked = false;
       runSimulatorCalc();
+    }
+
+
+    // ==========================================
+    // 企業別 逆質問＆事前知識ジェネレーター（カンペ）
+    // 田中壮さんの就活主軸（4大必須条件＋専門生/C++プロファイル）連動
+    // ==========================================
+
+    let activeQuestionCompanyName = 'NCD株式会社';
+    let activeQuestionSituation = 'all'; // 'all', 'session', 'zadankai', 'interview'
+
+    // 企業別専用 高精度プリセットデータベース
+    const COMPANY_QUESTIONS_DB = {
+      'NCD株式会社': {
+        officialName: '日本コンピュータ・ダイナミクス株式会社',
+        market: '東証スタンダード上場 (4783)',
+        businessType: '独立系SIer / パーキングシステム事業',
+        analystScore: 7.1,
+        tierText: '★安全併願の有力候補（常駐混在リスクに要警戒）',
+        mustMatch: { salary: true, trade: 'mixed', overtime: true, holidays: true },
+        overview: '1967年設立、売上約250億円超の老舗独立系IT企業。「IT関連事業（システム開発・クラウド運用）」と国内シェアトップの「パーキングシステム事業（日本初の自転車電磁ロック式駐輪場EcoStation21）」の2枚看板。',
+        strengths: [
+          '東証スタンダード上場の抜群の財務基盤。安定性はSIerの中でもトップクラス。',
+          '基本給21.8万円（4大条件クリア）、固定残業なし（全額1分単位支給）、賞与年2回（約4ヶ月）、年間休日123日。',
+          '新卒3ヶ月の手厚い研修制度（受講中も給与満額支給、違約金なし）。専門卒新卒の採用実績も多数。'
+        ],
+        hiddenRisks: [
+          '【客先常駐の混在】直請け受託開発多数と謳うが、実際は大手金融・通信向けに「客先常駐（オンサイト・ハイブリッド）」プロジェクトが少なからず混在する。',
+          '【初期配属リスク】新卒が「自社受託・システム開発（設計・実装）」に行けるか、「客先常駐・保守運用（問い合わせ対応・監視）」に回されるかで成長環境が二分される。',
+          '【技術スタック】ゲーム制作やC++ではなく、エンタープライズWeb（Java, C#, クラウドAWS/Azure）が主力。'
+        ],
+        checkpoints: [
+          '新卒1年目の「自社内（社内受託・パーキング開発）」対「客先常駐」の実際の配属比率',
+          '初期配属からプログラミング実装を担当できるか（マニュアルテスト・運用監視塩漬けの回避）',
+          '3年制専門卒（21.8万）と大卒（22.6万）の初任給格差およびその後の昇給・昇格スピードの透明性',
+          'パーキング事業（IoT・組み込みハード制御）とITソリューション事業（Web業務）の希望配属の通りやすさ'
+        ],
+        questions: [
+          {
+            situation: 'zadankai',
+            category: '🔥 若手社員座談会向け',
+            question: '新卒1年目の最初の半年〜1年間で、先輩方が実際に担当された業務内容（プログラミング実装 vs 仕様書確認やテスト検証）の具体的な比率を教えていただけますか？',
+            aim: '「新卒1年目は監視やテスターばかりで開発できない」という下流塩漬け地雷を自然に暴く。',
+            criteria: '「先輩と一緒に基本設計やJava/C#のコードを書いていた」なら◎。「最初はマニュアル通りに動かす検証が中心」と言われたら下流リスクあり。'
+          },
+          {
+            situation: 'zadankai',
+            category: '🔥 若手社員座談会向け',
+            question: '若手社員の皆さんは現在、自社オフィス（社内受託や自社パーキングシステム開発）とお客様先（客先常駐）のどちらで勤務されることが多いですか？また、勤務場所の希望はどの程度反映されましたか？',
+            aim: '客先常駐SES案件に強制配属される「案件ガチャ」の確率と、本人の希望が通る風土かを検証。',
+            criteria: '「本人の希望や適性を面談で聞いて社内開発に配属された」なら安心。「案件の状況次第でどこに行くか決まる」はSES地雷の警戒度アップ。'
+          },
+          {
+            situation: 'zadankai',
+            category: '🔥 若手社員座談会向け',
+            question: '平日の平均的な退社時間や有給休暇の取りやすさについて、若手の現場目線でのリアルな雰囲気を教えていただけますか？',
+            aim: '求人票の平均残業時間（約18h）が本当か、サービス残業や持ち帰り仕事がないかを若手の本音から探る。',
+            criteria: '「20時にはほぼ全員退社」「有給は前日でもSlackで気軽に申請できる」など具体例が出ればホワイト確定。'
+          },
+          {
+            situation: 'zadankai',
+            category: '🔥 若手社員座談会向け',
+            question: '専門学校でゲーム制作やC++などアルゴリズム・設計の基礎を学んできたのですが、研修終了後、現場で自発的な学習や技術へのこだわりが評価されたエピソードはありますか？',
+            aim: '技術力を評価してくれる現場カルチャーがあるかを確かめつつ、自己PR（技術への意欲）をさりげなく伝える。',
+            criteria: '「技術が好きな先輩が多く、コードレビューで丁寧に教えてくれた」なら成長環境として最高。'
+          },
+          {
+            situation: 'session',
+            category: '👔 人事・会社概要向け',
+            question: '募集要項の月給について、基本給単体と各種手当の内訳、および固定残業代が含まれていない認識でお間違いございませんでしょうか？',
+            aim: '【第1・第3必須条件】みなし残業（固定残業）ゼロ・残業代全額1分単位支給であることを正式に裏取りする。',
+            criteria: '「はい、固定残業代は含まず全額別途支給です」と即答されれば合格。言葉を濁す場合は要注意。'
+          },
+          {
+            situation: 'session',
+            category: '👔 人事・会社概要向け',
+            question: 'ITソリューション事業部とパーキングシステム事業部など各部門への初期配属は、研修期間中の適性評価や本人の希望がどの程度反映される仕組みになっていますか？',
+            aim: '希望と異なる部署（営業サポートやインフラ運用保守）に配属されるリスクを事前に排除。',
+            criteria: '面談や希望ヒアリングのフローが明確に定められているかを確認。'
+          },
+          {
+            situation: 'session',
+            category: '👔 人事・会社概要向け',
+            question: '3年制専門卒新卒の評価制度やその後のリーダー・PMへのキャリアアップにおいて、大卒者との扱いの違いや、実力主義で早期登用された実績はございますか？',
+            aim: '学歴フィルターや昇進の天井がないか、専門生の技術的素養が正当に評価されるかを確かめる。',
+            criteria: '「成果と実力主義で評価しており、専門卒でも数年でリーダーになった社員がいる」なら高評価。'
+          },
+          {
+            situation: 'interview',
+            category: '🎯 面接・個人面談向け',
+            question: '御社で活躍されている若手エンジニアに共通する行動特性や、新卒に期待される「最初の1年間でのキャッチアップ姿勢」について教えていただけますでしょうか？',
+            aim: '意欲の高さを強烈に印象付けつつ、田中さんの強み（課題解決・自走力・推進力）と合致しているか確認する。',
+            criteria: '自発的な課題解決や周囲と連携できる人を求められたら、自己PRのエピソードと完全に合致。'
+          }
+        ]
+      },
+
+      '株式会社コーエーテクモホールディングス': {
+        officialName: '株式会社コーエーテクモホールディングス',
+        market: '東証プライム上場 (3635)',
+        businessType: '家庭用・自社IPゲーム開発 100%',
+        analystScore: 9.3,
+        tierText: '★★★★★ 最高峰・夢の第一志望（自社開発100%）',
+        mustMatch: { salary: true, trade: true, overtime: true, holidays: true },
+        overview: '「信長の野望」「三國志」「仁王」「アトリエ」シリーズなど世界的IPを多数自社保有するゲーム業界屈指の超優良プライム上場企業。完全自社開発100%で客先常駐SESリスクは完全ゼロ。',
+        strengths: [
+          '完全自社開発100%。社内開発環境・自社ゲームエンジン開発の知見が圧倒的。',
+          '基本給単体で業界トップ水準の25.0万円超。固定残業代なし（全額支給）、特別賞与実績が極めて高い。',
+          '年間休日125日以上、ワークライフバランスと技術投資の両立が日本一クラス。'
+        ],
+        hiddenRisks: [
+          '採用難易度が極めて高い（全国のトップクリエイター・難関大生との激戦）。',
+          '提出ポートフォリオ（C++自作エンジン、DirectX、アルゴリズム最適化）の完成度が最重要審査対象となる。'
+        ],
+        checkpoints: [
+          '自作ゲームエンジンやC++低レイヤのメモリ管理・描画最適化の知見がプログラマー選考でダイレクトに評価されるか',
+          '3年制専門卒採用の受け入れ実績と、開発現場での即戦力プログラマー枠の配属実態',
+          'チーム制作（5人体制リーダー兼メインプログラマー経験）のエピソードの刺さり具合'
+        ],
+        questions: [
+          {
+            situation: 'zadankai',
+            category: '🔥 若手社員座談会向け',
+            question: '自社開発のゲームエンジンや共通基盤の開発と、各タイトルのゲームプレイ実装チームとの間では、若手プログラマーはどのように連携し業務を進められていますか？',
+            aim: '田中さんの自作ゲームエンジン知見を暗にアピールしつつ、開発組織の分業・技術力を確認。',
+            criteria: '自社エンジンや低レイヤ最適化に情熱を持つ社員が多く、若手も基盤に関われると回答されれば最高。'
+          },
+          {
+            situation: 'zadankai',
+            category: '🔥 若手社員座談会向け',
+            question: '入社1年目のプログラマーが開発現場で最初に直面する技術的な壁や、それを乗り越えるために先輩方からどのようなフォローやコードレビューが行われているか教えてください。',
+            aim: '技術成長を支えるレビュー文化・メンター制度の手厚さを探る。',
+            criteria: '「Gitでのレビュー文化が徹底しており、アーキテクチャまで指導してくれる」なら理想の職場。'
+          },
+          {
+            situation: 'session',
+            category: '👔 人事・会社概要向け',
+            question: '作品審査（自作エンジンやC++で制作したゲーム作品）において、開発チームの審査員の方が特に着目されている評価ポイント（設計の綺麗さ、描画効率、独自機能など）はございますか？',
+            aim: 'ポートフォリオ審査を有利に進めるための採点基準を聞き出す。',
+            criteria: '「完成度だけでなく、なぜその設計にしたかの工夫を重視する」等の生きたアドバイスを回収。'
+          },
+          {
+            situation: 'interview',
+            category: '🎯 面接・個人面談向け',
+            question: '私はチーム開発で共通クラス化や仕様変更への耐性を持たせた基盤設計に注力してきたのですが、御社の開発現場でプログラマーに求められる「チーム開発での最も重要な資質」は何でしょうか？',
+            aim: '自身の自己PRのキーワード（推進力、共通化、仕様調整）と面接官の求める人物像を一致させる。',
+            criteria: '「周囲と仕様をすり合わせられるコミュニケーション力と設計力」と返ってくれば合格確実ライン。'
+          }
+        ]
+      },
+
+      '株式会社セガ フェイブ': {
+        officialName: '株式会社セガ フェイブ (SEGA FAVE)',
+        market: 'セガサミーグループ (セガ100%子会社)',
+        businessType: 'メダル・アーケードゲーム自社開発',
+        analystScore: 9.1,
+        tierText: '★★★★★ 最有力・夢の自社開発枠（C++ダイレクト直結）',
+        mustMatch: { salary: true, trade: true, overtime: true, holidays: true },
+        overview: 'セガサミーグループの中核。アーケードメダルゲーム、キッズアミューズメント等のソフトウェア＆ハードウェア自社開発。C++や組み込み、自作エンジン等のプログラミング知見がダイレクトに活きる。',
+        strengths: [
+          '自社開発100%。客先常駐リスクゼロ。大手セガの最高水準の福利厚生・安定基盤。',
+          '基本給単体24.2万円以上、年休125日、完全週休2日、充実した開発設備。',
+          '10/20受信「3daysカレッジ」経由の直結選考ルートが存在。'
+        ],
+        hiddenRisks: [
+          'アミューズメント（メダル・キッズカード等）機器特有のハードウェア制御・リアルタイム通信の理解が求められる。',
+          '家庭用ゲーム（コンシューマー）専任志望とのミスマッチがないか面接で確認される。'
+        ],
+        checkpoints: [
+          '3daysカレッジでの評価が早期内定・本選考免除に直結する仕組みか',
+          'C++による低遅延ハード制御・リアルタイム処理の知識をどうプレゼンするか'
+        ],
+        questions: [
+          {
+            situation: 'zadankai',
+            category: '🔥 若手社員座談会向け',
+            question: 'メダルゲームの開発において、ソフトウェア（C++等）と筐体ハードウェア（メダル払出制御やセンサー）が連動する部分で、プログラマーとして最も面白さや手応えを感じる瞬間はどんな時ですか？',
+            aim: 'アーケード機器開発への真剣な熱意と技術的興味を若手社員に印象付ける。',
+            criteria: 'ハードとソフトが一体となって動く楽しさを熱く語ってくれる社員がいれば最高の配属先。'
+          },
+          {
+            situation: 'session',
+            category: '👔 人事・会社概要向け',
+            question: '3daysカレッジに参加するにあたり、事前に準備しておくと開発体験の理解が深まる技術分野（C++、DirectX、オブジェクト指向設計など）はございますか？',
+            aim: '参加への意気込みをアピールし、人事に顔と名前を強く印象付ける。',
+            criteria: '「C++の基礎があれば十分」「オブジェクト指向が活きる」などの具体的なヒントを得る。'
+          }
+        ]
+      },
+
+      '株式会社アトラス': {
+        officialName: '株式会社アトラス (ATLUS)',
+        market: 'セガサミーグループ (自社スタジオ)',
+        businessType: 'ペルソナ・真・女神転生等 RPG自社開発',
+        analystScore: 9.0,
+        tierText: '★★★★★ 最高峰・RPG自社開発スタジオ',
+        mustMatch: { salary: true, trade: true, overtime: true, holidays: true },
+        overview: '「ペルソナ」「真・女神転生」「メタファー」など世界中を熱狂させるRPGを自社制作する最高峰スタジオ。',
+        strengths: ['完全自社開発100%・客先常駐完全ゼロ。', '世界トップクラスのUI/UX設計・バトルシステム開発に携われる。'],
+        hiddenRisks: ['クオリティへの要求が極めて高い。C++およびアルゴリズムの徹底した理解が必須。'],
+        checkpoints: ['RPG独自のターン制バトルや状態管理、UI描画のアルゴリズム理解'],
+        questions: [
+          {
+            situation: 'zadankai',
+            category: '🔥 若手社員座談会向け',
+            question: 'アトラス作品の代名詞であるスタイリッシュなUI演出やレスポンスの速さを実現するために、プログラマー側で工夫されている設計やコードのこだわりはありますか？',
+            aim: '作品への深い敬意と技術者としての視点を同時にアピール。',
+            criteria: 'プログラマーとデザイナーが一体となって試行錯誤できる環境が整っているかを確認。'
+          }
+        ]
+      },
+
+      'パーソルクロステクノロジー株式会社': {
+        officialName: 'パーソルクロステクノロジー株式会社',
+        market: 'パーソルグループ中核 (技術者派遣・受託)',
+        businessType: '客先常駐SES / アウトソーシング / 一部受託',
+        analystScore: 5.8,
+        tierText: '⚠️ 注意・要見極め枠（客先常駐・特定派遣モデル）',
+        mustMatch: { salary: true, trade: false, overtime: true, holidays: true },
+        overview: 'パーソルグループ傘下の巨大技術系アウトソーシング企業。配属先の9割近くが顧客先（大手自動車・電機・IT企業等）での客先常駐（特定派遣）。',
+        strengths: ['研修制度や福利厚生は大手グループ準拠。', '自動車・IoT・Webなど案件の母数自体は膨大。'],
+        hiddenRisks: [
+          '【客先常駐SESモデル】第2必須条件（直請自社内6割以上）を完全に割る。案件ガチャと帰属意識の低さが最大リスク。',
+          '【給与水準】基本給単体は大卒・専門卒で差があり、昇給カーブは自社開発に比べ緩やか。'
+        ],
+        checkpoints: [
+          '「案件選択制度」で本当に本人が希望する開発案件（自社内受託やC++開発）を選べるのか、強制常駐にならないか',
+          '自社内開発チーム（持ち帰り受託）への初期配属ルートの有無'
+        ],
+        questions: [
+          {
+            situation: 'zadankai',
+            category: '🔥 若手社員座談会向け',
+            question: '実際に参画するプロジェクト（常駐先）を決める際、本人のスキル希望（C++や開発工程重視など）はどの程度反映されますか？希望に合わない案件を断ることはできますか？',
+            aim: '「案件選択制度」が形骸化していないか、案件ガチャの実態を若手の口から確認。',
+            criteria: '「営業が勝手に決めた現場に行かされた」なら完全SES地雷。「面談で納得するまで選べた」ならセーフ。'
+          },
+          {
+            situation: 'session',
+            category: '👔 人事・会社概要向け',
+            question: '新卒エンジニアのうち、客先常駐（特定派遣）ではなく「自社受託開発センター」で勤務する方の割合は何％程度でしょうか？',
+            aim: '社内開発比率の現実を暴き、客先常駐メインである事実を認識する。',
+            criteria: '「10%前後」など低い数字が出れば、常駐前提の会社であると確定できる。'
+          }
+        ]
+      }
+    };
+
+    // 状況別タブ切り替え
+    function setQuestionSituation(situation) {
+      activeQuestionSituation = situation;
+      const btnAll = document.getElementById('qFilterAll');
+      const btnSession = document.getElementById('qFilterSession');
+      const btnZadankai = document.getElementById('qFilterZadankai');
+      const btnInterview = document.getElementById('qFilterInterview');
+
+      const activeCls = 'px-3 py-1.5 rounded-lg bg-amber-500 text-slate-950 font-bold transition shadow-sm';
+      const inactiveCls = 'px-3 py-1.5 rounded-lg text-slate-300 hover:text-white font-medium transition';
+
+      if (btnAll) btnAll.className = situation === 'all' ? activeCls : inactiveCls;
+      if (btnSession) btnSession.className = situation === 'session' ? activeCls : inactiveCls;
+      if (btnZadankai) btnZadankai.className = situation === 'zadankai' ? activeCls : inactiveCls;
+      if (btnInterview) btnInterview.className = situation === 'interview' ? activeCls : inactiveCls;
+
+      renderQuestionsView();
+    }
+
+    // 企業名入力時
+    function handleQuestionSearchInput(val) {
+      const trimmed = (val || '').trim();
+      if (!trimmed) return;
+      // If matches exact company or close, re-render
+      activeQuestionCompanyName = trimmed;
+    }
+
+    function clearQuestionCompanyInput() {
+      const input = document.getElementById('questionCompanyInput');
+      if (input) {
+        input.value = '';
+        input.focus();
+      }
+    }
+
+    function selectCompanyForQuestions(compName) {
+      activeQuestionCompanyName = compName;
+      const input = document.getElementById('questionCompanyInput');
+      if (input) input.value = compName;
+      renderQuestionsView();
+    }
+
+    function runQuestionGenerate() {
+      const input = document.getElementById('questionCompanyInput');
+      const val = (input?.value || '').trim();
+      if (!val) {
+        showToast('企業名を入力してください', 'info');
+        return;
+      }
+      activeQuestionCompanyName = val;
+      renderQuestionsView();
+      showToast(`「${val}」専用の逆質問＆事前知識カンペを生成しました`, 'success');
+    }
+
+    // カレンダーや外部から企業名を指定して逆質問画面を開く
+    function openQuestionsForCompany(companyName) {
+      if (!companyName) return;
+      activeQuestionCompanyName = companyName;
+      switchTab('questions');
+    }
+
+    function openQuestionsFromCalendarDetail() {
+      const evt = calendarEvents.find(e => e.id === activeCalendarEventId);
+      if (!evt) return;
+      closeModal('calendarEventDetailModal');
+      openQuestionsForCompany(evt.companyName);
+    }
+
+    function openQuestionsFromPipelineDetail() {
+      if (!activeDetailItem) return;
+      closeModal('pipelineDetailModal');
+      openQuestionsForCompany(activeDetailItem.companyName);
+    }
+
+    // 初期化
+    function initQuestionsView() {
+      const input = document.getElementById('questionCompanyInput');
+      if (input && !input.value) {
+        input.value = activeQuestionCompanyName;
+      }
+
+      // Populate datalist suggestions from all known companies
+      const datalist = document.getElementById('companySuggestionsList');
+      if (datalist) {
+        const allKnown = new Set([
+          'NCD株式会社',
+          '株式会社コーエーテクモホールディングス',
+          '株式会社セガ フェイブ',
+          '株式会社アトラス',
+          '株式会社エムスリーインテック',
+          '株式会社アトミテック',
+          '日本NonStopイノベーション株式会社',
+          'パーソルクロステクノロジー株式会社',
+          '大興電子通信株式会社',
+          '株式会社システムエグゼ',
+          '株式会社テクノエージェント',
+          '株式会社MJE',
+          ...pipeline.map(p => p.companyName),
+          ...offers.map(o => o.companyName),
+          ...calendarEvents.map(c => c.companyName)
+        ]);
+        datalist.innerHTML = Array.from(allKnown).map(c => `<option value="${escapeHtml(c)}"></option>`).join('');
+      }
+
+      renderQuestionsView();
+    }
+
+    // 未登録企業向け AIユニバーサル自動ジェネレーター
+    function generateUniversalQuestions(rawCompanyName) {
+      const compName = rawCompanyName.trim();
+      const norm = normalizeCompanyName(compName).toLowerCase();
+      
+      // Determine industry / business type
+      let type = 'SIer';
+      let typeLabel = '独立系SIer / システム開発';
+      let isGame = false;
+      let isSES = false;
+      let isWeb = false;
+
+      if (/ゲーム|game|アミューズ|エンタメ|スクエニ|カプコン|任天堂|バンナム|フロム|コロプラ|サイバー/i.test(norm)) {
+        isGame = true;
+        type = 'Game';
+        typeLabel = 'ゲーム開発 / エンターテインメント制作';
+      } else if (/ses|派遣|スタッフ|エージェント|パートナー|アウトソーシング|常駐/i.test(norm)) {
+        isSES = true;
+        type = 'SES';
+        typeLabel = '客先常駐SES / 特定派遣疑い（要警戒）';
+      } else if (/web|ネット|クラウド|プラットフォーム|dx|saas/i.test(norm)) {
+        isWeb = true;
+        type = 'Web';
+        typeLabel = '自社Webサービス / クラウドソリューション';
+      }
+
+      // Estimate analyst score based on rubric
+      let estScore = isGame ? 8.5 : (isSES ? 5.2 : (isWeb ? 7.8 : 7.2));
+      let tierLabel = isGame ? '★★★★ 夢の本命・ゲーム自社開発候補' : (isSES ? '⚠️ 警戒・客先常駐リスクあり' : '★ 安全併願・ホワイトIT候補');
+
+      return {
+        officialName: compName,
+        market: '未登録企業（AIアナリスト自動解析モード）',
+        businessType: typeLabel,
+        analystScore: estScore,
+        tierText: tierLabel,
+        mustMatch: { salary: true, trade: isSES ? false : (isGame ? true : 'mixed'), overtime: true, holidays: true },
+        overview: `${compName} に関するAI動的解析結果です。田中壮さんの【4大必須条件】および【ゲーム制作/C++/3年制専門卒】の就活主軸に基づいて、説明会・座談会で見極めるべき核心ポイントを整理しています。`,
+        strengths: isGame ? [
+          '自社ゲームIP・グラフィックエンジン等の直接的なプログラミング開発に携われる可能性。',
+          '田中さんのC++自作エンジン開発や5人体制チーム制作のリーダー経験がダイレクトに評価されやすい。',
+          'クリエイターとしてのモノづくり熱意や完成責任感が武器になる環境。'
+        ] : (isSES ? [
+          '未経験でも入社しやすいが、客先常駐による「案件ガチャ」「下流工程塩漬け」のリスクが極めて高い。',
+          '面接練習や早期内定の滑り止めとしてのみ活用し、本命としては慎重に判断すべき枠。'
+        ] : [
+          '安定した企業間取引（BtoB）により、景気変動に強く堅実なエンジニアキャリアを築きやすい。',
+          '要件定義から設計・開発・テストまで一貫して請け負う直取引企業であれば、優良な安全併願先として適格。',
+          '資格取得支援や福利厚生が充実している傾向がある。'
+        ]),
+        hiddenRisks: isGame ? [
+          '選考倍率が高く、ポートフォリオ（C++コード、設計書）のクオリティが合否を左右する。',
+          '納期前（マスターアップ直前）の一時的な残業増加の有無を座談会で確認が必要。'
+        ] : (isSES ? [
+          '【最大リスク：客先常駐】自社で開発せず、他社オフィスに派遣されて監視やマニュアルテスト等の下流工程に固定される危険。',
+          '【給与の罠】基本給が18万程度に抑えられ、固定残業代（みなし残業30h）で総額を偽装しているケースが多い。'
+        ] : [
+          '直取引受託と見せかけて、一部客先常駐（派遣・SES）プロジェクトに配属される「隠れ常駐リスク」。',
+          '新卒1年目が開発（プログラミング）ではなく、システムの運用監視や問い合わせ窓口に回されないか確認が必要。'
+        ]),
+        checkpoints: [
+          '【第1条件】募集要項の基本給単体は21万円以上か？（固定残業代が含まれていないか）',
+          '【第2条件】勤務場所は自社オフィスか、お客様先常駐か？自社内開発の割合は何％か？',
+          '【第3条件】固定残業代（みなし残業）の有無と、賞与年2回の支給実績',
+          '【第4条件】年間休日は120日以上、月平均残業時間は20時間以内か？',
+          '【専門生の扱い】3年制専門卒の初任給・評価テーブルは大卒とどう区別されているか？'
+        ],
+        questions: [
+          {
+            situation: 'zadankai',
+            category: '🔥 若手社員座談会向け',
+            question: '新卒1年目の最初の1年間で、先輩方が現場で実際に担当された業務内容（プログラミングコード作成 vs 監視・マニュアルテスト等の保守）のリアルな比率を教えていただけますか？',
+            aim: '「1年目は下流のテストや監視ばかりで開発スキルが身につかない」リスクを若手の本音から暴く。',
+            criteria: '「半年目からJava/C#の設計やコードを書いていた」ならホワイト。「マニュアル通りに入力確認していた」なら下流塩漬けの危険。'
+          },
+          {
+            situation: 'zadankai',
+            category: '🔥 若手社員座談会向け',
+            question: '若手社員の皆さんは、普段どのような開発環境（PCスペック、ディスプレイ台数、使用ツールやエディタ）でお仕事をされていますか？',
+            aim: 'エンジニアへの設備投資や作業環境の自由度を確認。',
+            criteria: '「ハイスペックPCが支給されデュアルディスプレイ環境」なら優良企業。「古い客先PCをそのまま使う」なら常駐型SESの疑い濃厚。'
+          },
+          {
+            situation: 'zadankai',
+            category: '🔥 若手社員座談会向け',
+            question: '平日の平均退社時間や有給休暇の取りやすさについて、若手の現場目線でのリアルな雰囲気を教えていただけますか？',
+            aim: '隠れ残業や持ち帰り仕事がないかを若手目線で裏取り。',
+            criteria: '若手が気まずそうにせず「有給は取りやすい」「20時にはほぼ帰る」と即答されれば安心。'
+          },
+          {
+            situation: 'session',
+            category: '👔 人事・会社概要向け',
+            question: '募集要項に記載されている初任給について、基本給と固定残業代・各種手当の内訳を教えていただけますでしょうか？また残業代は1分単位で全額支給されますか？',
+            aim: '【第1・第3必須条件】基本給21万以上・固定残業なしの条件を公式に確認。',
+            criteria: '固定残業代が含まれている場合は要注意。純粋な基本給がいくらかを正確に把握する。'
+          },
+          {
+            situation: 'session',
+            category: '👔 人事・会社概要向け',
+            question: '初期配属先（プロジェクトや勤務地・自社内開発か客先か）は、新卒研修中の適性や本人の希望がどの程度反映される仕組みになっていますか？',
+            aim: '【第2必須条件】客先常駐SES案件への強制配属リスクを未然に防止。',
+            criteria: '「面談で本人の希望する技術・勤務先を最大限考慮する」なら安心。「案件の空き状況で決まる」ならSESリスク大。'
+          },
+          {
+            situation: 'interview',
+            category: '🎯 面接・個人面談向け',
+            question: '私は専門学校でのチーム制作で、共通処理のクラス化やCSVデータ管理導入など、仕様変更に柔軟に対応できる開発基盤づくりに注力したのですが、御社で活躍されているエンジニアに求められる最も重要な姿勢は何でしょうか？',
+            aim: '自己PRの強み（課題解決・先回りした開発基盤構築・推進力）を自然に提示しつつ高評価を狙う。',
+            criteria: 'チーム連携や自走力を重視する回答なら、田中さんのプロファイルと相性抜群。'
+          }
+        ]
+      };
+    }
+
+    // メイン描画関数
+    function renderQuestionsView() {
+      const container = document.getElementById('questionsResultContainer');
+      if (!container) return;
+
+      const compName = (activeQuestionCompanyName || 'NCD株式会社').trim();
+      
+      // Look up preset data or generate dynamically
+      let data = COMPANY_QUESTIONS_DB[compName];
+      if (!data) {
+        // Try normalized lookup
+        const foundKey = Object.keys(COMPANY_QUESTIONS_DB).find(k => normalizeCompanyName(k) === normalizeCompanyName(compName));
+        if (foundKey) {
+          data = COMPANY_QUESTIONS_DB[foundKey];
+        } else {
+          data = generateUniversalQuestions(compName);
+        }
+      }
+
+      questionsGeneratedData = data;
+
+      // Filter questions by situation
+      const filteredQuestions = data.questions.filter(q => {
+        if (activeQuestionSituation === 'all') return true;
+        return q.situation === activeQuestionSituation;
+      });
+
+      // Trade badge
+      let tradeBadge = '<span class="px-2 py-0.5 rounded bg-emerald-500/20 text-emerald-300 border border-emerald-500/40 text-[10px] font-bold">自社開発/直請受託</span>';
+      if (data.mustMatch.trade === 'mixed') {
+        tradeBadge = '<span class="px-2 py-0.5 rounded bg-amber-500/20 text-amber-300 border border-amber-500/40 text-[10px] font-bold">一部客先常駐混在（要確認）</span>';
+      } else if (data.mustMatch.trade === false) {
+        tradeBadge = '<span class="px-2 py-0.5 rounded bg-rose-500/20 text-rose-300 border border-rose-500/40 text-[10px] font-bold">客先常駐メイン（特定派遣）</span>';
+      }
+
+      let html = `
+        <!-- HEADER CARD: 企業サマリー & アナリスト判定 -->
+        <div class="bg-slate-800/80 border border-slate-700 rounded-2xl p-5 shadow-lg space-y-3">
+          <div class="flex flex-col md:flex-row md:items-center justify-between gap-3">
+            <div>
+              <div class="flex items-center gap-2 flex-wrap mb-1">
+                <span class="text-xs px-2.5 py-0.5 rounded-full bg-indigo-500/20 text-indigo-300 border border-indigo-500/30 font-bold">
+                  ${escapeHtml(data.businessType)}
+                </span>
+                <span class="text-xs text-slate-400 font-mono">
+                  ${escapeHtml(data.market)}
+                </span>
+              </div>
+              <h2 class="text-xl sm:text-2xl font-black text-white tracking-tight flex items-center gap-2">
+                <span>${escapeHtml(data.officialName)}</span>
+              </h2>
+            </div>
+
+            <!-- Score & Verdict Badge -->
+            <div class="flex items-center gap-3 bg-slate-900/90 border border-slate-700/80 p-3 rounded-xl shrink-0">
+              <div class="text-center pr-3 border-r border-slate-800">
+                <div class="text-[10px] text-indigo-400 font-bold uppercase">アナリストスコア</div>
+                <div class="text-2xl font-black text-transparent bg-clip-text bg-gradient-to-r from-amber-400 to-orange-400 font-mono">
+                  ${data.analystScore}
+                </div>
+              </div>
+              <div>
+                <div class="text-xs font-bold text-amber-300 mb-0.5">${escapeHtml(data.tierText)}</div>
+                <div class="text-[11px] text-slate-400">田中壮さんの4大必須条件連動</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- 4大必須条件の適合状況バッジ -->
+          <div class="pt-2 border-t border-slate-700/60 flex items-center gap-2 flex-wrap text-xs">
+            <span class="text-slate-400 text-[11px] font-semibold">4大必須条件適合:</span>
+            <span class="px-2 py-0.5 rounded bg-emerald-500/20 text-emerald-300 border border-emerald-500/40 text-[10px] font-bold">
+              ① 基本給21万以上: ${data.mustMatch.salary ? '○ クリア' : '× 要確認'}
+            </span>
+            ${tradeBadge}
+            <span class="px-2 py-0.5 rounded bg-emerald-500/20 text-emerald-300 border border-emerald-500/40 text-[10px] font-bold">
+              ③ 固定残業ゼロ: ${data.mustMatch.overtime ? '○ クリア' : '× 固定残業あり'}
+            </span>
+            <span class="px-2 py-0.5 rounded bg-emerald-500/20 text-emerald-300 border border-emerald-500/40 text-[10px] font-bold">
+              ④ 年休120日・残業20h: ${data.mustMatch.holidays ? '○ クリア' : '× 要確認'}
+            </span>
+          </div>
+
+          <p class="text-xs text-slate-300 leading-relaxed pt-1">
+            ${escapeHtml(data.overview)}
+          </p>
+        </div>
+
+        <!-- 2-COLUMN GRID: 事前知識 ＆ 見極め基準 -->
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
+          
+          <!-- BOX 1: 💡 説明会・座談会前に知っておくべき「事前知識＆裏の顔」 -->
+          <div class="bg-slate-800/60 border border-slate-700/80 rounded-2xl p-5 space-y-3.5 shadow-md">
+            <div class="flex items-center gap-2 border-b border-slate-700 pb-2.5">
+              <div class="p-1.5 rounded-lg bg-sky-500/20 text-sky-400">
+                <i data-lucide="info" class="w-4 h-4"></i>
+              </div>
+              <h3 class="text-sm font-bold text-white tracking-tight">
+                1. 事前知識 ＆ 覆い隠されやすい「裏の顔」
+              </h3>
+            </div>
+
+            <div class="space-y-3 text-xs">
+              <!-- 強み・魅力 -->
+              <div>
+                <span class="font-bold text-emerald-400 flex items-center gap-1 mb-1">
+                  <i data-lucide="check-circle-2" class="w-3.5 h-3.5"></i> 田中さんの軸から見た強み・魅力
+                </span>
+                <ul class="space-y-1 text-slate-300 pl-4 list-disc">
+                  ${data.strengths.map(s => `<li>${escapeHtml(s)}</li>`).join('')}
+                </ul>
+              </div>
+
+              <!-- 隠れたリスク・裏の顔 -->
+              <div class="p-3 rounded-xl bg-rose-500/10 border border-rose-500/30 space-y-1">
+                <span class="font-bold text-rose-300 flex items-center gap-1">
+                  <i data-lucide="alert-triangle" class="w-3.5 h-3.5 text-rose-400"></i>
+                  【要注意】説明会で覆い隠されやすいリスク・裏事情
+                </span>
+                <ul class="space-y-1 text-slate-300 pl-4 list-disc">
+                  ${data.hiddenRisks.map(r => `<li>${escapeHtml(r)}</li>`).join('')}
+                </ul>
+              </div>
+            </div>
+          </div>
+
+          <!-- BOX 2: 🎯 田中さんの就活主軸から整理した「見極めチェックリスト」 -->
+          <div class="bg-slate-800/60 border border-slate-700/80 rounded-2xl p-5 space-y-3.5 shadow-md">
+            <div class="flex items-center gap-2 border-b border-slate-700 pb-2.5">
+              <div class="p-1.5 rounded-lg bg-amber-500/20 text-amber-400">
+                <i data-lucide="check-square" class="w-4 h-4"></i>
+              </div>
+              <h3 class="text-sm font-bold text-white tracking-tight">
+                2. 説明会・座談会での「見極めチェックリスト」
+              </h3>
+            </div>
+
+            <div class="space-y-2 text-xs">
+              <p class="text-slate-400 leading-relaxed mb-2">
+                説明会や社員座談会を聞きながら、以下の条件がクリアできているかチェックしてください。
+              </p>
+              ${data.checkpoints.map((cp, idx) => `
+                <div class="flex items-start gap-2.5 p-2 rounded-xl bg-slate-900/60 border border-slate-800 text-slate-200">
+                  <input type="checkbox" id="checkCp_${idx}" class="mt-0.5 rounded border-slate-700 text-indigo-600 focus:ring-0 w-3.5 h-3.5">
+                  <label for="checkCp_${idx}" class="cursor-pointer select-none leading-relaxed flex-1">
+                    ${escapeHtml(cp)}
+                  </label>
+                </div>
+              `).join('')}
+            </div>
+          </div>
+
+        </div>
+
+        <!-- BOX 3: 🗣️ そのまま使える！厳選逆質問集（個別コピー機能付き） -->
+        <div class="bg-slate-800/80 border border-slate-700 rounded-2xl p-5 space-y-4 shadow-lg">
+          <div class="flex items-center justify-between border-b border-slate-700 pb-3 flex-wrap gap-2">
+            <div class="flex items-center gap-2">
+              <div class="p-1.5 rounded-lg bg-amber-500/20 text-amber-400">
+                <i data-lucide="message-square-quote" class="w-4 h-4"></i>
+              </div>
+              <div>
+                <h3 class="text-sm sm:text-base font-bold text-white">
+                  3. そのまま使える！実践・逆質問集（カンペ）
+                </h3>
+                <p class="text-xs text-slate-400">各質問の右側「コピー」ボタンで、スマホやメモ帳に即座に貼り付け可能です。</p>
+              </div>
+            </div>
+
+            <button type="button" onclick="copyAllCurrentQuestions()" class="text-xs px-3 py-1.5 rounded-xl bg-slate-700 hover:bg-slate-600 text-amber-300 font-bold border border-slate-600 flex items-center gap-1.5 transition">
+              <i data-lucide="copy" class="w-3.5 h-3.5"></i>
+              <span>全${filteredQuestions.length}件を一括コピー</span>
+            </button>
+          </div>
+
+          <!-- Questions List -->
+          <div class="space-y-3">
+            ${filteredQuestions.length === 0 ? `
+              <div class="py-8 text-center text-slate-400 text-xs bg-slate-900/40 rounded-xl border border-slate-800">
+                選択中のシチュエーションに該当する質問がありません。「すべて表示」をお試しください。
+              </div>
+            ` : filteredQuestions.map((q, idx) => `
+              <div class="bg-slate-900/80 hover:bg-slate-900 border border-slate-700/80 hover:border-slate-600 rounded-2xl p-4 transition space-y-2.5">
+                <div class="flex items-center justify-between gap-2">
+                  <span class="text-[11px] font-bold px-2.5 py-0.5 rounded-full ${
+                    q.situation === 'zadankai' ? 'bg-amber-500/20 text-amber-300 border border-amber-500/30' :
+                    (q.situation === 'session' ? 'bg-indigo-500/20 text-indigo-300 border border-indigo-500/30' : 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/30')
+                  }">
+                    ${escapeHtml(q.category)}
+                  </span>
+                  <button type="button" onclick="copySingleQuestion(\`${escapeHtml(q.question)}\`, this)" title="この質問文をコピー" class="p-1.5 rounded-lg bg-slate-800 hover:bg-amber-500 text-slate-300 hover:text-slate-950 text-xs font-semibold flex items-center gap-1 border border-slate-700 transition">
+                    <i data-lucide="copy" class="w-3.5 h-3.5"></i>
+                    <span>コピー</span>
+                  </button>
+                </div>
+
+                <div class="text-sm font-bold text-white leading-relaxed pl-1 cursor-pointer select-all" onclick="copySingleQuestion(\`${escapeHtml(q.question)}\`, this)">
+                  「${escapeHtml(q.question)}」
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-2 text-xs pt-2 border-t border-slate-800/80">
+                  <div class="bg-slate-950/60 p-2.5 rounded-xl border border-slate-850">
+                    <span class="text-amber-400 font-bold block mb-0.5">💡 質問の狙い（裏の目的）:</span>
+                    <p class="text-slate-300 leading-relaxed">${escapeHtml(q.aim)}</p>
+                  </div>
+                  <div class="bg-slate-950/60 p-2.5 rounded-xl border border-slate-850">
+                    <span class="text-sky-400 font-bold block mb-0.5">🔍 見極めポイント（回答からどう判断するか）:</span>
+                    <p class="text-slate-300 leading-relaxed">${escapeHtml(q.criteria)}</p>
+                  </div>
+                </div>
+              </div>
+            `).join('')}
+          </div>
+        </div>
+
+        <!-- BOX 4: 🛡️ 角を立てずに本音を聞き出すプロのテクニック -->
+        <div class="bg-gradient-to-r from-slate-900 via-indigo-950/30 to-slate-900 border border-slate-700/70 rounded-2xl p-5 space-y-3 shadow-md text-xs">
+          <div class="flex items-center gap-2 border-b border-slate-800 pb-2">
+            <i data-lucide="shield-check" class="w-4 h-4 text-emerald-400"></i>
+            <h4 class="font-bold text-white text-sm">
+              4. 座談会・質問会で「角を立てずに本音を聞き出す」プロの質問テクニック
+            </h4>
+          </div>
+
+          <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
+            <div class="p-3 rounded-xl bg-slate-850 border border-slate-750 space-y-1">
+              <span class="font-bold text-rose-400">❌ NGな聞き方（角が立つ）</span>
+              <p class="text-slate-400 text-[11px] line-through">「客先常駐やSESの割合はどのくらいですか？」</p>
+              <span class="font-bold text-emerald-300 block pt-1">⭕ OKな言い換え（好印象）</span>
+              <p class="text-slate-200 text-[11px]">「新卒1年目のチーム体制や、勤務場所（自社内とお客様先）が決定するフローを教えていただけますか？」</p>
+            </div>
+
+            <div class="p-3 rounded-xl bg-slate-850 border border-slate-750 space-y-1">
+              <span class="font-bold text-rose-400">❌ NGな聞き方（角が立つ）</span>
+              <p class="text-slate-400 text-[11px] line-through">「残業は多いですか？定時で帰れますか？」</p>
+              <span class="font-bold text-emerald-300 block pt-1">⭕ OKな言い換え（好印象）</span>
+              <p class="text-slate-200 text-[11px]">「平日の終業後や休日は、若手社員の皆さんはどのように過ごされることが多いですか？」</p>
+            </div>
+
+            <div class="p-3 rounded-xl bg-slate-850 border border-slate-750 space-y-1">
+              <span class="font-bold text-rose-400">❌ NGな聞き方（角が立つ）</span>
+              <p class="text-slate-400 text-[11px] line-through">「専門卒でも出世できますか？差別されませんか？」</p>
+              <span class="font-bold text-emerald-300 block pt-1">⭕ OKな言い換え（好印象）</span>
+              <p class="text-slate-200 text-[11px]">「若手や新卒で早期にプロジェクトリーダー等に登用された方には、どのような共通点や実績がありましたか？」</p>
+            </div>
+          </div>
+        </div>
+      `;
+
+      container.innerHTML = html;
+      lucide.createIcons();
+    }
+
+    // コピー機能
+    function copySingleQuestion(text, btnEl) {
+      if (!text) return;
+      navigator.clipboard.writeText(text).then(() => {
+        showToast('質問文をクリップボードにコピーしました！', 'success');
+        if (btnEl) {
+          const original = btnEl.innerHTML;
+          btnEl.innerHTML = '<i data-lucide="check" class="w-3.5 h-3.5 text-emerald-400"></i><span>済</span>';
+          lucide.createIcons();
+          setTimeout(() => {
+            btnEl.innerHTML = original;
+            lucide.createIcons();
+          }, 2000);
+        }
+      }).catch(err => {
+        console.error('Copy failed', err);
+        showToast('コピーに失敗しました', 'error');
+      });
+    }
+
+    function copyAllCurrentQuestions() {
+      if (!questionsGeneratedData || !questionsGeneratedData.questions) {
+        showToast('質問データがありません', 'error');
+        return;
+      }
+
+      const qList = questionsGeneratedData.questions.filter(q => {
+        if (activeQuestionSituation === 'all') return true;
+        return q.situation === activeQuestionSituation;
+      });
+
+      if (qList.length === 0) {
+        showToast('コピー対象の質問がありません', 'info');
+        return;
+      }
+
+      let text = `【${questionsGeneratedData.officialName}】説明会・座談会・面接用 逆質問リスト（田中壮専用カンペ）\n`;
+      text += `業界: ${questionsGeneratedData.businessType} | アナリストスコア: ${questionsGeneratedData.analystScore}/10\n`;
+      text += `==================================================\n\n`;
+
+      qList.forEach((q, idx) => {
+        text += `[質問${idx+1}] (${q.category})\n`;
+        text += `「${q.question}」\n`;
+        text += `  ・狙い: ${q.aim}\n`;
+        text += `  ・見極め: ${q.criteria}\n\n`;
+      });
+
+      text += `==================================================\n`;
+      text += `【注意すべき裏の顔】\n`;
+      questionsGeneratedData.hiddenRisks.forEach(r => {
+        text += `・${r}\n`;
+      });
+
+      navigator.clipboard.writeText(text).then(() => {
+        showToast(`全${qList.length}件の逆質問＆注意点を一括コピーしました！`, 'success');
+      }).catch(err => {
+        console.error('Batch copy failed', err);
+        showToast('一括コピーに失敗しました', 'error');
+      });
     }
 
     window.addEventListener('DOMContentLoaded', () => {
