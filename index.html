@@ -324,7 +324,7 @@
         left: 0; right: 0; bottom: 0;
         z-index: 40;
         display: grid !important;
-        grid-template-columns: repeat(5, minmax(0, 1fr));
+        grid-template-columns: repeat(4, minmax(0, 1fr));
         gap: 0;
         background: var(--ds-surface) !important;
         border-top: 1px solid var(--ds-border) !important;
@@ -662,6 +662,34 @@
       .ds-row .ds-actions { grid-column: 2 / 4; justify-content: flex-start; flex-wrap: wrap; }
     }
 
+    /* ホーム：予定・締切・オファーの1行 */
+    .ds-home-row {
+      display: flex; align-items: center; gap: 0.75rem; width: 100%;
+      padding: var(--ds-row-pad-y) 1rem; min-height: 3.25rem;
+      text-align: left; background: transparent; border: 0; border-bottom: 1px solid var(--ds-border);
+      color: var(--ds-text); font-size: 0.875rem; cursor: pointer;
+    }
+    .ds-home-row:last-child { border-bottom: 0; }
+    .ds-home-row:hover { background: var(--ds-row-hover); }
+    .ds-home-when { flex-shrink: 0; width: 6.5rem; font-size: 0.8125rem; color: var(--ds-text-sub); }
+    @media (max-width: 639px) { .ds-home-when { width: 4.75rem; } }
+    .ds-home-stage {
+      display: flex; flex-direction: column; align-items: flex-start; gap: 0.25rem;
+      padding: 0.75rem 1rem; background: var(--ds-surface); border: 0; text-align: left; cursor: pointer;
+    }
+    .ds-home-stage:hover { background: var(--ds-row-hover); }
+    .ds-home-stage:last-child:nth-child(odd) { grid-column: span 1; }
+
+    /* 企業：すべて の一覧 */
+    .ds-all-grid { grid-template-columns: minmax(0, 1fr) 11rem 6.5rem 11rem auto; }
+    .ds-col-status .ds-badge { white-space: normal; }
+    @media (max-width: 899px) {
+      .ds-all-grid { grid-template-columns: minmax(0, 1fr) auto; }
+      .ds-row.ds-all-grid .ds-col-status, .ds-row.ds-all-grid .ds-col-next { grid-column: 1 / 3; }
+      .ds-row.ds-all-grid .ds-col-score { grid-column: 2; grid-row: 1; justify-self: end; }
+      .ds-row.ds-all-grid .ds-actions { display: none; }
+    }
+
     /* カード表示 */
     .ds-card { padding: var(--ds-pad); display: flex; flex-direction: column; gap: 0.75rem; }
     .ds-card:hover { border-color: var(--ds-border-strong); }
@@ -777,38 +805,19 @@
         </div>
       </div>
 
-      <!-- Center Navigation Tabs: 5-column grid on mobile, flex on desktop -->
-      <nav class="hdr-nav grid grid-cols-5 md:flex items-center bg-slate-800/80 p-0.5 sm:p-1 rounded-xl border border-slate-700/60 shadow-inner w-full md:w-auto">
-        <button id="tabOffersBtn" onclick="switchTab('offers')" class="flex items-center justify-center gap-1 sm:gap-2 px-1 sm:px-3 py-1.5 sm:py-2 rounded-lg text-[11px] sm:text-sm font-semibold transition-all duration-150 bg-indigo-600 text-white shadow-sm text-center">
-          <i data-lucide="mail-check" class="w-3.5 h-3.5 sm:w-4 sm:h-4 shrink-0"></i>
-          <span class="hidden sm:inline">オファー管理</span>
-          <span class="sm:hidden">オファー</span>
-          <span id="offersBadgeCount" class="hdr-count text-[10px] sm:text-xs px-1 sm:px-1.5 py-0.2 rounded-full bg-indigo-800/80 text-indigo-200 shrink-0">0</span>
+      <!-- 画面の切り替え（パソコンではヘッダーの中、スマホでは画面の下に並ぶ） -->
+      <nav class="hdr-nav flex items-center" aria-label="画面の切り替え">
+        <button type="button" id="tabHomeBtn" data-tab="home" onclick="switchTab('home')" class="hdr-tab flex items-center justify-center gap-2">
+          <i data-lucide="house"></i><span>ホーム</span>
         </button>
-        <button id="tabPipelineBtn" onclick="switchTab('pipeline')" class="flex items-center justify-center gap-1 sm:gap-2 px-1 sm:px-3 py-1.5 sm:py-2 rounded-lg text-[11px] sm:text-sm font-semibold transition-all duration-150 text-slate-400 hover:text-slate-200 text-center">
-          <i data-lucide="kanban-square" class="w-3.5 h-3.5 sm:w-4 sm:h-4 shrink-0"></i>
-          <span class="hidden sm:inline">選考パイプライン</span>
-          <span class="sm:hidden">選考中</span>
-          <span id="pipelineBadgeCount" class="hdr-count text-[10px] sm:text-xs px-1 sm:px-1.5 py-0.2 rounded-full bg-slate-700 text-slate-300 shrink-0">0</span>
+        <button type="button" id="tabCompaniesBtn" data-tab="companies" onclick="switchTab('companies')" class="hdr-tab flex items-center justify-center gap-2">
+          <i data-lucide="building-2"></i><span>企業</span><span id="companiesBadgeCount" class="hdr-count">0</span>
         </button>
-        <button id="tabCalendarBtn" onclick="switchTab('calendar')" class="flex items-center justify-center gap-1 sm:gap-2 px-1 sm:px-3 py-1.5 sm:py-2 rounded-lg text-[11px] sm:text-sm font-semibold transition-all duration-150 text-slate-400 hover:text-slate-200 text-center">
-          <i data-lucide="calendar" class="w-3.5 h-3.5 sm:w-4 sm:h-4 shrink-0 text-sky-400"></i>
-          <span class="hidden sm:inline">選考カレンダー</span>
-          <span class="sm:hidden">カレンダー</span>
-          <span id="calendarBadgeCount" class="hdr-count text-[10px] sm:text-xs px-1 sm:px-1.5 py-0.2 rounded-full bg-sky-500/20 text-sky-300 border border-sky-500/30 shrink-0">0</span>
+        <button type="button" id="tabCalendarBtn" data-tab="calendar" onclick="switchTab('calendar')" class="hdr-tab flex items-center justify-center gap-2">
+          <i data-lucide="calendar"></i><span>カレンダー</span><span id="calendarBadgeCount" class="hdr-count">0</span>
         </button>
-        <!-- NEW: 逆質問・事前知識カンペ -->
-        <button id="tabQuestionsBtn" onclick="switchTab('questions')" class="flex items-center justify-center gap-1 sm:gap-2 px-1 sm:px-3 py-1.5 sm:py-2 rounded-lg text-[11px] sm:text-sm font-semibold transition-all duration-150 text-slate-400 hover:text-amber-300 text-center">
-          <i data-lucide="help-circle" class="w-3.5 h-3.5 sm:w-4 sm:h-4 shrink-0 text-amber-400"></i>
-          <span class="hidden sm:inline">逆質問・事前知識</span>
-          <span class="sm:hidden">逆質問</span>
-          <span class="hdr-extra text-[9px] sm:text-[10px] px-1 sm:px-1.5 py-0.2 rounded-full bg-amber-500/20 text-amber-300 border border-amber-500/30 shrink-0 font-bold">カンペ</span>
-        </button>
-        <button id="tabArchivedBtn" onclick="switchTab('archived')" class="flex items-center justify-center gap-1 sm:gap-2 px-1 sm:px-3 py-1.5 sm:py-2 rounded-lg text-[11px] sm:text-sm font-semibold transition-all duration-150 text-slate-400 hover:text-slate-200 text-center">
-          <i data-lucide="archive" class="w-3.5 h-3.5 sm:w-4 sm:h-4 shrink-0"></i>
-          <span class="hidden sm:inline">保管庫</span>
-          <span class="sm:hidden">保管庫</span>
-          <span id="archivedBadgeCount" class="hdr-count text-[10px] sm:text-xs px-1 sm:px-1.5 py-0.2 rounded-full bg-slate-700 text-slate-300 shrink-0">0</span>
+        <button type="button" id="tabQuestionsBtn" data-tab="questions" onclick="switchTab('questions')" class="hdr-tab flex items-center justify-center gap-2">
+          <i data-lucide="help-circle"></i><span>逆質問</span>
         </button>
       </nav>
 
@@ -847,6 +856,51 @@
 
   <!-- Main Container -->
   <main class="flex-1 max-w-[1850px] w-full mx-auto p-2.5 sm:p-6 lg:p-8 flex flex-col">
+
+    <!-- ============================================== -->
+    <!-- ホーム（今日やること） -->
+    <!-- ============================================== -->
+    <section id="viewHome" class="ds-page flex-1 flex flex-col gap-4 sm:gap-6 hidden">
+      <div>
+        <h2 class="ds-h1">ホーム</h2>
+        <p class="ds-sub mt-1"><span id="homeDateLabel"></span>の予定・締切・新しいオファーをまとめて表示します。</p>
+      </div>
+      <div id="homeContent"></div>
+    </section>
+
+    <!-- ============================================== -->
+    <!-- 企業：すべて / オファー / 選考中 / 保管庫 の切り替え -->
+    <!-- ============================================== -->
+    <div id="companiesSubnav" class="ds-tabbar ds-page mb-4 sm:mb-6 hidden" role="tablist" aria-label="企業の表示">
+      <button type="button" class="ds-tab" role="tab" data-view="all" onclick="switchTab('all')">すべて <span id="allBadgeCount" class="ds-sub ds-num">0</span></button>
+      <button type="button" class="ds-tab" role="tab" data-view="offers" onclick="switchTab('offers')">オファー <span id="offersBadgeCount" class="ds-sub ds-num">0</span></button>
+      <button type="button" class="ds-tab" role="tab" data-view="pipeline" onclick="switchTab('pipeline')">選考中 <span id="pipelineBadgeCount" class="ds-sub ds-num">0</span></button>
+      <button type="button" class="ds-tab" role="tab" data-view="archived" onclick="switchTab('archived')">保管庫 <span id="archivedBadgeCount" class="ds-sub ds-num">0</span></button>
+    </div>
+
+    <!-- 企業：すべて（オファー・選考中・保管庫をまとめた一覧） -->
+    <section id="viewCompaniesAll" class="ds-page flex-1 flex flex-col gap-4 hidden">
+      <div>
+        <h2 class="ds-h1">企業</h2>
+        <p class="ds-sub mt-1">オファー・選考中・保管庫の企業をまとめて表示します。<span id="companiesAllCount" class="ds-num">0社</span></p>
+      </div>
+      <div class="flex flex-col sm:flex-row gap-2">
+        <label class="ds-input-icon flex-1">
+          <span class="sr-only">企業を検索</span>
+          <i data-lucide="search"></i>
+          <input type="text" id="companiesAllSearch" oninput="renderCompaniesAll()" placeholder="企業名・媒体・状態で検索" class="ds-input">
+        </label>
+        <label class="sm:w-60">
+          <span class="sr-only">並び順</span>
+          <select id="companiesAllSort" onchange="renderCompaniesAll()" class="ds-select">
+            <option value="next">並び順：次の予定が近い順</option>
+            <option value="score">並び順：スコアが高い順</option>
+            <option value="name">並び順：会社名順</option>
+          </select>
+        </label>
+      </div>
+      <div id="companiesAllContainer"></div>
+    </section>
 
     <!-- ============================================== -->
     <!-- VIEW 1: オファー・スカウト管理ビュー -->
@@ -2035,6 +2089,17 @@
       <div class="p-6">
         <!-- OFFER FORM -->
         <form id="offerCreateForm" onsubmit="handleCreateOffer(event)" class="space-y-4">
+          <!-- メールから読み取る：OfferBox などの通知メールを貼り付けると、下の項目に自動で入力する -->
+          <div class="ds-panel ds-page p-3 sm:p-4 space-y-2">
+            <div class="ds-h2">メールを貼り付けて自動入力</div>
+            <p class="ds-sub">OfferBox・マイナビ・Re就活・paiza などから届いたメールの本文をそのまま貼り付けると、会社名・媒体・オファーの種類・期限を読み取って下の欄に入力します。</p>
+            <textarea id="offerEmailPaste" rows="4" class="ds-input" style="height: auto; padding: 0.5rem 0.75rem;" placeholder="ここにメールの本文を貼り付け"></textarea>
+            <div class="flex items-center gap-2 flex-wrap">
+              <button type="button" class="ds-btn" onclick="fillOfferFormFromEmail()"><i data-lucide="clipboard-paste"></i><span>読み取って入力する</span></button>
+              <span id="offerEmailResult" class="ds-sub" role="status"></span>
+            </div>
+          </div>
+          <input type="hidden" id="offerReceivedDate">
           <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
               <label class="block text-xs font-medium text-slate-300 mb-1">企業名 <span class="text-rose-400">*</span></label>
@@ -4650,83 +4715,306 @@
     }
 
     function updateBadges() {
-      const activeOffersCount = offers.filter(o => o.status !== '辞退').length;
-      const offBadge = document.getElementById('offersBadgeCount');
-      if (offBadge) offBadge.innerText = activeOffersCount;
-      const pipeBadge = document.getElementById('pipelineBadgeCount');
-      if (pipeBadge) pipeBadge.innerText = pipeline.length;
-      const archBadge = document.getElementById('archivedBadgeCount');
-      if (archBadge) archBadge.innerText = archivedPipeline.length;
-      const calBadge = document.getElementById('calendarBadgeCount');
-      if (calBadge) calBadge.innerText = calendarEvents.length;
+      const setCount = (id, value) => {
+        const el = document.getElementById(id);
+        if (el) el.innerText = value;
+      };
+      const activeOffers = offers.filter(o => o.status !== '辞退' && !isCompanyInPipeline(o.companyName));
+      setCount('offersBadgeCount', activeOffers.length);
+      setCount('pipelineBadgeCount', pipeline.length);
+      setCount('archivedBadgeCount', archivedPipeline.length);
+      setCount('allBadgeCount', activeOffers.length + pipeline.length + archivedPipeline.length);
+      setCount('companiesBadgeCount', activeOffers.length + pipeline.length);
+      setCount('calendarBadgeCount', calendarEvents.length);
       const calTotalBadge = document.getElementById('calendarTotalEventsBadge');
       if (calTotalBadge) calTotalBadge.innerText = `${calendarEvents.length}件`;
     }
 
     // ==========================================
-    // Tab Navigation
+    // 画面の切り替え
+    // ヘッダーのタブは「ホーム / 企業 / カレンダー / 逆質問」の4つ。
+    // 「企業」の中に「すべて / オファー / 選考中 / 保管庫」の4つの表示がある。
     // ==========================================
+    const VIEW_IDS = {
+      home: 'viewHome',
+      all: 'viewCompaniesAll',
+      offers: 'viewOffers',
+      pipeline: 'viewPipeline',
+      archived: 'viewArchived',
+      calendar: 'viewCalendar',
+      questions: 'viewQuestions'
+    };
+    const COMPANY_VIEWS = ['all', 'offers', 'pipeline', 'archived'];
+    let lastCompanyView = 'all';
+
     function switchTab(tab) {
-      const tabOffersBtn = document.getElementById('tabOffersBtn');
-      const tabPipelineBtn = document.getElementById('tabPipelineBtn');
-      const tabCalendarBtn = document.getElementById('tabCalendarBtn');
-      const tabQuestionsBtn = document.getElementById('tabQuestionsBtn');
-      const tabArchivedBtn = document.getElementById('tabArchivedBtn');
-      const viewOffers = document.getElementById('viewOffers');
-      const viewPipeline = document.getElementById('viewPipeline');
-      const viewCalendar = document.getElementById('viewCalendar');
-      const viewQuestions = document.getElementById('viewQuestions');
-      const viewArchived = document.getElementById('viewArchived');
+      if (tab === 'companies') tab = lastCompanyView;
+      if (!VIEW_IDS[tab]) tab = 'home';
+      const isCompanyView = COMPANY_VIEWS.includes(tab);
+      if (isCompanyView) lastCompanyView = tab;
 
-      const baseInactive = 'flex items-center justify-center gap-1 sm:gap-2 px-1 sm:px-3 py-1.5 sm:py-2 rounded-lg text-[11px] sm:text-sm font-semibold transition-all duration-150 text-slate-400 hover:text-slate-200 text-center';
-      const baseActiveIndigo = 'flex items-center justify-center gap-1 sm:gap-2 px-1 sm:px-3 py-1.5 sm:py-2 rounded-lg text-[11px] sm:text-sm font-semibold transition-all duration-150 bg-indigo-600 text-white shadow-sm text-center';
-      const baseActiveSky = 'flex items-center justify-center gap-1 sm:gap-2 px-1 sm:px-3 py-1.5 sm:py-2 rounded-lg text-[11px] sm:text-sm font-semibold transition-all duration-150 bg-sky-600 text-white shadow-sm text-center';
-      const baseActiveAmber = 'flex items-center justify-center gap-1 sm:gap-2 px-1 sm:px-3 py-1.5 sm:py-2 rounded-lg text-[11px] sm:text-sm font-semibold transition-all duration-150 bg-gradient-to-r from-amber-500 to-orange-500 text-slate-950 font-bold shadow-md text-center';
-      const baseActiveSlate = 'flex items-center justify-center gap-1 sm:gap-2 px-1 sm:px-3 py-1.5 sm:py-2 rounded-lg text-[11px] sm:text-sm font-semibold transition-all duration-150 bg-slate-700 text-white shadow-sm text-center';
+      Object.entries(VIEW_IDS).forEach(([key, id]) => {
+        const view = document.getElementById(id);
+        if (view) view.classList.toggle('hidden', key !== tab);
+      });
 
-      // Reset tabs
-      if (tabOffersBtn) tabOffersBtn.className = baseInactive;
-      if (tabPipelineBtn) tabPipelineBtn.className = baseInactive;
-      if (tabCalendarBtn) tabCalendarBtn.className = baseInactive;
-      if (tabQuestionsBtn) tabQuestionsBtn.className = baseInactive;
-      if (tabArchivedBtn) tabArchivedBtn.className = baseInactive;
-
-      if (viewOffers) viewOffers.classList.add('hidden');
-      if (viewPipeline) viewPipeline.classList.add('hidden');
-      if (viewCalendar) viewCalendar.classList.add('hidden');
-      if (viewQuestions) viewQuestions.classList.add('hidden');
-      if (viewArchived) viewArchived.classList.add('hidden');
-
-      if (tab === 'offers') {
-        if (tabOffersBtn) tabOffersBtn.className = baseActiveIndigo;
-        if (viewOffers) viewOffers.classList.remove('hidden');
-        renderOffers();
-      } else if (tab === 'pipeline') {
-        if (tabPipelineBtn) tabPipelineBtn.className = baseActiveIndigo;
-        if (viewPipeline) viewPipeline.classList.remove('hidden');
-        renderPipeline();
-      } else if (tab === 'calendar') {
-        if (tabCalendarBtn) tabCalendarBtn.className = baseActiveSky;
-        if (viewCalendar) viewCalendar.classList.remove('hidden');
-        setCalendarViewSubMode(calendarViewSubMode);
-      } else if (tab === 'questions') {
-        if (tabQuestionsBtn) tabQuestionsBtn.className = baseActiveAmber;
-        if (viewQuestions) viewQuestions.classList.remove('hidden');
-        initQuestionsView();
-      } else if (tab === 'archived') {
-        if (tabArchivedBtn) tabArchivedBtn.className = baseActiveSlate;
-        if (viewArchived) viewArchived.classList.remove('hidden');
-        renderArchived();
-      }
-
-      // 新デザインのヘッダー用：タブの目印クラスと「選択中」の印を付け直す
-      const tabButtons = { offers: tabOffersBtn, pipeline: tabPipelineBtn, calendar: tabCalendarBtn, questions: tabQuestionsBtn, archived: tabArchivedBtn };
-      Object.entries(tabButtons).forEach(([key, btn]) => {
-        if (!btn) return;
-        btn.classList.add('hdr-tab');
-        if (key === tab) btn.setAttribute('aria-current', 'page');
+      // ヘッダーのタブ：「企業」は4つの表示のどれを開いていても選択中にする
+      const navKey = isCompanyView ? 'companies' : tab;
+      document.querySelectorAll('.hdr-tab[data-tab]').forEach(btn => {
+        if (btn.dataset.tab === navKey) btn.setAttribute('aria-current', 'page');
         else btn.removeAttribute('aria-current');
       });
+
+      // 企業の中の切り替え
+      const subnav = document.getElementById('companiesSubnav');
+      if (subnav) subnav.classList.toggle('hidden', !isCompanyView);
+      document.querySelectorAll('#companiesSubnav [data-view]').forEach(btn => {
+        btn.setAttribute('aria-selected', String(btn.dataset.view === tab));
+      });
+
+      if (tab === 'home') renderHome();
+      else if (tab === 'all') renderCompaniesAll();
+      else if (tab === 'offers') renderOffers();
+      else if (tab === 'pipeline') renderPipeline();
+      else if (tab === 'archived') renderArchived();
+      else if (tab === 'calendar') setCalendarViewSubMode(calendarViewSubMode);
+      else if (tab === 'questions') initQuestionsView();
+
+      updateBadges();
+      window.scrollTo(0, 0);
+      lucide.createIcons();
+    }
+
+    // ==========================================
+    // ホーム（今日やること）
+    // ==========================================
+    function daysFromToday(dateStr) {
+      if (!dateStr) return null;
+      const today = new Date();
+      today.setHours(0, 0, 0, 0);
+      const target = new Date(dateStr);
+      target.setHours(0, 0, 0, 0);
+      return Math.round((target - today) / (1000 * 60 * 60 * 24));
+    }
+
+    function formatDateLabel(dateStr) {
+      const diff = daysFromToday(dateStr);
+      if (diff === 0) return '今日';
+      if (diff === 1) return '明日';
+      const d = new Date(dateStr);
+      const week = ['日', '月', '火', '水', '木', '金', '土'][d.getDay()];
+      return `${d.getMonth() + 1}/${d.getDate()}（${week}）`;
+    }
+
+    // その会社の、今日以降でいちばん近いカレンダーの予定
+    function nextEventForCompany(companyName) {
+      const key = normalizeCompanyName(companyName);
+      return calendarEvents
+        .filter(e => normalizeCompanyName(e.companyName) === key && daysFromToday(e.startDate) !== null && daysFromToday(e.startDate) >= 0)
+        .sort((a, b) => `${a.startDate} ${a.startTime || ''}`.localeCompare(`${b.startDate} ${b.startTime || ''}`))[0] || null;
+    }
+
+    function homeSectionHtml(title, rowsHtml, emptyText, moreAction) {
+      return `
+        <section class="ds-panel">
+          <div class="flex items-center justify-between gap-2 px-4 py-3" style="border-bottom: 1px solid var(--ds-border);">
+            <h3 class="ds-h2">${title}</h3>
+            ${moreAction || ''}
+          </div>
+          ${rowsHtml || `<p class="ds-sub px-4 py-4">${emptyText}</p>`}
+        </section>
+      `;
+    }
+
+    function homeRowHtml({ when, title, sub, badge, onclick }) {
+      return `
+        <button type="button" class="ds-home-row" onclick="${onclick}">
+          <span class="ds-home-when ds-num">${when}</span>
+          <span class="min-w-0 flex-1">
+            <span class="block font-medium truncate">${title}</span>
+            ${sub ? `<span class="block ds-sub truncate">${sub}</span>` : ''}
+          </span>
+          ${badge || ''}
+        </button>
+      `;
+    }
+
+    function renderHome() {
+      const container = document.getElementById('homeContent');
+      if (!container) return;
+      const today = new Date();
+      const week = ['日', '月', '火', '水', '木', '金', '土'][today.getDay()];
+      document.getElementById('homeDateLabel').innerText = `${today.getMonth() + 1}月${today.getDate()}日（${week}）`;
+
+      // 1. 今日と明日の予定
+      const upcoming = calendarEvents
+        .filter(e => { const d = daysFromToday(e.startDate); return d === 0 || d === 1; })
+        .sort((a, b) => `${a.startDate} ${a.startTime || ''}`.localeCompare(`${b.startDate} ${b.startTime || ''}`));
+      const upcomingRows = upcoming.map(e => homeRowHtml({
+        when: `${formatDateLabel(e.startDate)} ${escapeHtml(e.startTime || '')}`,
+        title: escapeHtml(e.companyName),
+        sub: escapeHtml([e.eventType, e.locationType].filter(Boolean).join(' ・ ')),
+        onclick: `openCalendarEventDetail('${safeId(e.id)}')`
+      })).join('');
+
+      // 2. 7日以内の締切（オファーの返信期限と、カレンダーの締切の予定）
+      const deadlines = [];
+      offers.forEach(o => {
+        if (!o.deadline || o.status === '辞退' || o.status === '選考移行済' || isCompanyInPipeline(o.companyName)) return;
+        const d = daysFromToday(o.deadline);
+        if (d !== null && d >= 0 && d <= 7) {
+          deadlines.push({ date: o.deadline, title: o.companyName, sub: `オファーの返信期限 ・ ${o.media || ''}`, onclick: `openOfferAsDetailModal('${safeId(o.id)}')` });
+        }
+      });
+      calendarEvents.forEach(e => {
+        if (!/締切|期限|ES|Webテスト/.test(e.eventType || '')) return;
+        if (String(e.id).startsWith('cal-offer-')) return; // オファーの期限から作った予定は上と重なるので除く
+        const d = daysFromToday(e.startDate);
+        if (d !== null && d >= 0 && d <= 7) {
+          deadlines.push({ date: e.startDate, title: e.companyName, sub: e.title || e.eventType, onclick: `openCalendarEventDetail('${safeId(e.id)}')` });
+        }
+      });
+      deadlines.sort((a, b) => a.date.localeCompare(b.date));
+      // 同じ会社・同じ日の締切は1つにまとめる（オファーの返信期限とカレンダーの締切が重なることがあるため）
+      const seenDeadlines = new Set();
+      const uniqueDeadlines = deadlines.filter(x => {
+        const key = `${normalizeCompanyName(x.title)}|${x.date}`;
+        if (seenDeadlines.has(key)) return false;
+        seenDeadlines.add(key);
+        return true;
+      });
+      const deadlineRows = uniqueDeadlines.map(x => homeRowHtml({
+        when: formatDateLabel(x.date),
+        title: escapeHtml(x.title),
+        sub: escapeHtml(x.sub),
+        badge: dsDeadlineHtml(x.date),
+        onclick: x.onclick
+      })).join('');
+
+      // 3. 未確認のオファー
+      const unread = offers.filter(o => !o.isViewed && o.status !== '辞退' && !isCompanyInPipeline(o.companyName));
+      const unreadRows = unread.map(o => homeRowHtml({
+        when: escapeHtml(o.receivedDate ? formatDateLabel(o.receivedDate) : ''),
+        title: escapeHtml(o.companyName),
+        sub: escapeHtml([o.media, o.offerType].filter(Boolean).join(' ・ ')),
+        badge: dsScoreHtml(o),
+        onclick: `openOfferAsDetailModal('${safeId(o.id)}')`
+      })).join('');
+
+      // 4. 選考の状況（段階ごとの社数）
+      const stageCounts = PIPELINE_STAGES.map(stage => ({ stage, count: pipeline.filter(p => p.stage === stage).length }));
+      const stageHtml = `
+        <div class="grid grid-cols-2 sm:grid-cols-3 gap-px" style="background: var(--ds-border);">
+          ${stageCounts.map(s => `
+            <button type="button" class="ds-home-stage" onclick="switchTab('pipeline')">
+              <span class="ds-sub">${escapeHtml(s.stage)}</span>
+              <span class="ds-stat-value" style="font-size: 1.25rem; ${s.count ? '' : 'color: var(--ds-text-disabled);'}">${s.count}</span>
+            </button>
+          `).join('')}
+        </div>
+      `;
+
+      container.innerHTML = `
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
+          ${homeSectionHtml('今日と明日の予定', upcomingRows, '今日と明日の予定はありません。', `<button type="button" class="ds-btn ds-btn-text" onclick="switchTab('calendar')">カレンダー</button>`)}
+          ${homeSectionHtml('7日以内の締切', deadlineRows, '7日以内の締切はありません。')}
+          ${homeSectionHtml(`未確認のオファー <span class="ds-sub ds-num">${unread.length}件</span>`, unreadRows, '未確認のオファーはありません。', `<button type="button" class="ds-btn ds-btn-text" onclick="switchTab('offers')">オファー一覧</button>`)}
+          ${homeSectionHtml(`選考中の企業 <span class="ds-sub ds-num">${pipeline.length}社</span>`, stageHtml, '', `<button type="button" class="ds-btn ds-btn-text" onclick="switchTab('pipeline')">選考の一覧</button>`)}
+        </div>
+      `;
+      lucide.createIcons();
+    }
+
+    // ==========================================
+    // 企業：すべて（オファー・選考中・保管庫を1つの一覧にまとめて表示）
+    // データはこれまでどおり3つに分けて保存し、表示のときだけまとめる
+    // ==========================================
+    function getAllCompanyRows() {
+      const rows = [];
+      offers.forEach(o => {
+        if (isCompanyInPipeline(o.companyName)) return;
+        rows.push({ kind: 'offer', item: o, status: o.status === '辞退' ? 'オファー（辞退）' : 'オファー', open: `openOfferAsDetailModal('${safeId(o.id)}')` });
+      });
+      pipeline.forEach(p => rows.push({ kind: 'pipeline', item: p, status: p.stage, open: `openPipelineDetailModal('${safeId(p.id)}')` }));
+      archivedPipeline.forEach(a => rows.push({ kind: 'archived', item: a, status: '保管庫', open: `openArchivedDetailModal('${safeId(a.id)}')` }));
+      rows.forEach(r => {
+        // 次の予定：オファーは返信期限、それ以外はカレンダーの予定
+        if (r.kind === 'offer' && r.item.deadline && daysFromToday(r.item.deadline) >= 0) {
+          r.nextDate = r.item.deadline;
+          r.nextText = '返信期限';
+        } else if (r.kind !== 'archived') {
+          const ev = nextEventForCompany(r.item.companyName);
+          if (ev) {
+            r.nextDate = ev.startDate;
+            r.nextText = ev.eventType || ev.title || '予定';
+          }
+        }
+        const rep = getOfferReport(r.item);
+        r.score = rep && typeof rep.score === 'number' ? rep.score : -1;
+      });
+      return rows;
+    }
+
+    function renderCompaniesAll() {
+      const container = document.getElementById('companiesAllContainer');
+      if (!container) return;
+      const search = (document.getElementById('companiesAllSearch')?.value || '').toLowerCase().trim();
+      const sort = document.getElementById('companiesAllSort')?.value || 'next';
+
+      let rows = getAllCompanyRows();
+      if (search) {
+        rows = rows.filter(r => [r.item.companyName, r.item.media, r.status, r.item.notes]
+          .some(v => (v || '').toLowerCase().includes(search)));
+      }
+      const kindOrder = { pipeline: 0, offer: 1, archived: 2 };
+      rows.sort((a, b) => {
+        if (sort === 'score') return b.score - a.score;
+        if (sort === 'name') return (a.item.companyName || '').localeCompare(b.item.companyName || '', 'ja');
+        // 次の予定が近い順（予定がないものは後ろ、保管庫はいちばん後ろ）
+        if (kindOrder[a.kind] === 2 || kindOrder[b.kind] === 2) return kindOrder[a.kind] - kindOrder[b.kind];
+        if (a.nextDate && b.nextDate) return a.nextDate.localeCompare(b.nextDate);
+        if (a.nextDate) return -1;
+        if (b.nextDate) return 1;
+        return kindOrder[a.kind] - kindOrder[b.kind];
+      });
+
+      document.getElementById('companiesAllCount').innerText = `${rows.length}社`;
+
+      if (!rows.length) {
+        container.innerHTML = `<div class="ds-panel py-12 px-4 text-center"><p class="ds-h2">該当する企業はありません</p></div>`;
+        return;
+      }
+
+      const statusBadge = r => {
+        if (r.kind === 'archived') return `<span class="ds-badge ds-badge-neutral">保管庫</span>`;
+        if (r.kind === 'offer') return `<span class="ds-badge ds-badge-info">${escapeHtml(r.status)}</span>`;
+        if ((r.status || '').includes('内定')) return `<span class="ds-badge ds-badge-good">${escapeHtml(r.status)}</span>`;
+        return `<span class="ds-badge ds-badge-neutral" style="color: var(--ds-text);">${escapeHtml(r.status)}</span>`;
+      };
+
+      container.innerHTML = `
+        <div class="ds-panel">
+          <div class="ds-list-head ds-all-grid" role="row">
+            <span>企業</span><span>状態</span><span>スコア</span><span>次の予定</span><span></span>
+          </div>
+          ${rows.map(r => `
+            <div class="ds-row ds-all-grid" role="row">
+              <div class="min-w-0">
+                <button type="button" class="ds-company" onclick="${r.open}">${escapeHtml(r.item.companyName)}</button>
+                <div class="ds-sub truncate">${escapeHtml(r.item.media || '')}</div>
+              </div>
+              <div class="ds-col-status">${statusBadge(r)}</div>
+              <div class="ds-col-score">${dsScoreHtml(r.item)}</div>
+              <div class="ds-col-next">
+                ${r.nextDate ? `<span class="ds-num">${formatDateLabel(r.nextDate)}</span> <span class="ds-sub">${escapeHtml(r.nextText)}</span>` : '<span class="ds-sub">予定なし</span>'}
+              </div>
+              <div class="ds-actions">
+                <button type="button" class="ds-btn ds-btn-text" onclick="${r.open}">詳細</button>
+              </div>
+            </div>
+          `).join('')}
+        </div>
+      `;
       lucide.createIcons();
     }
 
@@ -4889,6 +5177,113 @@
       if (status === '辞退') cls = 'bg-slate-800 text-slate-500 border border-slate-700';
       if (status === '選考移行済') cls = 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/30';
       return `<span class="text-[11px] font-medium px-2 py-0.5 rounded-md ${cls}">${escapeHtml(status)}</span>`;
+    }
+
+    // ==========================================
+    // 就活サービスの通知メールの読み取り
+    // OfferBox・マイナビ・Re就活・paiza などから届くメールの本文から、オファー登録に必要な情報を取り出す。
+    // 画面の「メールから読み取る」と、Gmail からの自動取り込み（今後追加）の両方で使うので、
+    // 画面（DOM）には触らず、文字列を受け取って結果のオブジェクトを返すだけにしておく。
+    // ==========================================
+    const EMAIL_MEDIA_RULES = [
+      { media: 'OfferBox', pattern: /offerbox|オファーボックス/i },
+      { media: 'paiza新卒', pattern: /paiza/i },
+      { media: 'Re就活キャンパス', pattern: /re就活|re-katsu|rekatsu/i },
+      { media: 'マイナビ', pattern: /マイナビ|mynavi/i },
+      { media: 'リクナビ', pattern: /リクナビ|rikunabi/i },
+      { media: 'Wantedly', pattern: /wantedly/i }
+    ];
+
+    // 上から順に判定する（「選考免除」と「説明会」が両方書かれていたら、選考免除を優先する）
+    const EMAIL_OFFER_TYPE_RULES = [
+      { type: '特別選考/1次免除', pattern: /選考免除|一次免除|1次免除|書類免除|特別選考|特別ルート|ゴールデンスカウト|プラチナスカウト/ },
+      { type: 'カジュアル面談確約', pattern: /面談確約|カジュアル面談/ },
+      { type: 'インターン・説明会案内', pattern: /インターン|仕事体験|1day|ワンデー/i },
+      { type: '会社説明会案内', pattern: /説明会|セミナー/ }
+    ];
+
+    const COMPANY_FORMS = '株式会社|合同会社|有限会社|（株）|\\(株\\)';
+    // 会社名のあとに続きやすい言葉。ここで会社名を区切る
+    const COMPANY_STOP = '(?=から|より|様|さま|さん|の(?:オファー|選考|説明会|インターン|採用|人事)|が|へ|に(?:て|つ)|で|\\s|、|。|！|!|【|】|「|」|『|』|$)';
+
+    function toLocalDateString(date) {
+      const y = date.getFullYear();
+      const m = String(date.getMonth() + 1).padStart(2, '0');
+      const d = String(date.getDate()).padStart(2, '0');
+      return `${y}-${m}-${d}`;
+    }
+
+    // 「2026年10月30日」「2026/10/30」「10月30日」「10/30」を YYYY-MM-DD にする。年がないときは基準日から推測する
+    function parseJapaneseDate(text, baseDate) {
+      let m = text.match(/(20\d{2})\s*[年\/\-.]\s*(\d{1,2})\s*[月\/\-.]\s*(\d{1,2})/);
+      if (m) return `${m[1]}-${m[2].padStart(2, '0')}-${m[3].padStart(2, '0')}`;
+      m = text.match(/(\d{1,2})\s*[月\/]\s*(\d{1,2})\s*日?/);
+      if (!m) return '';
+      const month = Number(m[1]);
+      const day = Number(m[2]);
+      if (month < 1 || month > 12 || day < 1 || day > 31) return '';
+      let year = baseDate.getFullYear();
+      // 基準日より2か月以上前の日付なら、翌年の日付とみなす（例：12月に届いたメールの「1月10日まで」）
+      const candidate = new Date(year, month - 1, day);
+      if (candidate < new Date(baseDate.getFullYear(), baseDate.getMonth() - 2, baseDate.getDate())) year += 1;
+      return `${year}-${String(month).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+    }
+
+    function findCompanyName(text, knownCompanies) {
+      // すでに登録済みの会社名が本文にあれば、それを使う（表記ゆれを防ぐため、両方を同じ形に整えてから比べる）
+      const normalizedText = normalizeCompanyName(text);
+      for (const name of knownCompanies) {
+        const core = normalizeCompanyName(name);
+        if (core && core.length >= 2 && normalizedText.includes(core)) return name;
+      }
+      // 「株式会社○○」型と「○○株式会社」型の両方を探し、メールの中で先に出てくるほうを使う
+      // （件名に会社名があり、本文の後ろに「株式会社 人事部」のような署名がある場合に、件名のほうを選ぶため）
+      const prefix = text.match(new RegExp(`(?:${COMPANY_FORMS})\\s?[^\\s、。！？!【】「」『』()（）<>]+?${COMPANY_STOP}`));
+      const suffix = text.match(new RegExp(`[^\\s、。！？!【】「」『』()（）<>]{1,30}?(?:${COMPANY_FORMS})`));
+      let found = '';
+      if (prefix && suffix) found = suffix.index < prefix.index ? suffix[0] : prefix[0];
+      else found = prefix ? prefix[0] : (suffix ? suffix[0] : '');
+      return found.replace(/^[：:・\s]+/, '').replace(/[（(]株[）)]/, '株式会社').trim();
+    }
+
+    function parseRecruitEmail(rawText, options = {}) {
+      const text = String(rawText || '').replace(/\r\n?/g, '\n');
+      const lines = text.split('\n').map(l => l.trim()).filter(Boolean);
+      const baseDate = options.receivedDate ? new Date(options.receivedDate) : new Date();
+      const knownCompanies = options.knownCompanies || [];
+
+      const mediaRule = EMAIL_MEDIA_RULES.find(r => r.pattern.test(text));
+      const typeRule = EMAIL_OFFER_TYPE_RULES.find(r => r.pattern.test(text));
+
+      // 期限：「期限」「締切」「まで」を含む行から日付を探す
+      let deadline = '';
+      for (const line of lines) {
+        if (/期限|締切|締め切り|〆切|までに|まで(?:に|の|ご)|まで$/.test(line)) {
+          deadline = parseJapaneseDate(line, baseDate);
+          if (deadline) break;
+        }
+      }
+
+      const urls = text.match(/https?:\/\/[^\s<>"'）)」]+/g) || [];
+      const serviceUrl = urls.find(u => /offerbox|mynavi|re-katsu|paiza|rikunabi|wantedly/i.test(u));
+
+      // メモ：件名と、本文のうち内容のある最初の数行（あいさつ・URL・署名を除く）
+      const meaningful = lines.filter(l =>
+        !/^https?:\/\//.test(l) &&
+        !/^(件名|差出人|宛先|from|to|subject|date)[:：]/i.test(l) &&
+        !/様$|さん$|お世話になっております|配信|このメールは|^-+$|^=+$/.test(l)
+      );
+      const notes = meaningful.slice(0, 3).join(' ').slice(0, 200);
+
+      return {
+        companyName: findCompanyName(text, knownCompanies),
+        media: mediaRule ? mediaRule.media : 'その他',
+        offerType: typeRule ? typeRule.type : '通常選考案内',
+        deadline,
+        receivedDate: toLocalDateString(baseDate),
+        url: serviceUrl || urls[0] || '',
+        notes
+      };
     }
 
     // ==========================================
@@ -6561,7 +6956,8 @@
         url: document.getElementById('offerUrl').value.trim(),
         gmailUrl: (document.getElementById('offerGmailUrl')?.value || '').trim(),
         notes: document.getElementById('offerNotes').value.trim(),
-        receivedDate: new Date().toISOString().split('T')[0],
+        // メールから読み取った受信日があればそれを使う（toISOString は世界標準時なので、日本の朝だと前日になってしまう）
+        receivedDate: document.getElementById('offerReceivedDate').value || toLocalDateString(new Date()),
         isViewed: false,
         selectionType: '早期選考',
         analystReport: ANALYST_REPORTS[comp] ? JSON.parse(JSON.stringify(ANALYST_REPORTS[comp])) : null
@@ -6571,8 +6967,45 @@
       saveState();
       closeModal('createModal');
       document.getElementById('offerCreateForm').reset();
+      document.getElementById('offerReceivedDate').value = '';
+      document.getElementById('offerEmailResult').textContent = '';
       renderOffers();
       showToast(`新着オファー「${newOffer.companyName}」を最上位に登録しました`, 'success');
+    }
+
+    // 新規登録の窓：貼り付けたメールを読み取り、オファーの入力欄を埋める
+    function fillOfferFormFromEmail() {
+      const text = document.getElementById('offerEmailPaste').value.trim();
+      const resultEl = document.getElementById('offerEmailResult');
+      if (!text) {
+        resultEl.textContent = 'メールの本文を貼り付けてください';
+        return;
+      }
+      const knownCompanies = [...offers, ...pipeline, ...archivedPipeline]
+        .map(x => x.companyName)
+        .concat(Object.keys(ANALYST_REPORTS));
+      const result = parseRecruitEmail(text, { knownCompanies });
+
+      const setValue = (id, value) => { if (value) document.getElementById(id).value = value; };
+      setValue('offerCompanyName', result.companyName);
+      setValue('offerMedia', result.media);
+      setValue('offerType', result.offerType);
+      setValue('offerDeadline', result.deadline);
+      setValue('offerUrl', result.url);
+      setValue('offerNotes', result.notes);
+      document.getElementById('offerReceivedDate').value = result.receivedDate;
+
+      const notices = [];
+      const missing = [];
+      if (!result.companyName) missing.push('会社名');
+      if (!result.deadline) missing.push('期限');
+      if (missing.length) notices.push(`${missing.join('と')}が見つからなかったので、手で入力してください。`);
+      const alreadyRegistered = result.companyName && [...offers, ...pipeline].some(x =>
+        normalizeCompanyName(x.companyName) === normalizeCompanyName(result.companyName));
+      if (alreadyRegistered) notices.push('この会社はすでに登録されています。');
+
+      resultEl.textContent = notices.length ? notices.join(' ') : '読み取りました。内容を確認して「オファーを保存」を押してください。';
+      resultEl.style.color = notices.length ? 'var(--ds-warn-fg)' : 'var(--ds-good-fg)';
     }
 
     function handleCreatePipeline(e) {
@@ -6989,7 +7422,7 @@
         sessionStorage.setItem('job_hunt_auth', 'true');
       }
 
-      switchTab('offers');
+      switchTab('home');
 
       lockScreen.classList.add('opacity-0');
       setTimeout(() => {
@@ -9105,7 +9538,7 @@ URL: https://www.ncd.co.jp/
       applyAppearance(loadAppearanceSettings());
       checkAuth();
       loadState();
-      switchTab('offers');
+      switchTab('home');
       renderOffers();
       renderPipeline();
       renderArchived();
