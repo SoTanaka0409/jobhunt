@@ -1576,6 +1576,39 @@
 
         <!-- CATEGORY 3: データ管理・バックアップ -->
         <div id="setCatContent-data" class="space-y-6 hidden">
+          <section class="space-y-3">
+            <h4 class="ds-h2">Gmailから自動取り込み</h4>
+            <p class="ds-sub">OfferBox・マイナビ・Re就活・paiza などから Gmail に届いたオファーのメールを、自動でオファー一覧に追加します。Google 側の準備が必要です。手順は <a href="https://github.com/SoTanaka0409/jobhunt/blob/main/docs/gmail-import.md" target="_blank" rel="noopener noreferrer" style="color: var(--ds-main); text-decoration: underline;">設定ガイド</a> を見てください。</p>
+            <p class="ds-sub">状態：<span id="gmailImportStatus" role="status">未設定</span></p>
+
+            <div class="space-y-1">
+              <label for="gmailImportKey" class="block font-medium">1. 合言葉</label>
+              <p class="ds-sub">自分以外が取り込み用のURLを使えないようにするための文字列です。作ったら、Google 側のスクリプトにも同じものを貼り付けます。</p>
+              <div class="flex flex-wrap gap-2">
+                <input type="text" id="gmailImportKey" class="ds-input flex-1" style="min-width: 12rem; font-family: ui-monospace, monospace;" placeholder="「合言葉を作る」を押してください" autocomplete="off" spellcheck="false">
+                <button type="button" class="ds-btn" onclick="generateGmailImportKey()">合言葉を作る</button>
+                <button type="button" class="ds-btn ds-btn-text" onclick="copyGmailImportKey()">コピー</button>
+              </div>
+            </div>
+
+            <div class="space-y-1">
+              <label for="gmailImportUrl" class="block font-medium">2. 取り込み用のURL</label>
+              <p class="ds-sub">Google 側でスクリプトを「ウェブアプリ」として公開したときに表示される URL（https://script.google.com/macros/s/… で始まるもの）を貼り付けます。</p>
+              <input type="url" id="gmailImportUrl" class="ds-input" placeholder="https://script.google.com/macros/s/…/exec" autocomplete="off" spellcheck="false">
+            </div>
+
+            <label class="flex items-center gap-2">
+              <input type="checkbox" id="gmailImportAuto" checked onchange="saveGmailImportSettings({ silent: true })">
+              <span>アプリを開いたときに自動で取り込む</span>
+            </label>
+
+            <div class="flex flex-wrap gap-2">
+              <button type="button" class="ds-btn ds-btn-primary" onclick="saveAndRunGmailImport()"><i data-lucide="mail-plus"></i><span>保存して今すぐ取り込む</span></button>
+              <button type="button" class="ds-btn ds-btn-text" onclick="saveGmailImportSettings()">保存だけする</button>
+              <button type="button" class="ds-btn ds-btn-danger-text" onclick="clearGmailImportSettings()">設定を消す</button>
+            </div>
+          </section>
+
           <section class="space-y-2">
             <h4 class="ds-h2">バックアップ</h4>
             <p class="ds-sub">データはこの端末のブラウザの中だけに保存されています。機種変更やブラウザのデータ削除に備えて、ときどきファイルに書き出しておいてください。</p>
@@ -5238,8 +5271,8 @@
       }
       // 「株式会社○○」型と「○○株式会社」型の両方を探し、メールの中で先に出てくるほうを使う
       // （件名に会社名があり、本文の後ろに「株式会社 人事部」のような署名がある場合に、件名のほうを選ぶため）
-      const prefix = text.match(new RegExp(`(?:${COMPANY_FORMS})\\s?[^\\s、。！？!【】「」『』()（）<>]+?${COMPANY_STOP}`));
-      const suffix = text.match(new RegExp(`[^\\s、。！？!【】「」『』()（）<>]{1,30}?(?:${COMPANY_FORMS})`));
+      const prefix = text.match(new RegExp(`(?:${COMPANY_FORMS})\\s?[^\\s、。！？!【】「」『』()（）<>：:｜|]+?${COMPANY_STOP}`));
+      const suffix = text.match(new RegExp(`[^\\s、。！？!【】「」『』()（）<>：:｜|]{1,30}?(?:${COMPANY_FORMS})`));
       let found = '';
       if (prefix && suffix) found = suffix.index < prefix.index ? suffix[0] : prefix[0];
       else found = prefix ? prefix[0] : (suffix ? suffix[0] : '');
@@ -5252,7 +5285,9 @@
       const baseDate = options.receivedDate ? new Date(options.receivedDate) : new Date();
       const knownCompanies = options.knownCompanies || [];
 
-      const mediaRule = EMAIL_MEDIA_RULES.find(r => r.pattern.test(text));
+      // 媒体は差出人（options.mediaHint）も見て判定する。差出人には運営会社名が入ることがあるので、会社名の判定には使わない
+      const mediaText = `${options.mediaHint || ''}\n${text}`;
+      const mediaRule = EMAIL_MEDIA_RULES.find(r => r.pattern.test(mediaText));
       const typeRule = EMAIL_OFFER_TYPE_RULES.find(r => r.pattern.test(text));
 
       // 期限：「期限」「締切」「まで」を含む行から日付を探す
@@ -5690,6 +5725,9 @@
 
       if (category === 'ui') {
         updateAppearanceModalUI(loadAppearanceSettings());
+      }
+      if (category === 'data') {
+        updateGmailImportStatus();
       }
       lucide.createIcons();
     }
@@ -7008,6 +7046,221 @@
       resultEl.style.color = notices.length ? 'var(--ds-warn-fg)' : 'var(--ds-good-fg)';
     }
 
+    // ==========================================
+    // Gmail からの自動取り込み
+    // Google Apps Script（tools/gmail-import.gs）が返す就活サービスのメールを読み取り、オファーとして登録する。
+    // 設定はこの端末のブラウザの中だけに保存する（Google のパスワードなどはアプリに一切入らない）。
+    // ==========================================
+    const GMAIL_IMPORT_KEY = 'jobhunt_gmail_import_v1';
+    // オファーとして取り込むメールの目印。これを含まないメール（メルマガなど）は取り込まない
+    const GMAIL_OFFER_KEYWORDS = /オファー|スカウト|選考免除|一次免除|1次免除|書類免除|面談確約|特別選考|特別ルート|ゴールデン|プラチナ|早期選考/;
+    const GMAIL_IMPORTED_IDS_LIMIT = 1000;
+
+    function loadGmailImportConfig() {
+      try {
+        const c = JSON.parse(localStorage.getItem(GMAIL_IMPORT_KEY)) || {};
+        return {
+          url: c.url || '',
+          key: c.key || '',
+          autoOnOpen: c.autoOnOpen !== false,
+          lastRunAt: c.lastRunAt || null,
+          lastResult: c.lastResult || '',
+          importedIds: Array.isArray(c.importedIds) ? c.importedIds : []
+        };
+      } catch (e) {
+        return { url: '', key: '', autoOnOpen: true, lastRunAt: null, lastResult: '', importedIds: [] };
+      }
+    }
+
+    function saveGmailImportConfig(config) {
+      config.importedIds = config.importedIds.slice(-GMAIL_IMPORTED_IDS_LIMIT);
+      localStorage.setItem(GMAIL_IMPORT_KEY, JSON.stringify(config));
+    }
+
+    function isGmailImportConfigured(config) {
+      return /^https:\/\/script\.google(usercontent)?\.com\//.test(config.url) && config.key.length >= 16;
+    }
+
+    // 取り込んだメール1通を、オファー1件に変換する。取り込まないときは null を返す
+    function gmailMessageToOffer(message) {
+      const text = `${message.subject || ''}\n${message.body || ''}`;
+      if (!GMAIL_OFFER_KEYWORDS.test(text)) return { skip: 'not-offer' };
+
+      const knownCompanies = [...offers, ...pipeline, ...archivedPipeline]
+        .map(x => x.companyName)
+        .concat(Object.keys(ANALYST_REPORTS));
+      const parsed = parseRecruitEmail(text, { knownCompanies, receivedDate: message.date, mediaHint: message.from });
+      if (!parsed.companyName) return { skip: 'no-company' };
+
+      const threadUrl = safeUrl(message.threadUrl);
+      const key = normalizeCompanyName(parsed.companyName);
+      const existing = [...offers, ...pipeline, ...archivedPipeline].find(x => normalizeCompanyName(x.companyName) === key);
+      if (existing) {
+        // すでに登録済みの会社：新しく登録せず、Gmail へのリンクがなければ補うだけにする
+        if (threadUrl && !existing.gmailUrl) existing.gmailUrl = threadUrl;
+        return { skip: 'exists' };
+      }
+
+      return {
+        offer: {
+          id: 'gmail-' + safeId(message.id),
+          companyName: parsed.companyName,
+          media: parsed.media,
+          deadline: parsed.deadline,
+          offerType: parsed.offerType,
+          rating: 2,
+          status: '検討中',
+          url: parsed.url,
+          gmailUrl: threadUrl,
+          notes: parsed.notes,
+          receivedDate: parsed.receivedDate,
+          isViewed: false,
+          selectionType: '早期選考',
+          importedFrom: 'gmail',
+          analystReport: ANALYST_REPORTS[parsed.companyName] ? JSON.parse(JSON.stringify(ANALYST_REPORTS[parsed.companyName])) : null
+        }
+      };
+    }
+
+    let gmailImportRunning = false;
+
+    // options.manual が true のときは、設定がなくてもメッセージを表示する
+    async function runGmailImport(options = {}) {
+      const config = loadGmailImportConfig();
+      if (!isGmailImportConfigured(config)) {
+        if (options.manual) showToast('Gmail の取り込み設定がまだです。設定 → データ で入力してください', 'error');
+        return null;
+      }
+      if (gmailImportRunning) return null;
+      gmailImportRunning = true;
+      updateGmailImportStatus('取り込み中…');
+
+      try {
+        const requestUrl = new URL(config.url);
+        requestUrl.searchParams.set('key', config.key);
+        const res = await fetch(requestUrl.toString(), { cache: 'no-store' });
+        const data = await res.json();
+        if (!data.ok) {
+          throw new Error(data.error === 'unauthorized' ? '合言葉が一致しません。スクリプトの KEY とアプリの合言葉を確認してください' : 'Gmail から読み込めませんでした');
+        }
+
+        const seen = new Set(config.importedIds);
+        const added = [];
+        (data.messages || []).forEach(message => {
+          if (!message || !message.id || seen.has(message.id)) return;
+          seen.add(message.id);
+          config.importedIds.push(message.id);
+          const result = gmailMessageToOffer(message);
+          if (result.offer) {
+            offers.unshift(result.offer);
+            added.push(result.offer);
+          }
+        });
+
+        config.lastRunAt = new Date().toISOString();
+        config.lastResult = added.length ? `${added.length}件のオファーを取り込みました` : '新しいオファーはありませんでした';
+        saveGmailImportConfig(config);
+        saveState();
+        refreshCurrentView();
+        if (added.length || options.manual) showToast(config.lastResult, added.length ? 'success' : 'info');
+        return added;
+      } catch (err) {
+        config.lastRunAt = new Date().toISOString();
+        config.lastResult = `失敗：${err.message || '通信できませんでした'}`;
+        saveGmailImportConfig(config);
+        if (options.manual) showToast(config.lastResult, 'error');
+        return null;
+      } finally {
+        gmailImportRunning = false;
+        updateGmailImportStatus();
+      }
+    }
+
+    // 今開いている画面を描き直す（取り込みでオファーが増えたときなど）
+    function refreshCurrentView() {
+      const current = Object.keys(VIEW_IDS).find(key => {
+        const view = document.getElementById(VIEW_IDS[key]);
+        return view && !view.classList.contains('hidden');
+      });
+      if (current) switchTab(current);
+      else updateBadges();
+    }
+
+    // ---- 設定画面（設定 → データ → Gmailから自動取り込み） ----
+    function updateGmailImportStatus(runningText) {
+      const config = loadGmailImportConfig();
+      const urlInput = document.getElementById('gmailImportUrl');
+      const keyInput = document.getElementById('gmailImportKey');
+      const autoInput = document.getElementById('gmailImportAuto');
+      const status = document.getElementById('gmailImportStatus');
+      if (urlInput && document.activeElement !== urlInput) urlInput.value = config.url;
+      if (keyInput && document.activeElement !== keyInput) keyInput.value = config.key;
+      if (autoInput) autoInput.checked = config.autoOnOpen;
+      if (!status) return;
+      if (runningText) {
+        status.textContent = runningText;
+      } else if (!isGmailImportConfigured(config)) {
+        status.textContent = '未設定';
+      } else if (config.lastRunAt) {
+        const d = new Date(config.lastRunAt);
+        status.textContent = `最後の取り込み：${d.getMonth() + 1}/${d.getDate()} ${String(d.getHours()).padStart(2, '0')}:${String(d.getMinutes()).padStart(2, '0')}　${config.lastResult}`;
+      } else {
+        status.textContent = '設定済み（まだ取り込んでいません）';
+      }
+    }
+
+    function generateGmailImportKey() {
+      const bytes = crypto.getRandomValues(new Uint8Array(18));
+      const key = Array.from(bytes).map(b => b.toString(16).padStart(2, '0')).join('');
+      document.getElementById('gmailImportKey').value = key;
+      saveGmailImportSettings({ silent: true });
+      copyTextToClipboard(key, '合言葉を作ってコピーしました。スクリプトの KEY に貼り付けてください');
+    }
+
+    function copyGmailImportKey() {
+      const key = document.getElementById('gmailImportKey').value.trim();
+      if (!key) {
+        showToast('先に「合言葉を作る」を押してください', 'error');
+        return;
+      }
+      copyTextToClipboard(key, '合言葉をコピーしました');
+    }
+
+    function copyTextToClipboard(text, message) {
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(text).then(() => showToast(message, 'success'), () => showToast('コピーできませんでした。手で選択してコピーしてください', 'error'));
+      } else {
+        showToast('コピーできませんでした。手で選択してコピーしてください', 'error');
+      }
+    }
+
+    function saveGmailImportSettings(options = {}) {
+      const config = loadGmailImportConfig();
+      config.url = document.getElementById('gmailImportUrl').value.trim();
+      config.key = document.getElementById('gmailImportKey').value.trim();
+      config.autoOnOpen = document.getElementById('gmailImportAuto').checked;
+      saveGmailImportConfig(config);
+      updateGmailImportStatus();
+      if (options.silent) return;
+      if (config.url && !/^https:\/\/script\.google(usercontent)?\.com\//.test(config.url)) {
+        showToast('URL は https://script.google.com/ で始まるものを貼り付けてください', 'error');
+        return;
+      }
+      showToast('Gmail の取り込み設定を保存しました', 'success');
+    }
+
+    async function saveAndRunGmailImport() {
+      saveGmailImportSettings({ silent: true });
+      await runGmailImport({ manual: true });
+    }
+
+    function clearGmailImportSettings() {
+      if (!confirm('Gmail の取り込み設定（URL・合言葉・取り込み済みの記録）を消しますか？\n\n取り込んだオファーは消えません。')) return;
+      localStorage.removeItem(GMAIL_IMPORT_KEY);
+      updateGmailImportStatus();
+      showToast('Gmail の取り込み設定を消しました', 'info');
+    }
+
     function handleCreatePipeline(e) {
       e.preventDefault();
       const comp = document.getElementById('pipeCompanyName').value.trim();
@@ -7459,6 +7712,7 @@
       if (gcalConfig && gcalConfig.autoSyncOnRelog) {
         syncFromGoogleCalendar({ source: 'reload' });
       }
+      if (loadGmailImportConfig().autoOnOpen) runGmailImport();
 
       setTimeout(() => {
         icons.forEach(icon => icon.classList.remove('animate-spin'));
@@ -9548,6 +9802,10 @@ URL: https://www.ncd.co.jp/
       if (typeof gcalConfig !== 'undefined' && gcalConfig.autoSyncOnRelog) {
         syncFromGoogleCalendar({ source: 'init' });
       }
+
+      // 起動時 Gmail からの自動取り込み（設定済みで、「開いたときに取り込む」がオンのとき）
+      updateGmailImportStatus();
+      if (loadGmailImportConfig().autoOnOpen) runGmailImport();
     });
   </script>
 </body>
