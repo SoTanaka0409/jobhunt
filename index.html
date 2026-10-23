@@ -20,6 +20,8 @@
         root.setAttribute('data-density', s.density || 'comfortable');
         root.setAttribute('data-col-width', s.colWidth || 'fixed');
       } catch(e) {}
+      // 起動時はオファー画面から始まるので、最初から新デザインを当てておく（ちらつき防止）
+      document.documentElement.classList.add('ds');
     })();
   </script>
   <meta charset="UTF-8">
@@ -399,6 +401,259 @@
     html[data-accent="sky"] .border-indigo-500,
     html[data-accent="sky"] .border-indigo-500\/40 { border-color: #0284c7 !important; }
   </style>
+
+  <!-- ========================================================
+       新デザイン（docs/design-guidelines.md に準拠）
+       html に ds クラスが付いている画面（現在はオファー画面のみ）で使う
+       ======================================================== -->
+  <style>
+    :root {
+      --ds-bg: #f8f7f6;
+      --ds-surface: #ffffff;
+      --ds-sunken: #f2f1f0;
+      --ds-head: #edebe8;
+      --ds-border: #d6d3d0;
+      --ds-border-strong: #c1bdb7;
+      --ds-text: #23221e;
+      --ds-text-sub: #706d65;
+      --ds-text-disabled: #c1bdb7;
+      --ds-main: #0077c7;
+      --ds-main-hover: #00609f;
+      --ds-good: #0f7f85;
+      --ds-warn: #ffcc17;
+      --ds-danger: #e01e5a;
+      --ds-hover: rgba(3, 3, 2, 0.05);
+      /* 英数字はOS標準の書体、日本語は Mac=ヒラギノ / それ以外=Noto Sans JP（Windows標準の游ゴシックは細く読みにくいため） */
+      --ds-font: -apple-system, BlinkMacSystemFont, "Segoe UI", "Hiragino Sans", "Noto Sans JP", sans-serif;
+    }
+
+    /* ---- ページ全体（オファー画面を開いている間だけ明るくする） ---- */
+    html.ds body {
+      background-color: var(--ds-bg) !important;
+      color: var(--ds-text) !important;
+      font-family: var(--ds-font);
+    }
+
+    /* ---- ヘッダー ---- */
+    html.ds header {
+      background-color: var(--ds-surface) !important;
+      border-bottom: 1px solid var(--ds-border) !important;
+      box-shadow: none !important;
+      backdrop-filter: none !important;
+    }
+    html.ds header .hdr-logo {
+      background: var(--ds-text) !important;
+      box-shadow: none !important;
+      border-radius: 6px !important;
+    }
+    html.ds header h1 {
+      color: var(--ds-text) !important;
+      font-size: 16px !important;
+      font-weight: 600 !important;
+    }
+    html.ds header .hdr-extra { display: none !important; }
+    html.ds header .hdr-nav {
+      background: transparent !important;
+      border: 0 !important;
+      box-shadow: none !important;
+      padding: 0 !important;
+      gap: 2px;
+      overflow-x: auto;
+    }
+    html.ds header .hdr-tab {
+      background: transparent !important;
+      color: var(--ds-text-sub) !important;
+      box-shadow: none !important;
+      border-radius: 6px !important;
+      font-size: 14px !important;
+      font-weight: 500 !important;
+      white-space: nowrap;
+    }
+    html.ds header .hdr-tab:hover { background: var(--ds-hover) !important; color: var(--ds-text) !important; }
+    html.ds header .hdr-tab[aria-current="page"] {
+      background: var(--ds-sunken) !important;
+      color: var(--ds-text) !important;
+    }
+    html.ds header .hdr-tab svg { display: none; }
+    html.ds header .hdr-tab { transition: none !important; padding: 6px 10px !important; }
+    html.ds header .hdr-count {
+      background: transparent !important;
+      border: 0 !important;
+      color: var(--ds-text-sub) !important;
+      font-size: 13px !important;
+      font-weight: 400 !important;
+      padding: 0 !important;
+    }
+    html.ds header .hdr-btn {
+      background: var(--ds-surface) !important;
+      border: 1px solid var(--ds-border) !important;
+      color: var(--ds-text) !important;
+      border-radius: 6px !important;
+      box-shadow: none !important;
+      font-size: 14px !important;
+      font-weight: 500 !important;
+    }
+    html.ds header .hdr-btn:hover { background: var(--ds-sunken) !important; }
+    html.ds header .hdr-btn svg { color: var(--ds-text-sub) !important; width: 16px !important; height: 16px !important; }
+    /* 補助的なボタン（再読み込み・ロック・設定）はアイコンだけにして、ヘッダーを詰め込みすぎない */
+    html.ds header .hdr-btn { padding: 0 !important; width: 32px; height: 32px; justify-content: center; }
+    html.ds header .hdr-btn span { display: none !important; }
+    html.ds header .hdr-btn-primary { white-space: nowrap; height: 32px; padding: 0 12px !important; }
+    html.ds header .hdr-nav { scrollbar-width: none; display: flex !important; }
+    html.ds header .hdr-nav::-webkit-scrollbar { display: none; }
+    html.ds header .hdr-btn-primary {
+      background: var(--ds-main) !important;
+      border: 1px solid var(--ds-main) !important;
+      color: #fff !important;
+      border-radius: 6px !important;
+      box-shadow: none !important;
+      font-size: 14px !important;
+      font-weight: 500 !important;
+    }
+    html.ds header .hdr-btn-primary:hover { background: var(--ds-main-hover) !important; }
+
+    /* ---- 文字 ---- */
+    .ds-page { font-family: var(--ds-font); color: var(--ds-text); font-size: 14px; line-height: 1.5; }
+    .ds-h1 { font-size: 24px; font-weight: 600; line-height: 1.25; color: var(--ds-text); }
+    .ds-h2 { font-size: 16px; font-weight: 600; line-height: 1.25; color: var(--ds-text); }
+    .ds-sub { font-size: 13px; color: var(--ds-text-sub); }
+    .ds-num { font-variant-numeric: tabular-nums; }
+
+    /* ---- 面・区切り ---- */
+    .ds-panel {
+      background: var(--ds-surface);
+      border: 1px solid var(--ds-border);
+      border-radius: 8px;
+    }
+
+    /* ---- ボタン ---- */
+    .ds-btn {
+      display: inline-flex; align-items: center; justify-content: center; gap: 6px;
+      height: 32px; padding: 0 12px;
+      border: 1px solid var(--ds-border); border-radius: 6px;
+      background: var(--ds-surface); color: var(--ds-text);
+      font-size: 14px; font-weight: 500; line-height: 1; white-space: nowrap;
+      cursor: pointer; text-decoration: none;
+    }
+    .ds-btn:hover { background: var(--ds-sunken); }
+    .ds-btn:focus-visible, .ds-input:focus-visible, .ds-select:focus-visible, .ds-icon-btn:focus-visible, .ds-dot-btn:focus-visible {
+      outline: 2px solid var(--ds-main); outline-offset: 1px;
+    }
+    /* Lucide はアイコンを <svg> に置き換えるので svg を指定する */
+    .ds-btn svg, .ds-icon-btn svg { width: 16px; height: 16px; color: var(--ds-text-sub); flex-shrink: 0; }
+    .ds-btn-text { border-color: transparent; background: transparent; }
+    .ds-btn-text:hover { background: var(--ds-hover); }
+    .ds-icon-btn {
+      display: inline-flex; align-items: center; justify-content: center;
+      width: 32px; height: 32px; border-radius: 6px;
+      border: 1px solid transparent; background: transparent; color: var(--ds-text-sub);
+      cursor: pointer;
+    }
+    .ds-icon-btn:hover { background: var(--ds-hover); color: var(--ds-text); }
+
+    /* 表示切り替え（カード / リスト） */
+    .ds-seg { display: inline-flex; border: 1px solid var(--ds-border); border-radius: 6px; overflow: hidden; background: var(--ds-surface); }
+    .ds-seg button {
+      display: inline-flex; align-items: center; gap: 6px;
+      height: 30px; padding: 0 12px; font-size: 14px; color: var(--ds-text-sub);
+      background: transparent; border: 0; cursor: pointer;
+    }
+    .ds-seg button + button { border-left: 1px solid var(--ds-border); }
+    .ds-seg button[aria-pressed="true"] { background: var(--ds-sunken); color: var(--ds-text); font-weight: 500; }
+    .ds-seg button svg { width: 16px; height: 16px; }
+
+    /* ---- 入力欄 ---- */
+    .ds-input, .ds-select {
+      height: 36px; width: 100%;
+      border: 1px solid var(--ds-border); border-radius: 6px;
+      background: var(--ds-surface); color: var(--ds-text);
+      font-size: 14px; padding: 0 12px;
+    }
+    .ds-input::placeholder { color: var(--ds-text-sub); }
+    .ds-input-icon { position: relative; display: block; }
+    .ds-input-icon > svg { position: absolute; left: 10px; top: 10px; width: 16px; height: 16px; color: var(--ds-text-sub); pointer-events: none; }
+    .ds-input-icon .ds-input { padding-left: 34px; }
+
+    /* ---- バッジ ---- */
+    .ds-badge {
+      display: inline-flex; align-items: center; gap: 4px;
+      font-size: 12px; font-weight: 500; line-height: 1.5;
+      padding: 1px 8px; border-radius: 4px; white-space: nowrap;
+    }
+    .ds-badge-neutral { background: var(--ds-sunken); color: var(--ds-text-sub); }
+    .ds-badge-info { background: #e5f1fa; color: #005a96; }
+    .ds-badge-good { background: #e2f1f1; color: #0b5f63; }
+    .ds-badge-warn { background: #fff4c7; color: var(--ds-text); }
+    .ds-badge-danger { background: #fde7ee; color: #b0144a; }
+
+    /* 未確認の印（青い点）。押すと確認済みに切り替わる */
+    .ds-dot-btn {
+      display: inline-flex; align-items: center; justify-content: center;
+      width: 20px; height: 20px; border-radius: 4px; border: 0; background: transparent; cursor: pointer; flex-shrink: 0;
+    }
+    .ds-dot-btn::before { content: ""; width: 8px; height: 8px; border-radius: 50%; border: 1.5px solid var(--ds-border-strong); }
+    .ds-dot-btn[aria-pressed="false"]::before { background: var(--ds-main); border-color: var(--ds-main); }
+    .ds-dot-btn:hover { background: var(--ds-hover); }
+
+    /* スコア */
+    .ds-score { display: inline-flex; align-items: baseline; gap: 6px; white-space: nowrap; }
+    .ds-score-num { font-size: 20px; font-weight: 600; line-height: 1; font-variant-numeric: tabular-nums; color: var(--ds-text); }
+    .ds-score-label { display: inline-flex; align-items: center; gap: 4px; font-size: 12px; color: var(--ds-text-sub); }
+    .ds-score-label::before { content: ""; width: 6px; height: 6px; border-radius: 50%; background: var(--ds-score-color, var(--ds-text-disabled)); }
+    .ds-score-none { font-size: 13px; color: var(--ds-text-sub); }
+
+    /* ---- 集計の帯 ---- */
+    .ds-stats { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); }
+    .ds-stats > div { padding: 12px 16px; }
+    .ds-stats > div + div { border-left: 1px solid var(--ds-border); }
+    .ds-stat-value { font-size: 24px; font-weight: 600; line-height: 1.25; font-variant-numeric: tabular-nums; }
+    @media (max-width: 639px) {
+      .ds-stats { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+      .ds-stats > div:nth-child(3) { border-left: 0; }
+      .ds-stats > div:nth-child(n+3) { border-top: 1px solid var(--ds-border); }
+    }
+
+    /* ---- 折りたたみ（補足情報） ---- */
+    .ds-details > summary {
+      display: flex; align-items: center; gap: 8px; list-style: none; cursor: pointer;
+      padding: 10px 16px; font-size: 14px; color: var(--ds-text);
+    }
+    .ds-details > summary::-webkit-details-marker { display: none; }
+    .ds-details > summary > svg:first-child { width: 16px; height: 16px; color: var(--ds-text-sub); transition: transform .15s; flex-shrink: 0; }
+    .ds-details[open] > summary > svg:first-child { transform: rotate(90deg); }
+    .ds-details > summary:hover { background: var(--ds-hover); }
+    .ds-details-body { padding: 4px 16px 16px 40px; }
+
+    /* ---- 一覧（リスト表示） ---- */
+    .ds-list-head, .ds-row {
+      display: grid;
+      grid-template-columns: 20px minmax(0, 1fr) 104px 168px 96px auto;
+      align-items: center; gap: 12px; padding: 0 16px;
+    }
+    .ds-list-head { height: 36px; background: var(--ds-head); font-size: 13px; color: var(--ds-text-sub); border-bottom: 1px solid var(--ds-border); border-radius: 8px 8px 0 0; }
+    .ds-row { min-height: 64px; padding-top: 10px; padding-bottom: 10px; border-bottom: 1px solid var(--ds-border); }
+    .ds-row:last-child { border-bottom: 0; }
+    .ds-row:hover { background: #fbfaf9; }
+    .ds-company { font-size: 14px; font-weight: 600; color: var(--ds-text); cursor: pointer; text-align: left; background: none; border: 0; padding: 0; }
+    .ds-company:hover { color: var(--ds-main); text-decoration: underline; }
+    .ds-actions { display: flex; align-items: center; justify-content: flex-end; gap: 4px; }
+    @media (max-width: 899px) {
+      .ds-list-head { display: none; }
+      .ds-row { grid-template-columns: 20px minmax(0, 1fr) auto; row-gap: 8px; }
+      .ds-row .ds-col-media, .ds-row .ds-col-deadline { grid-column: 2 / 4; }
+      .ds-row .ds-col-score { grid-column: 3; grid-row: 1; justify-self: end; }
+      .ds-row .ds-actions { grid-column: 2 / 4; justify-content: flex-start; flex-wrap: wrap; }
+    }
+
+    /* ---- カード表示 ---- */
+    .ds-card { padding: 16px; display: flex; flex-direction: column; gap: 12px; }
+    .ds-card:hover { border-color: var(--ds-border-strong); }
+    .ds-card-notes {
+      font-size: 14px; color: var(--ds-text-sub);
+      display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;
+    }
+    .ds-card-footer { display: flex; align-items: center; justify-content: space-between; gap: 8px; padding-top: 12px; border-top: 1px solid var(--ds-border); margin-top: auto; }
+  </style>
 </head>
 <body class="bg-slate-900 text-slate-100 min-h-screen flex flex-col transition-colors duration-200">
 
@@ -471,101 +726,101 @@
       <!-- Top Row on Mobile / Left Column on Desktop -->
       <div class="flex items-center justify-between gap-2">
         <div class="flex items-center gap-2 sm:gap-3 min-w-0">
-          <div class="w-8 h-8 sm:w-10 sm:h-10 rounded-xl bg-gradient-to-tr from-indigo-600 via-indigo-500 to-sky-400 flex items-center justify-center shadow-lg shadow-indigo-500/20 shrink-0">
+          <div class="hdr-logo w-8 h-8 sm:w-10 sm:h-10 rounded-xl bg-gradient-to-tr from-indigo-600 via-indigo-500 to-sky-400 flex items-center justify-center shadow-lg shadow-indigo-500/20 shrink-0">
             <i data-lucide="shield-check" class="w-4 h-4 sm:w-5 sm:h-5 text-white"></i>
           </div>
           <div class="min-w-0">
             <div class="flex items-center gap-1.5 sm:gap-2 flex-wrap">
-              <h1 class="text-sm sm:text-lg font-bold tracking-tight text-white truncate">就活統合ダッシュボード</h1>
-              <span class="text-[10px] sm:text-xs px-1.5 sm:px-2 py-0.5 rounded-full bg-indigo-500/20 text-indigo-300 border border-indigo-500/40 font-semibold flex items-center gap-1 shrink-0">
+              <h1 class="text-sm sm:text-lg font-bold tracking-tight text-white truncate">就活ダッシュボード</h1>
+              <span class="hdr-extra text-[10px] sm:text-xs px-1.5 sm:px-2 py-0.5 rounded-full bg-indigo-500/20 text-indigo-300 border border-indigo-500/40 font-semibold flex items-center gap-1 shrink-0">
                 <i data-lucide="user-check" class="w-2.5 h-2.5 sm:w-3 sm:h-3"></i> 田中 壮 様
               </span>
-              <span class="hidden lg:inline-block text-[11px] px-2 py-0.5 rounded-full bg-slate-800 text-slate-400 border border-slate-700">新スコアリング基準</span>
+              <span class="hdr-extra hidden lg:inline-block text-[11px] px-2 py-0.5 rounded-full bg-slate-800 text-slate-400 border border-slate-700">新スコアリング基準</span>
             </div>
-            <p class="hidden sm:block text-xs text-slate-400 truncate">「4大必須条件」＆「5段階ルーブリック」完全連動アナリストシステム</p>
+            <p class="hdr-extra hidden sm:block text-xs text-slate-400 truncate">「4大必須条件」＆「5段階ルーブリック」完全連動アナリストシステム</p>
           </div>
         </div>
 
         <!-- Mobile Right Controls (Compact Icon Buttons on mobile) -->
         <div class="flex md:hidden items-center gap-1 shrink-0">
           <!-- 再読み込み -->
-          <button onclick="handleDataReload()" title="データを再読み込み" class="p-2 rounded-lg bg-emerald-500/15 border border-emerald-500/40 text-emerald-300 active:scale-95 transition">
+          <button onclick="handleDataReload()" title="データを再読み込み" class="hdr-btn p-2 rounded-lg bg-emerald-500/15 border border-emerald-500/40 text-emerald-300 active:scale-95 transition">
             <i data-lucide="refresh-cw" class="w-3.5 h-3.5 refresh-data-icon"></i>
           </button>
           <!-- リログ -->
-          <button onclick="handleAuthLogout()" title="リログ（画面ロック）" class="p-2 rounded-lg bg-slate-800 border border-slate-700 text-slate-300 hover:text-rose-400 active:scale-95 transition">
+          <button onclick="handleAuthLogout()" title="リログ（画面ロック）" class="hdr-btn p-2 rounded-lg bg-slate-800 border border-slate-700 text-slate-300 hover:text-rose-400 active:scale-95 transition">
             <i data-lucide="lock" class="w-3.5 h-3.5 text-rose-400"></i>
           </button>
           <!-- 設定 -->
-          <button onclick="openSettingsModal('ui')" title="設定ハブ" class="p-2 rounded-lg bg-slate-800 border border-slate-700 text-slate-200 active:scale-95 transition">
+          <button onclick="openSettingsModal('ui')" title="設定ハブ" class="hdr-btn p-2 rounded-lg bg-slate-800 border border-slate-700 text-slate-200 active:scale-95 transition">
             <i data-lucide="settings" class="w-3.5 h-3.5 text-indigo-400"></i>
           </button>
           <!-- 新規追加 -->
-          <button onclick="openCreateModal()" title="新規追加" class="p-2 rounded-lg bg-gradient-to-r from-indigo-500 to-sky-500 text-white shadow-md active:scale-95 transition">
+          <button onclick="openCreateModal()" title="新規追加" class="hdr-btn-primary p-2 rounded-lg bg-gradient-to-r from-indigo-500 to-sky-500 text-white shadow-md active:scale-95 transition">
             <i data-lucide="plus" class="w-3.5 h-3.5"></i>
           </button>
         </div>
       </div>
 
       <!-- Center Navigation Tabs: 5-column grid on mobile, flex on desktop -->
-      <nav class="grid grid-cols-5 md:flex items-center bg-slate-800/80 p-0.5 sm:p-1 rounded-xl border border-slate-700/60 shadow-inner w-full md:w-auto">
+      <nav class="hdr-nav grid grid-cols-5 md:flex items-center bg-slate-800/80 p-0.5 sm:p-1 rounded-xl border border-slate-700/60 shadow-inner w-full md:w-auto">
         <button id="tabOffersBtn" onclick="switchTab('offers')" class="flex items-center justify-center gap-1 sm:gap-2 px-1 sm:px-3 py-1.5 sm:py-2 rounded-lg text-[11px] sm:text-sm font-semibold transition-all duration-150 bg-indigo-600 text-white shadow-sm text-center">
           <i data-lucide="mail-check" class="w-3.5 h-3.5 sm:w-4 sm:h-4 shrink-0"></i>
           <span class="hidden sm:inline">オファー管理</span>
           <span class="sm:hidden">オファー</span>
-          <span id="offersBadgeCount" class="text-[10px] sm:text-xs px-1 sm:px-1.5 py-0.2 rounded-full bg-indigo-800/80 text-indigo-200 shrink-0">0</span>
+          <span id="offersBadgeCount" class="hdr-count text-[10px] sm:text-xs px-1 sm:px-1.5 py-0.2 rounded-full bg-indigo-800/80 text-indigo-200 shrink-0">0</span>
         </button>
         <button id="tabPipelineBtn" onclick="switchTab('pipeline')" class="flex items-center justify-center gap-1 sm:gap-2 px-1 sm:px-3 py-1.5 sm:py-2 rounded-lg text-[11px] sm:text-sm font-semibold transition-all duration-150 text-slate-400 hover:text-slate-200 text-center">
           <i data-lucide="kanban-square" class="w-3.5 h-3.5 sm:w-4 sm:h-4 shrink-0"></i>
           <span class="hidden sm:inline">選考パイプライン</span>
           <span class="sm:hidden">選考中</span>
-          <span id="pipelineBadgeCount" class="text-[10px] sm:text-xs px-1 sm:px-1.5 py-0.2 rounded-full bg-slate-700 text-slate-300 shrink-0">0</span>
+          <span id="pipelineBadgeCount" class="hdr-count text-[10px] sm:text-xs px-1 sm:px-1.5 py-0.2 rounded-full bg-slate-700 text-slate-300 shrink-0">0</span>
         </button>
         <button id="tabCalendarBtn" onclick="switchTab('calendar')" class="flex items-center justify-center gap-1 sm:gap-2 px-1 sm:px-3 py-1.5 sm:py-2 rounded-lg text-[11px] sm:text-sm font-semibold transition-all duration-150 text-slate-400 hover:text-slate-200 text-center">
           <i data-lucide="calendar" class="w-3.5 h-3.5 sm:w-4 sm:h-4 shrink-0 text-sky-400"></i>
-          <span class="hidden sm:inline">📅 選考カレンダー</span>
+          <span class="hidden sm:inline">選考カレンダー</span>
           <span class="sm:hidden">カレンダー</span>
-          <span id="calendarBadgeCount" class="text-[10px] sm:text-xs px-1 sm:px-1.5 py-0.2 rounded-full bg-sky-500/20 text-sky-300 border border-sky-500/30 shrink-0">0</span>
+          <span id="calendarBadgeCount" class="hdr-count text-[10px] sm:text-xs px-1 sm:px-1.5 py-0.2 rounded-full bg-sky-500/20 text-sky-300 border border-sky-500/30 shrink-0">0</span>
         </button>
         <!-- NEW: 🎯 逆質問・事前知識カンペ -->
         <button id="tabQuestionsBtn" onclick="switchTab('questions')" class="flex items-center justify-center gap-1 sm:gap-2 px-1 sm:px-3 py-1.5 sm:py-2 rounded-lg text-[11px] sm:text-sm font-semibold transition-all duration-150 text-slate-400 hover:text-amber-300 text-center">
           <i data-lucide="help-circle" class="w-3.5 h-3.5 sm:w-4 sm:h-4 shrink-0 text-amber-400"></i>
-          <span class="hidden sm:inline">🎯 逆質問・事前知識</span>
+          <span class="hidden sm:inline">逆質問・事前知識</span>
           <span class="sm:hidden">逆質問</span>
-          <span class="text-[9px] sm:text-[10px] px-1 sm:px-1.5 py-0.2 rounded-full bg-amber-500/20 text-amber-300 border border-amber-500/30 shrink-0 font-bold">カンペ</span>
+          <span class="hdr-extra text-[9px] sm:text-[10px] px-1 sm:px-1.5 py-0.2 rounded-full bg-amber-500/20 text-amber-300 border border-amber-500/30 shrink-0 font-bold">カンペ</span>
         </button>
         <button id="tabArchivedBtn" onclick="switchTab('archived')" class="flex items-center justify-center gap-1 sm:gap-2 px-1 sm:px-3 py-1.5 sm:py-2 rounded-lg text-[11px] sm:text-sm font-semibold transition-all duration-150 text-slate-400 hover:text-slate-200 text-center">
           <i data-lucide="archive" class="w-3.5 h-3.5 sm:w-4 sm:h-4 shrink-0"></i>
           <span class="hidden sm:inline">保管庫</span>
           <span class="sm:hidden">保管庫</span>
-          <span id="archivedBadgeCount" class="text-[10px] sm:text-xs px-1 sm:px-1.5 py-0.2 rounded-full bg-slate-700 text-slate-300 shrink-0">0</span>
+          <span id="archivedBadgeCount" class="hdr-count text-[10px] sm:text-xs px-1 sm:px-1.5 py-0.2 rounded-full bg-slate-700 text-slate-300 shrink-0">0</span>
         </button>
       </nav>
 
       <!-- Desktop Right Controls (hidden on mobile, shown on md:) -->
       <div class="hidden md:flex items-center gap-2">
         <!-- 1. 再読み込み（データ同期） -->
-        <button id="refreshDataBtn" onclick="handleDataReload()" title="データを最新状態に再読み込み（リログ不要）" class="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-emerald-500/15 hover:bg-emerald-500/25 border border-emerald-500/40 text-emerald-300 text-xs font-semibold shadow-sm transition active:scale-95 group">
+        <button id="refreshDataBtn" onclick="handleDataReload()" title="データを最新状態に再読み込み（リログ不要）" class="hdr-btn flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-emerald-500/15 hover:bg-emerald-500/25 border border-emerald-500/40 text-emerald-300 text-xs font-semibold shadow-sm transition active:scale-95 group">
           <i id="refreshDataIcon" data-lucide="refresh-cw" class="w-3.5 h-3.5 text-emerald-400 group-hover:rotate-180 transition-transform duration-500 refresh-data-icon"></i>
           <span class="hidden sm:inline">再読み込み</span>
         </button>
 
         <!-- 2. 🔒 リログ機能 -->
-        <button onclick="handleAuthLogout()" title="ログアウトして画面をロック（リログ）" class="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-slate-800 hover:bg-rose-500/20 border border-slate-700 hover:border-rose-500/50 text-slate-300 hover:text-rose-400 text-xs font-semibold transition active:scale-95 shadow-sm group">
+        <button onclick="handleAuthLogout()" title="ログアウトして画面をロック（リログ）" class="hdr-btn flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-slate-800 hover:bg-rose-500/20 border border-slate-700 hover:border-rose-500/50 text-slate-300 hover:text-rose-400 text-xs font-semibold transition active:scale-95 shadow-sm group">
           <i data-lucide="lock" class="w-3.5 h-3.5 text-rose-400 group-hover:scale-110 transition-transform"></i>
           <span>リログ</span>
         </button>
 
         <!-- 3. ⚙️ 設定 -->
-        <button onclick="openSettingsModal('ui')" title="設定ハブ（明るさ設定、UI外観、自身の希望する条件、データ管理）" class="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 border border-slate-700 hover:border-indigo-500/50 text-slate-200 hover:text-white text-xs font-semibold transition active:scale-95 shadow-sm">
+        <button onclick="openSettingsModal('ui')" title="設定ハブ（明るさ設定、UI外観、自身の希望する条件、データ管理）" class="hdr-btn flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 border border-slate-700 hover:border-indigo-500/50 text-slate-200 hover:text-white text-xs font-semibold transition active:scale-95 shadow-sm">
           <i data-lucide="settings" class="w-3.5 h-3.5 text-indigo-400"></i>
           <span>設定</span>
         </button>
 
         <!-- 4. ＋ 新規追加 -->
-        <button onclick="openCreateModal()" class="flex items-center gap-2 px-3.5 py-2 rounded-xl bg-gradient-to-r from-indigo-500 to-sky-500 hover:from-indigo-600 hover:to-sky-600 text-white font-medium text-xs sm:text-sm shadow-lg shadow-indigo-500/25 transition-all transform active:scale-95">
+        <button onclick="openCreateModal()" class="hdr-btn-primary flex items-center gap-2 px-3.5 py-2 rounded-xl bg-gradient-to-r from-indigo-500 to-sky-500 hover:from-indigo-600 hover:to-sky-600 text-white font-medium text-xs sm:text-sm shadow-lg shadow-indigo-500/25 transition-all transform active:scale-95">
           <i data-lucide="plus-circle" class="w-4 h-4"></i>
-          <span class="hidden xs:inline">新規追加</span>
+          <span class="hidden lg:inline">新規追加</span>
         </button>
       </div>
 
@@ -578,185 +833,130 @@
     <!-- ============================================== -->
     <!-- VIEW 1: オファー・スカウト管理ビュー -->
     <!-- ============================================== -->
-    <section id="viewOffers" class="flex-1 flex flex-col space-y-4">
-      <!-- Sub header & Filter Controls -->
-      <div class="bg-slate-800/40 border border-slate-800 p-3 sm:p-4 rounded-2xl space-y-3">
-        <!-- Top Row: Title, Stats Badge & Layout Switcher -->
-        <div class="flex items-center justify-between gap-2 flex-wrap">
-          <div>
-            <div class="flex items-center gap-2">
-              <h2 class="text-sm sm:text-lg font-bold text-white flex items-center gap-1.5">
-                <i data-lucide="mail-check" class="w-4 h-4 text-indigo-400"></i>
-                <span>受信オファー・検討中</span>
-              </h2>
-              <span id="offersStatsCount" class="text-[11px] sm:text-xs px-2 py-0.5 rounded-full bg-slate-800 text-slate-300 border border-slate-700 font-bold">0件</span>
-            </div>
-            <p class="hidden sm:block text-xs text-slate-400 mt-0.5">届いたスカウトの返信期限とアピール内容を管理。「🎓 診断」で新スコアリング（7.5点以上の4大条件チェック）を即時確認</p>
-          </div>
-
-          <!-- View Switch (Grid / Table) -->
-          <div class="flex items-center bg-slate-800/90 border border-slate-700/80 rounded-xl p-0.5 shadow-inner">
-            <button id="offersViewGridBtn" onclick="toggleOffersLayout('grid')" class="p-1.5 px-2.5 rounded-lg text-indigo-400 bg-slate-700 transition flex items-center gap-1 text-xs font-semibold" title="カードグリッド表示">
-              <i data-lucide="layout-grid" class="w-3.5 h-3.5"></i>
-              <span class="hidden sm:inline">グリッド</span>
-            </button>
-            <button id="offersViewTableBtn" onclick="toggleOffersLayout('table')" class="p-1.5 px-2.5 rounded-lg text-slate-400 hover:text-slate-200 transition flex items-center gap-1 text-xs font-semibold" title="テーブル一覧表示">
-              <i data-lucide="list" class="w-3.5 h-3.5"></i>
-              <span class="hidden sm:inline">リスト</span>
-            </button>
-          </div>
+    <section id="viewOffers" class="ds-page flex-1 flex flex-col gap-4 sm:gap-6">
+      <!-- 見出し -->
+      <div class="flex items-end justify-between gap-3 flex-wrap">
+        <div>
+          <h2 class="ds-h1">オファー</h2>
+          <p class="ds-sub mt-1">届いたスカウトの返信期限と評価を確認します。<span id="offersStatsCount" class="ds-num">0件</span>を表示中</p>
         </div>
+        <div class="ds-seg" role="group" aria-label="表示の切り替え">
+          <button type="button" id="offersViewTableBtn" onclick="toggleOffersLayout('table')" aria-pressed="true">
+            <i data-lucide="list"></i><span>リスト</span>
+          </button>
+          <button type="button" id="offersViewGridBtn" onclick="toggleOffersLayout('grid')" aria-pressed="false">
+            <i data-lucide="layout-grid"></i><span>カード</span>
+          </button>
+        </div>
+      </div>
 
-        <!-- Filter & Search Controls -->
-        <div class="space-y-2">
-          <!-- Row 1: Search Input + Mobile Filter Toggle Button -->
-          <div class="flex items-center gap-2">
-            <div class="relative flex-1">
-              <i data-lucide="search" class="w-3.5 h-3.5 absolute left-3 top-2.5 text-slate-400"></i>
-              <input type="text" id="offerSearchQuery" oninput="renderOffers()" placeholder="企業名・評価点検索..." class="w-full text-xs pl-8 pr-3 py-2 rounded-xl bg-slate-800 border border-slate-700 text-slate-200 placeholder-slate-500 focus:outline-none focus:border-indigo-500 shadow-inner">
-            </div>
+      <!-- 集計 -->
+      <div class="ds-panel ds-stats">
+        <div>
+          <div class="ds-sub">返信期限が3日以内</div>
+          <div id="statUrgentOffers" class="ds-stat-value">0</div>
+        </div>
+        <div>
+          <div class="ds-sub">検討中</div>
+          <div id="statReviewingOffers" class="ds-stat-value">0</div>
+        </div>
+        <div>
+          <div class="ds-sub">特別枠のスカウト</div>
+          <div id="statSpecialOffers" class="ds-stat-value">0</div>
+        </div>
+        <div>
+          <div class="ds-sub">選考に移行済み</div>
+          <div id="statConvertedOffers" class="ds-stat-value">0</div>
+        </div>
+      </div>
 
-            <!-- Mobile Filter Toggle Button -->
-            <button type="button" id="offerFilterToggleBtn" onclick="toggleOfferMobileFilters()" class="md:hidden flex items-center gap-1 px-3 py-2 rounded-xl bg-slate-800 border border-slate-700 hover:border-indigo-500/50 text-slate-300 text-xs font-semibold shrink-0 active:scale-95 transition">
-              <i data-lucide="sliders-horizontal" class="w-3.5 h-3.5 text-indigo-400"></i>
-              <span>絞込</span>
-            </button>
-          </div>
-
-          <!-- Row 2: Filter Selects & Sort Order (Hidden on mobile unless opened, inline on desktop) -->
-          <div id="offerFiltersDropdown" class="hidden md:grid md:grid-cols-3 gap-2 pt-1 border-t border-slate-800/80 md:border-0 md:pt-0">
-            <!-- Sort Order: 期限が近い順・新しく来た順・新着優先 -->
-            <select id="offerSortOrder" onchange="renderOffers()" class="text-xs bg-slate-800 border border-amber-500/40 text-amber-300 font-semibold rounded-lg px-2.5 py-1.5 focus:outline-none focus:border-indigo-500 shadow-sm">
-              <option value="unread_first">🔥 並び順: 新着・未確認が上</option>
-              <option value="deadline_asc">⏰ 並び順: 返信期限が近い順</option>
-              <option value="received_desc">📅 並び順: 新しく来た順</option>
-              <option value="score_desc">⭐ 並び順: 評価スコアが高い順</option>
-              <option value="priority_desc">🎯 並び順: 志望度が高い順</option>
+      <!-- 検索・絞り込み -->
+      <div class="flex flex-col gap-2">
+        <div class="flex items-center gap-2">
+          <label class="ds-input-icon flex-1">
+            <span class="sr-only">オファーを検索</span>
+            <i data-lucide="search"></i>
+            <input type="text" id="offerSearchQuery" oninput="renderOffers()" placeholder="企業名・オファー内容で検索" class="ds-input">
+          </label>
+          <button type="button" id="offerFilterToggleBtn" onclick="toggleOfferMobileFilters()" class="ds-btn md:hidden">
+            <span>絞り込み</span><i data-lucide="chevron-down"></i>
+          </button>
+        </div>
+        <div id="offerFiltersDropdown" class="hidden md:grid md:grid-cols-3 gap-2 grid grid-cols-1">
+          <label>
+            <span class="sr-only">並び順</span>
+            <select id="offerSortOrder" onchange="renderOffers()" class="ds-select">
+              <option value="unread_first">並び順：未確認を先頭</option>
+              <option value="deadline_asc">並び順：返信期限が近い順</option>
+              <option value="received_desc">並び順：受信日が新しい順</option>
+              <option value="score_desc">並び順：スコアが高い順</option>
+              <option value="priority_desc">並び順：志望度が高い順</option>
             </select>
-
-            <!-- Filter: Media -->
-            <select id="offerFilterMedia" onchange="renderOffers()" class="text-xs bg-slate-800 border border-slate-700 text-slate-200 rounded-lg px-2.5 py-1.5 focus:outline-none focus:border-indigo-500">
-              <option value="ALL">全媒体</option>
+          </label>
+          <label>
+            <span class="sr-only">媒体</span>
+            <select id="offerFilterMedia" onchange="renderOffers()" class="ds-select">
+              <option value="ALL">すべての媒体</option>
               <option value="OfferBox">OfferBox</option>
               <option value="paiza新卒">paiza新卒</option>
               <option value="Re就活キャンパス">Re就活キャンパス</option>
               <option value="その他">その他</option>
             </select>
-
-            <!-- Filter: Status -->
-            <select id="offerFilterStatus" onchange="renderOffers()" class="text-xs bg-slate-800 border border-slate-700 text-slate-200 rounded-lg px-2.5 py-1.5 focus:outline-none focus:border-indigo-500">
-              <option value="ALL">全ステータス</option>
+          </label>
+          <label>
+            <span class="sr-only">状態</span>
+            <select id="offerFilterStatus" onchange="renderOffers()" class="ds-select">
+              <option value="ALL">すべての状態</option>
               <option value="検討中">検討中</option>
               <option value="やり取り中">やり取り中</option>
               <option value="辞退">辞退</option>
               <option value="選考移行済">選考移行済</option>
             </select>
-          </div>
+          </label>
         </div>
       </div>
 
-      <!-- Quick Summary Cards for Offers -->
-      <div class="grid grid-cols-2 sm:grid-cols-4 gap-2 sm:gap-4">
-        <div class="bg-slate-800/60 border border-slate-800/90 rounded-xl p-2.5 sm:p-3.5 flex items-center gap-2.5 sm:gap-3">
-          <div class="p-2 sm:p-2.5 rounded-lg bg-rose-500/10 border border-rose-500/20 text-rose-400 shrink-0">
-            <i data-lucide="alert-circle" class="w-4 h-4 sm:w-5 sm:h-5"></i>
-          </div>
-          <div>
-            <div class="text-[11px] sm:text-xs text-slate-400">期限迫る</div>
-            <div id="statUrgentOffers" class="text-base sm:text-xl font-bold text-rose-400">0</div>
-          </div>
-        </div>
-        <div class="bg-slate-800/60 border border-slate-800/90 rounded-xl p-2.5 sm:p-3.5 flex items-center gap-2.5 sm:gap-3">
-          <div class="p-2 sm:p-2.5 rounded-lg bg-amber-500/10 border border-amber-500/20 text-amber-400 shrink-0">
-            <i data-lucide="clock" class="w-4 h-4 sm:w-5 sm:h-5"></i>
-          </div>
-          <div>
-            <div class="text-[11px] sm:text-xs text-slate-400">検討中</div>
-            <div id="statReviewingOffers" class="text-base sm:text-xl font-bold text-amber-400">0</div>
-          </div>
-        </div>
-        <div class="bg-slate-800/60 border border-slate-800/90 rounded-xl p-2.5 sm:p-3.5 flex items-center gap-2.5 sm:gap-3">
-          <div class="p-2 sm:p-2.5 rounded-lg bg-indigo-500/10 border border-indigo-500/20 text-indigo-400 shrink-0">
-            <i data-lucide="sparkles" class="w-4 h-4 sm:w-5 sm:h-5"></i>
-          </div>
-          <div>
-            <div class="text-[11px] sm:text-xs text-slate-400">特別枠</div>
-            <div id="statSpecialOffers" class="text-base sm:text-xl font-bold text-indigo-300">0</div>
-          </div>
-        </div>
-        <div class="bg-slate-800/60 border border-slate-800/90 rounded-xl p-2.5 sm:p-3.5 flex items-center gap-2.5 sm:gap-3">
-          <div class="p-2 sm:p-2.5 rounded-lg bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 shrink-0">
-            <i data-lucide="check-circle-2" class="w-4 h-4 sm:w-5 sm:h-5"></i>
-          </div>
-          <div>
-            <div class="text-[11px] sm:text-xs text-slate-400">選考移行</div>
-            <div id="statConvertedOffers" class="text-base sm:text-xl font-bold text-emerald-400">0</div>
-          </div>
-        </div>
+      <!-- オファー一覧 -->
+      <div id="offersContainer">
+        <!-- JavaScript で描画（リスト / カード） -->
       </div>
 
-
-      <!-- 就活サイト別優先キーワードルール＆自動削除通知 -->
-      <div class="space-y-3">
-        <!-- 優先キーワードルール適用バー -->
-        <div class="p-3.5 rounded-xl bg-slate-800/60 border border-slate-700/80 text-xs space-y-2 shadow-sm">
-          <div class="flex items-center justify-between flex-wrap gap-2">
-            <div class="flex items-center gap-2 text-indigo-300 font-bold">
-              <i data-lucide="filter" class="w-4 h-4 text-indigo-400"></i>
-              <span>就活サイト別 優先スカウト抽出ルール（適用中）</span>
-            </div>
-            <span class="text-[11px] px-2 py-0.5 rounded bg-indigo-500/10 text-indigo-300 border border-indigo-500/30 font-medium">条件合致オファーを最上位へ自動抽出</span>
+      <!-- 補足情報（ふだんは閉じておく） -->
+      <div class="ds-panel">
+        <details class="ds-details">
+          <summary>
+            <i data-lucide="chevron-right" class="ds-chevron"></i>
+            <span>優先して表示するスカウトの条件</span>
+          </summary>
+          <div class="ds-details-body">
+            <p class="ds-sub mb-3">メールの件名に次の言葉が含まれるオファーを、一覧の上に表示します。</p>
+            <dl class="grid grid-cols-1 sm:grid-cols-[160px_1fr] gap-x-4 gap-y-2">
+              <dt class="font-medium">OfferBox</dt>
+              <dd>「オファーが届きました」「早期選考」「特別」<span class="ds-sub">（スコア5.0未満は除外）</span></dd>
+              <dt class="font-medium">マイナビ</dt>
+              <dd>「スカウト」「面接のご案内」「選考免除」<span class="ds-sub">（一次・書類免除を含む）</span></dd>
+              <dt class="font-medium">Re就活</dt>
+              <dd>「IT業界フォーラム」「早期選考」</dd>
+              <dt class="font-medium">paiza新卒</dt>
+              <dd>「ゴールデンスカウト」「プラチナスカウト」<span class="ds-sub">（面談確約）</span></dd>
+              <dt class="font-medium">その他・ゲーム企業</dt>
+              <dd>「早期選考案内」「一次選考免除」「書類選考免除」「3daysカレッジ」</dd>
+            </dl>
           </div>
-          <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-2 text-[11px]">
-            <div class="p-2.5 rounded-lg bg-slate-900/70 border border-slate-800">
-              <span class="text-indigo-400 font-bold block mb-1">【OfferBox】</span>
-              <span class="text-slate-300 leading-tight block">「オファーが届きました」「早期選考」「特別」</span>
-              <span class="text-rose-400 font-semibold block mt-1">※5.0未満は自動削除</span>
-            </div>
-            <div class="p-2.5 rounded-lg bg-slate-900/70 border border-slate-800">
-              <span class="text-sky-400 font-bold block mb-1">【マイナビ】</span>
-              <span class="text-slate-300 leading-tight block">「スカウト」「面接のご案内」「選考免除」</span>
-              <span class="text-sky-400/80 block mt-1">※一次・書類免除含む</span>
-            </div>
-            <div class="p-2.5 rounded-lg bg-slate-900/70 border border-slate-800">
-              <span class="text-amber-400 font-bold block mb-1">【Re就活】</span>
-              <span class="text-slate-300 leading-tight block">「IT業界フォーラム」「早期選考」</span>
-              <span class="text-amber-400/80 block mt-1">※IT特化スカウト抽出</span>
-            </div>
-            <div class="p-2.5 rounded-lg bg-slate-900/70 border border-slate-800">
-              <span class="text-emerald-400 font-bold block mb-1">【paiza新卒】</span>
-              <span class="text-slate-300 leading-tight block">「ゴールデンスカウト」「プラチナスカウト」</span>
-              <span class="text-amber-300 font-semibold block mt-1">🥇面談確約・特別優遇</span>
-            </div>
-            <div class="p-2.5 rounded-lg bg-slate-900/70 border border-slate-800">
-              <span class="text-purple-400 font-bold block mb-1">【その他・ゲーム企業】</span>
-              <span class="text-slate-300 leading-tight block">「早期選考案内」「一次選考免除」「書類選考免除」「3daysカレッジ」</span>
+        </details>
+        <details class="ds-details" style="border-top: 1px solid var(--ds-border);">
+          <summary>
+            <i data-lucide="chevron-right" class="ds-chevron"></i>
+            <span>自動で除外したオファー</span>
+            <span id="autoDeleteBadge" class="ds-sub ds-num">0件</span>
+          </summary>
+          <div class="ds-details-body">
+            <p class="ds-sub mb-3">スコアが5.0未満、または条件に合わなかったオファーです。</p>
+            <div id="autoDeleteLogList" class="flex flex-col gap-2">
+              <!-- JavaScript で描画 -->
             </div>
           </div>
-        </div>
-
-        <!-- 自動削除ログ通知パネル -->
-        <div class="bg-rose-950/20 border border-rose-900/40 rounded-xl p-3.5 text-xs shadow-sm">
-          <div class="flex items-center justify-between cursor-pointer select-none" onclick="toggleAutoDeleteLog()">
-            <div class="flex items-center gap-2 text-rose-300 font-bold">
-              <i data-lucide="shield-alert" class="w-4 h-4 text-rose-400"></i>
-              <span>※以下の記事を自動で削除しました（新評価基準 5.0未満・非合致案件）</span>
-              <span id="autoDeleteBadge" class="px-2 py-0.2 rounded-full bg-rose-500/20 text-rose-300 border border-rose-500/40 text-[11px] font-semibold">3件</span>
-            </div>
-            <div class="text-[11px] text-slate-400 hover:text-slate-200 flex items-center gap-1 font-medium">
-              <span id="autoDeleteToggleText">詳細ログを表示</span>
-              <i id="autoDeleteToggleIcon" data-lucide="chevron-down" class="w-3.5 h-3.5"></i>
-            </div>
-          </div>
-          <div id="autoDeleteLogList" class="hidden mt-3 pt-3 border-t border-rose-900/30 space-y-2 text-slate-300 text-[11px]">
-            <!-- Rendered by JavaScript -->
-          </div>
-        </div>
-      </div>
-
-      <!-- Offers Content Container -->
-      <div id="offersContainer" class="flex-1">
-        <!-- Injected via JavaScript (Cards or Table) -->
+        </details>
       </div>
     </section>
 
@@ -4327,7 +4527,7 @@
     let pipeline = [];
     let archivedPipeline = [];
     let calendarEvents = [];
-    let currentOffersLayout = 'grid';
+    let currentOffersLayout = 'table';
     let activeDetailItem = null;
     let activeDetailType = 'pipeline';
 
@@ -4665,6 +4865,17 @@
         if (viewArchived) viewArchived.classList.remove('hidden');
         renderArchived();
       }
+
+      // 新デザインのヘッダー用：タブの目印クラスと「選択中」の印を付け直す
+      const tabButtons = { offers: tabOffersBtn, pipeline: tabPipelineBtn, calendar: tabCalendarBtn, questions: tabQuestionsBtn, archived: tabArchivedBtn };
+      Object.entries(tabButtons).forEach(([key, btn]) => {
+        if (!btn) return;
+        btn.classList.add('hdr-tab');
+        if (key === tab) btn.setAttribute('aria-current', 'page');
+        else btn.removeAttribute('aria-current');
+      });
+      // 新デザインは今のところオファー画面だけに適用する
+      document.documentElement.classList.toggle('ds', tab === 'offers');
       lucide.createIcons();
     }
 
@@ -4673,13 +4884,8 @@
       const gridBtn = document.getElementById('offersViewGridBtn');
       const tableBtn = document.getElementById('offersViewTableBtn');
 
-      if (layout === 'grid') {
-        gridBtn.className = 'p-1.5 rounded text-indigo-400 bg-slate-700 transition';
-        tableBtn.className = 'p-1.5 rounded text-slate-400 hover:text-slate-200 transition';
-      } else {
-        gridBtn.className = 'p-1.5 rounded text-slate-400 hover:text-slate-200 transition';
-        tableBtn.className = 'p-1.5 rounded text-indigo-400 bg-slate-700 transition';
-      }
+      gridBtn.setAttribute('aria-pressed', String(layout === 'grid'));
+      tableBtn.setAttribute('aria-pressed', String(layout !== 'grid'));
       renderOffers();
     }
 
@@ -4835,6 +5041,93 @@
     }
 
     // ==========================================
+    // オファー画面（新デザイン）用の部品
+    // docs/design-guidelines.md のルールに沿って、色は状態を表すときだけ使う
+    // ==========================================
+
+    // スコアは「保存済みの評価 → 組み込みの評価」の順で探す（編集したスコアがカードにも反映されるように）
+    function getOfferReport(item) {
+      return (item && item.analystReport) || ANALYST_REPORTS[item && item.companyName] || null;
+    }
+
+    function dsScoreHtml(item) {
+      const rep = getOfferReport(item);
+      if (!rep || typeof rep.score !== 'number') {
+        return `<span class="ds-score-none">未評価</span>`;
+      }
+      let label = '非推奨';
+      let color = 'var(--ds-danger)';
+      if (rep.score >= 9.0) { label = '理想'; color = 'var(--ds-good)'; }
+      else if (rep.score >= 7.5) { label = '推奨'; color = 'var(--ds-good)'; }
+      else if (rep.score >= 6.0) { label = '検討'; color = 'var(--ds-text-disabled)'; }
+      else if (rep.score >= 4.5) { label = '懸念'; color = 'var(--ds-warn)'; }
+      return `
+        <span class="ds-score" title="スコア ${rep.score.toFixed(1)} / 10">
+          <span class="ds-score-num">${rep.score.toFixed(1)}</span>
+          <span class="ds-score-label" style="--ds-score-color: ${color}">${label}</span>
+        </span>
+      `;
+    }
+
+    function dsDeadlineHtml(deadlineDate) {
+      if (!deadlineDate) return `<span class="ds-sub">期限なし</span>`;
+      const today = new Date();
+      today.setHours(0, 0, 0, 0);
+      const target = new Date(deadlineDate);
+      target.setHours(0, 0, 0, 0);
+      const diffDays = Math.ceil((target - today) / (1000 * 60 * 60 * 24));
+
+      if (diffDays < 0) return `<span class="ds-badge ds-badge-neutral">期限切れ</span>`;
+      if (diffDays === 0) return `<span class="ds-badge ds-badge-danger">今日まで</span>`;
+      if (diffDays <= 3) return `<span class="ds-badge ds-badge-danger">あと${diffDays}日</span>`;
+      if (diffDays <= 7) return `<span class="ds-badge ds-badge-warn">あと${diffDays}日</span>`;
+      return `<span class="ds-sub ds-num">あと${diffDays}日</span>`;
+    }
+
+    function dsSpecialScoutLabel(item) {
+      const type = item.offerType || '';
+      if (type.includes('ゴールデンスカウト')) return 'ゴールデンスカウト';
+      if (type.includes('プラチナスカウト')) return 'プラチナスカウト';
+      if (item.matchedRule) return '優先スカウト';
+      return '';
+    }
+
+    // 「媒体・受信日・選考区分・状態」を1行の補足テキストにまとめる
+    function dsOfferMetaText(item) {
+      const parts = [];
+      if (item.media) parts.push(escapeHtml(item.media));
+      if (item.receivedDate) parts.push(`受信 ${escapeHtml(item.receivedDate.replace(/^\d{4}-/, '').replace('-', '/'))}`);
+      if (item.selectionType) parts.push(escapeHtml(item.selectionType));
+      if (item.status && item.status !== '検討中') parts.push(escapeHtml(item.status));
+      return parts.join(' ・ ');
+    }
+
+    function dsViewedToggleHtml(item) {
+      const viewed = !!item.isViewed;
+      const label = viewed ? '確認済み（押すと未確認に戻す）' : '未確認（押すと確認済みにする）';
+      return `<button type="button" class="ds-dot-btn" aria-pressed="${viewed}" aria-label="${label}" title="${label}" onclick="toggleOfferItemViewed('${safeId(item.id)}', event)"></button>`;
+    }
+
+    function dsOfferSecondaryActionsHtml(item) {
+      const id = safeId(item.id);
+      const url = safeUrl(item.url);
+      return `
+        <button type="button" class="ds-btn ds-btn-text" onclick="openOfferAsDetailModal('${id}')">評価を見る</button>
+        <a class="ds-icon-btn" href="${escapeHtml(getGmailUrl(item))}" target="_blank" rel="noopener noreferrer" aria-label="Gmailで開く" title="Gmailで開く"><i data-lucide="mail"></i></a>
+        ${url ? `<a class="ds-icon-btn" href="${escapeHtml(url)}" target="_blank" rel="noopener noreferrer" aria-label="応募ページを開く" title="応募ページを開く"><i data-lucide="external-link"></i></a>` : ''}
+        <button type="button" class="ds-icon-btn" onclick="openOfferEditModal('${id}')" aria-label="編集する" title="編集する"><i data-lucide="pencil"></i></button>
+      `;
+    }
+
+    function dsOfferMainActionHtml(item) {
+      const id = safeId(item.id);
+      if (item.status === '選考移行済') {
+        return `<button type="button" class="ds-btn ds-btn-text" onclick="revertOfferFromPipeline('${id}')">選考への移行を取り消す</button>`;
+      }
+      return `<button type="button" class="ds-btn" onclick="convertOfferToPipeline('${id}')"><span>選考に進める</span><i data-lucide="arrow-right"></i></button>`;
+    }
+
+    // ==========================================
     // Render Offers View
     // ==========================================
     function renderOffers() {
@@ -4848,16 +5141,13 @@
         let logHtml = '';
         AUTO_DELETED_OFFERS.forEach(del => {
           logHtml += `
-            <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-1.5 p-2.5 rounded-lg bg-slate-900/90 border border-rose-900/40">
-              <div class="flex items-center gap-2 flex-wrap">
-                <span class="px-1.5 py-0.5 rounded bg-rose-500/20 text-rose-300 border border-rose-500/40 font-mono text-[10px] font-bold">★ ${del.score.toFixed(1)}点</span>
-                <span class="font-bold text-slate-200 text-xs">${escapeHtml(del.companyName)}</span>
-                <span class="text-[10px] px-1.5 py-0.2 rounded bg-slate-800 text-slate-400 border border-slate-700">${escapeHtml(del.media)}</span>
-                <span class="text-[10px] text-slate-500 font-mono">${escapeHtml(del.date)}</span>
+            <div class="flex flex-col sm:flex-row sm:items-baseline gap-1 sm:gap-4 py-2" style="border-top: 1px solid var(--ds-border);">
+              <div class="flex items-baseline gap-2 sm:w-72 shrink-0">
+                <span class="ds-num font-semibold">${del.score.toFixed(1)}</span>
+                <span class="font-medium">${escapeHtml(del.companyName)}</span>
               </div>
-              <div class="text-[11px] text-rose-400/90 flex-1 sm:text-right font-medium">
-                ${escapeHtml(del.reason)}
-              </div>
+              <div class="ds-sub flex-1">${escapeHtml(del.reason)}</div>
+              <div class="ds-sub ds-num shrink-0">${escapeHtml(del.media)} ・ ${escapeHtml(del.date)}</div>
             </div>
           `;
         });
@@ -4964,10 +5254,9 @@
 
       if (filtered.length === 0) {
         container.innerHTML = `
-          <div class="py-16 text-center bg-slate-800/20 border border-dashed border-slate-800 rounded-2xl">
-            <i data-lucide="inbox" class="w-12 h-12 text-slate-600 mx-auto mb-3"></i>
-            <p class="text-slate-300 font-semibold text-sm">現在該当するオファーはありません</p>
-            <p class="text-slate-500 text-xs mt-1.5">条件を変更するか、右上の「+ 新規追加」から新しいオファーを登録してください</p>
+          <div class="ds-panel py-12 px-4 text-center">
+            <p class="ds-h2">該当するオファーはありません</p>
+            <p class="ds-sub mt-2">検索や絞り込みの条件を変えるか、「新規追加」からオファーを登録してください。</p>
           </div>
         `;
         lucide.createIcons();
@@ -4975,241 +5264,75 @@
       }
 
       if (currentOffersLayout === 'grid') {
-        let cardsHtml = `<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">`;
+        let cardsHtml = `<div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-3 sm:gap-4">`;
         filtered.forEach(item => {
-          const isViewed = !!item.isViewed;
-          const cardBorder = isViewed ? 'border-slate-700/60 bg-slate-800/60 opacity-90 hover:opacity-100' : 'border-sky-500/40 bg-slate-800/90 shadow-sky-950/20 ring-1 ring-sky-500/20';
-
+          const id = safeId(item.id);
+          const special = dsSpecialScoutLabel(item);
           cardsHtml += `
-            <div class="${cardBorder} hover:bg-slate-800 border rounded-2xl p-5 flex flex-col justify-between transition-all duration-200 shadow-lg group">
-              <div>
-                <!-- Top Badges Row: New/Viewed toggle badge on left -->
-                <div class="flex items-center justify-between gap-2 mb-3">
-                  <div class="flex items-center gap-1.5 flex-wrap">
-                    <!-- 既読/未読（確認済/新着）トグルバッジ -->
-                    ${!isViewed ? `
-                      <button type="button" onclick="toggleOfferItemViewed('${item.id}', event)" title="クリックして確認済みにする（下へ移動）" class="inline-flex items-center gap-1 text-[10px] px-2 py-0.5 rounded-full bg-gradient-to-r from-sky-500/25 to-indigo-500/25 text-sky-200 border border-sky-400/50 font-bold shadow-sm shadow-sky-500/20 hover:scale-105 transition active:scale-95">
-                        <span class="w-1.5 h-1.5 rounded-full bg-sky-400 animate-pulse"></span>
-                        <span>NEW 未確認</span>
-                      </button>
-                    ` : `
-                      <button type="button" onclick="toggleOfferItemViewed('${item.id}', event)" title="クリックして未確認に戻す（上へ移動）" class="inline-flex items-center gap-1 text-[10px] px-2 py-0.5 rounded-full bg-slate-800 text-slate-400 border border-slate-700 hover:text-slate-200 hover:border-slate-500 transition active:scale-95">
-                        <i data-lucide="check" class="w-3 h-3 text-slate-500"></i>
-                        <span>確認済</span>
-                      </button>
-                    `}
-
-                    ${getSelectionTypeBadgeHtml(item.selectionType)}
-                    ${getMediaBadgeHtml(item.media)}
-                    ${getOfferStatusBadgeHtml(item.status)}
-                    ${getScoreBadgeSmallHtml(item.companyName)}
-                  </div>
-                  <div>
-                    ${getStarsHtml(item.rating, item.companyName)}
+            <article class="ds-panel ds-card">
+              <div class="flex items-start justify-between gap-3">
+                <div class="flex items-start gap-2 min-w-0">
+                  ${dsViewedToggleHtml(item)}
+                  <div class="min-w-0">
+                    <button type="button" class="ds-company" onclick="openOfferAsDetailModal('${id}')">${escapeHtml(item.companyName)}</button>
+                    <div class="ds-sub">${escapeHtml(item.offerType || '通常選考')}</div>
                   </div>
                 </div>
-
-                <!-- Company & Offer Type -->
-                <h3 class="text-base font-bold text-white group-hover:text-indigo-300 transition-colors tracking-tight mb-1 cursor-pointer flex items-center gap-1.5" onclick="openOfferAsDetailModal('${item.id}')">
-                  <span>${escapeHtml(item.companyName)}</span>
-                </h3>
-
-                <div class="flex items-center gap-2 mb-3 flex-wrap">
-                  <span class="text-xs font-semibold px-2 py-0.5 rounded bg-indigo-500/15 text-indigo-300 border border-indigo-500/25">
-                    ${escapeHtml(item.offerType || '通常選考')}
-                  </span>
-                  ${item.offerType && item.offerType.includes('ゴールデンスカウト') ? `
-                    <span class="text-[11px] font-bold px-2.5 py-0.5 rounded-full bg-amber-500/20 text-amber-300 border border-amber-500/40 flex items-center gap-1 shadow-sm">
-                      <i data-lucide="award" class="w-3.5 h-3.5 text-amber-400"></i>
-                      <span>🥇 ゴールデンスカウト (面談確約)</span>
-                    </span>
-                  ` : item.offerType && item.offerType.includes('プラチナスカウト') ? `
-                    <span class="text-[11px] font-bold px-2.5 py-0.5 rounded-full bg-cyan-500/20 text-cyan-200 border border-cyan-400/40 flex items-center gap-1 shadow-sm">
-                      <i data-lucide="gem" class="w-3.5 h-3.5 text-cyan-300"></i>
-                      <span>💎 プラチナスカウト (特別優遇)</span>
-                    </span>
-                  ` : item.matchedRule ? `
-                    <span class="text-[11px] font-bold px-2 py-0.5 rounded-full bg-amber-500/15 text-amber-300 border border-amber-500/30 flex items-center gap-1">
-                      <i data-lucide="star" class="w-3 h-3 fill-amber-400 text-amber-400"></i>
-                      <span>優先スカウト (${escapeHtml(item.matchedRule)})</span>
-                    </span>
-                  ` : ''}
-                </div>
-
-                <!-- Deadline Badge & Received Date -->
-                <div class="mb-3.5 flex items-center justify-between gap-2 flex-wrap">
-                  <div class="flex items-center gap-1.5">
-                    <span class="text-[11px] text-slate-400 font-medium">返信期限:</span>
-                    ${getDeadlineBadgeHtml(item.deadline)}
-                  </div>
-                  ${item.receivedDate ? `
-                    <span class="text-[11px] text-slate-400 font-mono flex items-center gap-1">
-                      <i data-lucide="calendar" class="w-3 h-3 text-slate-500"></i>
-                      <span>受信: ${escapeHtml(item.receivedDate.replace(/^2026-/, ''))}</span>
-                    </span>
-                  ` : ''}
-                </div>
-
-                <!-- Evaluated Points / Notes -->
-                <div class="bg-slate-900/60 rounded-xl p-3 border border-slate-800/80 mb-4">
-                  <div class="text-[11px] font-semibold text-slate-400 flex items-center gap-1 mb-1">
-                    <i data-lucide="sparkle" class="w-3 h-3 text-amber-400"></i>
-                    評価されたポイント・スカウト文
-                  </div>
-                  <p class="text-xs text-slate-300 line-clamp-3 leading-relaxed">
-                    ${escapeHtml(item.notes || 'アピールポイントのメモはありません。')}
-                  </p>
-                </div>
+                ${dsScoreHtml(item)}
               </div>
-
-              <!-- Card Action Footer -->
-              <div class="pt-3 border-t border-slate-700/60 flex items-center justify-between gap-2">
+              <div class="flex items-center gap-2 flex-wrap">
+                ${dsDeadlineHtml(item.deadline)}
+                ${special ? `<span class="ds-badge ds-badge-info">${escapeHtml(special)}</span>` : ''}
+              </div>
+              <div class="ds-sub">${dsOfferMetaText(item)}</div>
+              ${item.notes ? `<p class="ds-card-notes">${escapeHtml(item.notes)}</p>` : ''}
+              <div class="ds-card-footer">
                 <div class="flex items-center gap-1">
-                  <!-- Analyst View Button -->
-                  <button onclick="openOfferAsDetailModal('${item.id}')" title="専門アナリスト厳格診断を開く" class="px-2.5 py-1.5 rounded-lg bg-indigo-500/15 hover:bg-indigo-500/25 border border-indigo-500/30 text-indigo-300 text-xs font-semibold flex items-center gap-1 transition">
-                    <i data-lucide="shield-alert" class="w-3.5 h-3.5"></i>
-                    <span>🎓 診断</span>
-                  </button>
-                  <!-- Direct Gmail Button -->
-                  <a href="${escapeHtml(getGmailUrl(item))}" target="_blank" rel="noopener noreferrer" title="${item.gmailUrl ? '該当メールをGmailで直接開く' : 'Gmailでこの企業を検索'}" class="px-2.5 py-1.5 rounded-lg bg-rose-500/15 hover:bg-rose-500/25 border border-rose-500/30 text-rose-300 text-xs font-semibold flex items-center gap-1 transition">
-                    <i data-lucide="mail" class="w-3.5 h-3.5 text-rose-400"></i>
-                    <span>✉️ Gmail</span>
-                  </a>
-                  <button onclick="openOfferEditModal('${item.id}')" title="オファー編集（Gmail URL登録など）" class="p-2 rounded-lg bg-slate-700/50 hover:bg-slate-700 text-slate-300 hover:text-white transition">
-                    <i data-lucide="edit" class="w-4 h-4"></i>
-                  </button>
-                  ${safeUrl(item.url) ? `
-                    <a href="${escapeHtml(safeUrl(item.url))}" target="_blank" rel="noopener noreferrer" title="オファーリンク・マイページを開く" class="p-2 rounded-lg bg-slate-700/50 hover:bg-slate-700 text-slate-300 hover:text-white transition">
-                      <i data-lucide="external-link" class="w-4 h-4"></i>
-                    </a>
-                  ` : ''}
+                  ${dsOfferSecondaryActionsHtml(item)}
                 </div>
-
-                <!-- Transition / Revert buttons -->
-                ${item.status !== '選考移行済' ? `
-                  <button onclick="convertOfferToPipeline('${item.id}')" class="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold bg-emerald-600 hover:bg-emerald-500 text-white shadow-md shadow-emerald-600/20 transition-transform active:scale-95">
-                    <i data-lucide="arrow-right-circle" class="w-4 h-4"></i>
-                    <span>選考へ移行</span>
-                  </button>
-                ` : `
-                  <div class="flex items-center gap-2">
-                    <span class="text-xs text-emerald-400 flex items-center gap-1 font-medium">
-                      <i data-lucide="check" class="w-3.5 h-3.5"></i> 移行済
-                    </span>
-                    <button onclick="revertOfferFromPipeline('${item.id}')" title="選考から削除してオファーに戻します" class="text-xs px-2.5 py-1 rounded-md bg-amber-500/15 hover:bg-amber-500/25 border border-amber-500/30 text-amber-300 font-medium transition flex items-center gap-1">
-                      <i data-lucide="undo-2" class="w-3 h-3"></i>
-                      <span>取消</span>
-                    </button>
-                  </div>
-                `}
+                ${dsOfferMainActionHtml(item)}
               </div>
-            </div>
+            </article>
           `;
         });
         cardsHtml += `</div>`;
         container.innerHTML = cardsHtml;
       } else {
-        // Table view
-        let tableHtml = `
-          <div class="bg-slate-800/70 border border-slate-700/80 rounded-2xl overflow-hidden shadow-lg">
-            <div class="overflow-x-auto">
-              <table class="w-full text-left text-xs text-slate-300">
-                <thead class="bg-slate-900/80 text-slate-400 uppercase text-[11px] font-semibold border-b border-slate-700">
-                  <tr>
-                    <th class="px-3 py-3.5 text-center">状態</th>
-                    <th class="px-4 py-3.5">企業名</th>
-                    <th class="px-3 py-3.5">スコア判定</th>
-                    <th class="px-3 py-3.5">媒体</th>
-                    <th class="px-3 py-3.5">オファー種別</th>
-                    <th class="px-3 py-3.5">返信期限</th>
-                    <th class="px-3 py-3.5">受信日</th>
-                    <th class="px-4 py-3.5">評価されたポイント</th>
-                    <th class="px-3 py-3.5 text-center">興味度</th>
-                    <th class="px-3 py-3.5">ステータス</th>
-                    <th class="px-4 py-3.5 text-right">アクション</th>
-                  </tr>
-                </thead>
-                <tbody class="divide-y divide-slate-700/50">
+        // リスト表示（Linear のように1行1社で並べる）
+        let listHtml = `
+          <div class="ds-panel">
+            <div class="ds-list-head" role="row">
+              <span></span>
+              <span>企業・オファー</span>
+              <span>スコア</span>
+              <span>媒体・受信日</span>
+              <span>返信期限</span>
+              <span class="text-right">操作</span>
+            </div>
         `;
         filtered.forEach(item => {
-          const isViewed = !!item.isViewed;
-          tableHtml += `
-            <tr class="hover:bg-slate-700/30 transition-colors ${!isViewed ? 'bg-sky-500/5' : ''}">
-              <td class="px-3 py-3 text-center whitespace-nowrap">
-                ${!isViewed ? `
-                  <button type="button" onclick="toggleOfferItemViewed('${item.id}', event)" title="クリックして確認済みにする" class="px-1.5 py-0.5 rounded-full bg-sky-500/20 text-sky-300 border border-sky-500/40 text-[10px] font-bold">
-                    NEW
-                  </button>
-                ` : `
-                  <button type="button" onclick="toggleOfferItemViewed('${item.id}', event)" title="クリックして未確認に戻す" class="px-1.5 py-0.5 rounded-full bg-slate-800 text-slate-500 border border-slate-700 text-[10px]">
-                    済
-                  </button>
-                `}
-              </td>
-              <td class="px-4 py-3 font-bold text-white whitespace-nowrap cursor-pointer hover:text-indigo-300" onclick="openOfferAsDetailModal('${item.id}')">
-                ${escapeHtml(item.companyName)}
-              </td>
-              <td class="px-3 py-3 whitespace-nowrap">
-                ${getScoreBadgeSmallHtml(item.companyName)}
-              </td>
-              <td class="px-3 py-3 whitespace-nowrap">
-                ${getMediaBadgeHtml(item.media)}
-              </td>
-              <td class="px-3 py-3 whitespace-nowrap">
-                <span class="px-2 py-0.5 rounded bg-indigo-500/15 text-indigo-300 border border-indigo-500/25 font-medium text-[11px]">
-                  ${escapeHtml(item.offerType || '通常')}
-                </span>
-              </td>
-              <td class="px-3 py-3 whitespace-nowrap">
-                ${getDeadlineBadgeHtml(item.deadline)}
-              </td>
-              <td class="px-3 py-3 whitespace-nowrap font-mono text-slate-400 text-[11px]">
-                ${escapeHtml(item.receivedDate ? item.receivedDate.replace(/^2026-/, '') : '—')}
-              </td>
-              <td class="px-4 py-3 max-w-xs truncate text-slate-400" title="${escapeHtml(item.notes || '')}">
-                ${escapeHtml(item.notes || '—')}
-              </td>
-              <td class="px-3 py-3 text-center whitespace-nowrap">
-                ${getStarsHtml(item.rating, item.companyName)}
-              </td>
-              <td class="px-3 py-3 whitespace-nowrap">
-                ${getOfferStatusBadgeHtml(item.status)}
-              </td>
-              <td class="px-4 py-3 text-right whitespace-nowrap">
-                <div class="flex items-center justify-end gap-2">
-                  <a href="${escapeHtml(getGmailUrl(item))}" target="_blank" rel="noopener noreferrer" class="px-2 py-1 rounded bg-rose-500/20 text-rose-300 hover:bg-rose-500/30 border border-rose-500/30 text-[11px] font-bold flex items-center gap-1" title="${item.gmailUrl ? '該当メールをGmailで直接開く' : 'Gmailでこの企業を検索'}">
-                    <i data-lucide="mail" class="w-3 h-3 text-rose-400"></i>
-                    Gmail
-                  </a>
-                  <button onclick="openOfferAsDetailModal('${item.id}')" class="px-2 py-1 rounded bg-indigo-500/20 text-indigo-300 hover:bg-indigo-500/30 border border-indigo-500/30 text-[11px] font-bold">
-                    🎓 診断
-                  </button>
-                  <button onclick="openOfferEditModal('${item.id}')" class="p-1.5 rounded hover:bg-slate-700 text-slate-300 hover:text-white" title="編集">
-                    <i data-lucide="edit" class="w-4 h-4"></i>
-                  </button>
-                  ${item.status !== '選考移行済' ? `
-                    <button onclick="convertOfferToPipeline('${item.id}')" class="px-2.5 py-1 rounded-md text-[11px] font-semibold bg-emerald-600 hover:bg-emerald-500 text-white flex items-center gap-1 shadow-sm">
-                      <i data-lucide="arrow-right-circle" class="w-3.5 h-3.5"></i>
-                      移行
-                    </button>
-                  ` : `
-                    <button onclick="revertOfferFromPipeline('${item.id}')" class="px-2 py-1 rounded-md text-[10px] font-semibold bg-amber-500/20 hover:bg-amber-500/30 text-amber-300 border border-amber-500/30 flex items-center gap-1" title="選考からオファーへ戻す">
-                      <i data-lucide="undo-2" class="w-3 h-3"></i>
-                      取消
-                    </button>
-                  `}
+          const special = dsSpecialScoutLabel(item);
+          listHtml += `
+            <div class="ds-row" role="row">
+              ${dsViewedToggleHtml(item)}
+              <div class="min-w-0">
+                <button type="button" class="ds-company" onclick="openOfferAsDetailModal('${safeId(item.id)}')">${escapeHtml(item.companyName)}</button>
+                <div class="ds-sub truncate">
+                  ${escapeHtml(item.offerType || '通常選考')}${special ? ` ・ ${escapeHtml(special)}` : ''}
                 </div>
-              </td>
-            </tr>
+              </div>
+              <div class="ds-col-score">${dsScoreHtml(item)}</div>
+              <div class="ds-col-media ds-sub">${dsOfferMetaText(item)}</div>
+              <div class="ds-col-deadline">${dsDeadlineHtml(item.deadline)}</div>
+              <div class="ds-actions">
+                ${dsOfferSecondaryActionsHtml(item)}
+                ${dsOfferMainActionHtml(item)}
+              </div>
+            </div>
           `;
         });
-        tableHtml += `
-                </tbody>
-              </table>
-            </div>
-          </div>
-        `;
-        container.innerHTML = tableHtml;
+        listHtml += `</div>`;
+        container.innerHTML = listHtml;
       }
 
       lucide.createIcons();
