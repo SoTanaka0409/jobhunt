@@ -5267,12 +5267,19 @@
       const normalizedText = normalizeCompanyName(text);
       for (const name of knownCompanies) {
         const core = normalizeCompanyName(name);
-        if (core && core.length >= 2 && normalizedText.includes(core)) return name;
+        if (!core || core.length < 2) continue;
+        // 「GO」のような短い英字の会社名は、URL の「google」などに含まれていても一致としない
+        if (/^[a-z0-9]{1,4}$/.test(core)) {
+          if (new RegExp(`(?<![a-z0-9])${core}(?![a-z0-9])`).test(normalizedText)) return name;
+        } else if (normalizedText.includes(core)) {
+          return name;
+        }
       }
       // 「株式会社○○」型と「○○株式会社」型の両方を探し、メールの中で先に出てくるほうを使う
       // （件名に会社名があり、本文の後ろに「株式会社 人事部」のような署名がある場合に、件名のほうを選ぶため）
       const prefix = text.match(new RegExp(`(?:${COMPANY_FORMS})\\s?[^\\s、。！？!【】「」『』()（）<>：:｜|]+?${COMPANY_STOP}`));
-      const suffix = text.match(new RegExp(`[^\\s、。！？!【】「」『』()（）<>：:｜|]{1,30}?(?:${COMPANY_FORMS})`));
+      // 「■株式会社○○」の「■」のような飾り記号は会社名に含めない
+      const suffix = text.match(new RegExp(`[^\\s、。！？!【】「」『』()（）<>：:｜|■□◆◇●○◎★☆※▼▲▶►]{1,30}?(?:${COMPANY_FORMS})`));
       let found = '';
       if (prefix && suffix) found = suffix.index < prefix.index ? suffix[0] : prefix[0];
       else found = prefix ? prefix[0] : (suffix ? suffix[0] : '');
@@ -7054,6 +7061,12 @@
     const GMAIL_IMPORT_KEY = 'jobhunt_gmail_import_v1';
     // オファーとして取り込むメールの目印。これを含まないメール（メルマガなど）は取り込まない
     const GMAIL_OFFER_KEYWORDS = /オファー|スカウト|選考免除|一次免除|1次免除|書類免除|面談確約|特別選考|特別ルート|ゴールデン|プラチナ|早期選考/;
+    // 就活サービスのお知らせ・メルマガの件名。オファーの言葉を含んでいても取り込まない
+    const GMAIL_NEWSLETTER_SUBJECTS = /おすすめ(?:の)?(?:企業|求人)|求人をお届け|新着求人/;
+    // メルマガだけを送ってくる差出人（リクナビNEXT は転職向けで、届くのは「編集部」からのお知らせだけ）
+    const GMAIL_NEWSLETTER_SENDERS = /編集部|next\.rikunabi\.com/;
+    // 就活サービスの運営会社。メルマガの署名から拾った会社名は取り込まない
+    const GMAIL_SERVICE_OPERATORS = /ウォンテッドリー|Wantedly|Indeed|リクルート|マイナビ|アイプラグ|i-plug|paiza/i;
     const GMAIL_IMPORTED_IDS_LIMIT = 1000;
 
     function loadGmailImportConfig() {
@@ -7085,12 +7098,16 @@
     function gmailMessageToOffer(message) {
       const text = `${message.subject || ''}\n${message.body || ''}`;
       if (!GMAIL_OFFER_KEYWORDS.test(text)) return { skip: 'not-offer' };
+      if (GMAIL_NEWSLETTER_SUBJECTS.test(message.subject || '') || GMAIL_NEWSLETTER_SENDERS.test(message.from || '')) {
+        return { skip: 'newsletter' };
+      }
 
       const knownCompanies = [...offers, ...pipeline, ...archivedPipeline]
         .map(x => x.companyName)
         .concat(Object.keys(ANALYST_REPORTS));
       const parsed = parseRecruitEmail(text, { knownCompanies, receivedDate: message.date, mediaHint: message.from });
       if (!parsed.companyName) return { skip: 'no-company' };
+      if (GMAIL_SERVICE_OPERATORS.test(parsed.companyName)) return { skip: 'newsletter' };
 
       const threadUrl = safeUrl(message.threadUrl);
       const key = normalizeCompanyName(parsed.companyName);
