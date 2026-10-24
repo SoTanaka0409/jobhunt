@@ -672,6 +672,17 @@
     .ds-home-row:last-child { border-bottom: 0; }
     .ds-home-row:hover { background: var(--ds-row-hover); }
     .ds-home-when { flex-shrink: 0; width: 6.5rem; font-size: 0.8125rem; color: var(--ds-text-sub); }
+    /* ToDo の1行（ホームと、企業の詳細で共通） */
+    .ds-todo-row {
+      display: flex; align-items: center; gap: 0.75rem;
+      padding: var(--ds-row-pad-y) 1rem; min-height: 3rem;
+      border-bottom: 1px solid var(--ds-border); font-size: 0.875rem;
+    }
+    .ds-todo-row:last-child { border-bottom: 0; }
+    .ds-todo-row:hover { background: var(--ds-row-hover); }
+    .ds-todo-check { width: 1.125rem; height: 1.125rem; flex-shrink: 0; accent-color: var(--ds-primary-bg); cursor: pointer; }
+    .ds-todo-done { color: var(--ds-text-sub); text-decoration: line-through; }
+    .ds-todo-open { min-width: 0; flex: 1; text-align: left; background: none; border: 0; padding: 0; color: inherit; font: inherit; cursor: pointer; }
     @media (max-width: 639px) { .ds-home-when { width: 4.75rem; } }
     .ds-home-stage {
       display: flex; flex-direction: column; align-items: flex-start; gap: 0.25rem;
@@ -2452,6 +2463,9 @@
           評価 <span id="modalScoreBadge" class="ds-sub ds-num">-</span>
         </button>
         <button type="button" id="modalTabProgressBtn" class="ds-tab" role="tab" aria-selected="false" onclick="switchModalTab('progress')">選考メモ</button>
+        <button type="button" id="modalTabTodosBtn" class="ds-tab" role="tab" aria-selected="false" onclick="switchModalTab('todos')">
+          ToDo <span id="modalTodoCount" class="ds-sub ds-num"></span>
+        </button>
       </div>
 
       <!-- Modal Body (Scrollable Container) -->
@@ -2639,6 +2653,28 @@
         <!-- ============================================== -->
         <!-- TAB 2: 選考進捗・面接対策フォーム -->
         <!-- ============================================== -->
+        <!-- ============================================== -->
+        <!-- TAB 3: この会社のToDo（ES提出・Webテスト・お礼メールなど） -->
+        <!-- ============================================== -->
+        <div id="modalSecTodos" class="space-y-4 hidden">
+          <form onsubmit="addTodoFromModal(event)" class="space-y-2">
+            <div class="flex flex-col sm:flex-row gap-2">
+              <input type="text" id="todoTextInput" class="ds-input" placeholder="やることを入力（例：ESを提出する）" maxlength="80" autocomplete="off" aria-label="やること">
+              <input type="date" id="todoDueInput" class="ds-input sm:w-44 shrink-0" aria-label="期限">
+              <button type="submit" class="ds-btn ds-btn-primary shrink-0"><i data-lucide="plus"></i><span>追加</span></button>
+            </div>
+            <div class="flex flex-wrap items-center gap-1">
+              <span class="ds-sub">よく使う：</span>
+              <button type="button" class="ds-btn ds-btn-text" onclick="fillTodoText('ESを提出する')">ESを提出する</button>
+              <button type="button" class="ds-btn ds-btn-text" onclick="fillTodoText('Webテストを受ける')">Webテストを受ける</button>
+              <button type="button" class="ds-btn ds-btn-text" onclick="fillTodoText('逆質問を考える')">逆質問を考える</button>
+              <button type="button" class="ds-btn ds-btn-text" onclick="fillTodoText('お礼メールを送る')">お礼メールを送る</button>
+              <button type="button" class="ds-btn ds-btn-text" onclick="fillTodoText('面接の振り返りを書く')">面接の振り返りを書く</button>
+            </div>
+          </form>
+          <div id="modalTodoList" class="ds-panel"></div>
+        </div>
+
         <form id="pipelineDetailForm" onsubmit="handleUpdatePipeline(event)" class="space-y-5 hidden">
           <input type="hidden" id="detailPipeId">
 
@@ -4947,9 +4983,33 @@
         </div>
       `;
 
+      // 2.5 やること（会社ごとのToDoのうち、未完了のもの。期限の近い順）
+      const HOME_TODO_LIMIT = 6;
+      const todoOwners = [...pipeline, ...offers.filter(o => o.status !== '辞退' && o.status !== '選考移行済' && !isCompanyInPipeline(o.companyName))];
+      const openTodos = [];
+      todoOwners.forEach(item => getTodos(item).forEach(t => { if (!t.done) openTodos.push({ item, todo: t }); }));
+      openTodos.sort((a, b) => {
+        if (a.todo.due && b.todo.due) return a.todo.due.localeCompare(b.todo.due);
+        if (a.todo.due) return -1;
+        if (b.todo.due) return 1;
+        return 0;
+      });
+      const todoRows = openTodos.slice(0, HOME_TODO_LIMIT).map(({ item, todo }) => `
+        <div class="ds-todo-row">
+          <input type="checkbox" class="ds-todo-check" onchange="toggleTodoFromHome('${safeId(item.id)}', '${safeId(todo.id)}')" aria-label="完了にする：${escapeHtml(todo.text)}">
+          <button type="button" class="ds-todo-open" onclick="openCompanyTodos('${safeId(item.id)}')">
+            <span class="block font-medium truncate">${escapeHtml(todo.text)}</span>
+            <span class="block ds-sub truncate">${escapeHtml(item.companyName)}</span>
+          </button>
+          ${todoDueHtml(todo.due)}
+        </div>
+      `).join('') + (openTodos.length > HOME_TODO_LIMIT
+        ? `<p class="ds-sub px-4 py-3">ほかに${openTodos.length - HOME_TODO_LIMIT}件あります。各企業の詳細の「ToDo」で確認できます。</p>` : '');
+
       container.innerHTML = `
         <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
           ${homeSectionHtml('今日と明日の予定', upcomingRows, '今日と明日の予定はありません。', `<button type="button" class="ds-btn ds-btn-text" onclick="switchTab('calendar')">カレンダー</button>`)}
+          ${homeSectionHtml(`やること <span class="ds-sub ds-num">${openTodos.length}件</span>`, todoRows, 'やることはありません。企業の詳細の「ToDo」から追加できます。')}
           ${homeSectionHtml('7日以内の締切', deadlineRows, '7日以内の締切はありません。')}
           ${homeSectionHtml(`未確認のオファー <span class="ds-sub ds-num">${unread.length}件</span>`, unreadRows, '未確認のオファーはありません。', `<button type="button" class="ds-btn ds-btn-text" onclick="switchTab('offers')">オファー一覧</button>`)}
           ${homeSectionHtml(`選考中の企業 <span class="ds-sub ds-num">${pipeline.length}社</span>`, stageHtml, '', `<button type="button" class="ds-btn ds-btn-text" onclick="switchTab('pipeline')">選考の一覧</button>`)}
@@ -5034,7 +5094,7 @@
             <div class="ds-row ds-all-grid" role="row">
               <div class="min-w-0">
                 <button type="button" class="ds-company" onclick="${r.open}">${escapeHtml(r.item.companyName)}</button>
-                <div class="ds-sub truncate">${escapeHtml(r.item.media || '')}</div>
+                <div class="ds-sub truncate">${escapeHtml(r.item.media || '')}${openTodoCount(r.item) ? ` ・ ToDo ${openTodoCount(r.item)}件` : ''}</div>
               </div>
               <div class="ds-col-status">${statusBadge(r)}</div>
               <div class="ds-col-score">${dsScoreHtml(r.item)}</div>
@@ -6240,6 +6300,7 @@
         questionsAsked: '',
         reverseQuestions: '',
         interviewReview: '',
+        todos: getTodos(offer).map(t => ({ ...t })),
         analystReport: offer.analystReport ? JSON.parse(JSON.stringify(offer.analystReport)) : null
       };
 
@@ -6270,6 +6331,8 @@
 
       if (matchedOffer) {
         matchedOffer.status = '検討中';
+        // 選考中に増えたToDoもオファー側に持ち帰る
+        matchedOffer.todos = getTodos(pipeItem).map(t => ({ ...t }));
       } else {
         const restoredOffer = {
           id: 'offer-restored-' + Date.now(),
@@ -6281,6 +6344,7 @@
           status: '検討中',
           url: pipeItem.mypageUrl || '',
           notes: pipeItem.motiveSummary || '',
+          todos: getTodos(pipeItem).map(t => ({ ...t })),
           analystReport: pipeItem.analystReport ? JSON.parse(JSON.stringify(pipeItem.analystReport)) : null
         };
         offers.unshift(restoredOffer);
@@ -6308,8 +6372,12 @@
         return;
       }
 
-      pipeline = pipeline.filter(p => p.originalOfferId !== offer.id && p.companyName.trim() !== offer.companyName.trim());
+      const removed = pipeline.filter(p => p.originalOfferId === offer.id || p.companyName.trim() === offer.companyName.trim());
+      pipeline = pipeline.filter(p => !removed.includes(p));
       offer.status = '検討中';
+      // 選考中に増えたToDoもオファー側に持ち帰る
+      const carried = removed.flatMap(p => getTodos(p));
+      if (carried.length) offer.todos = carried.map(t => ({ ...t }));
 
       saveState();
       renderOffers();
@@ -6478,6 +6546,8 @@
       const revertBtn = document.getElementById('modalRevertBtn');
       if (revertBtn) revertBtn.classList.remove('hidden');
 
+      switchModalTab('analyst');
+
       document.getElementById('pipelineDetailModal').classList.remove('hidden');
       document.getElementById('pipelineDetailModal').classList.add('flex');
       if (window.lucide) lucide.createIcons();
@@ -6493,20 +6563,145 @@
     // Detail Modal with Analyst Report & Progress
     // ==========================================
     function switchModalTab(tab) {
-      const analystBtn = document.getElementById('modalTabAnalystBtn');
-      const progressBtn = document.getElementById('modalTabProgressBtn');
       const secAnalyst = document.getElementById('modalSecAnalyst');
       const formProgress = document.getElementById('pipelineDetailForm');
+      const secTodos = document.getElementById('modalSecTodos');
+      if (!['analyst', 'progress', 'todos'].includes(tab)) tab = 'progress';
 
-      analystBtn.setAttribute('aria-selected', String(tab === 'analyst'));
-      progressBtn.setAttribute('aria-selected', String(tab !== 'analyst'));
-      if (tab === 'analyst') {
-        secAnalyst.classList.remove('hidden');
-        formProgress.classList.add('hidden');
-      } else {
-        formProgress.classList.remove('hidden');
-        secAnalyst.classList.add('hidden');
+      document.getElementById('modalTabAnalystBtn').setAttribute('aria-selected', String(tab === 'analyst'));
+      document.getElementById('modalTabProgressBtn').setAttribute('aria-selected', String(tab === 'progress'));
+      document.getElementById('modalTabTodosBtn').setAttribute('aria-selected', String(tab === 'todos'));
+      secAnalyst.classList.toggle('hidden', tab !== 'analyst');
+      formProgress.classList.toggle('hidden', tab !== 'progress');
+      secTodos.classList.toggle('hidden', tab !== 'todos');
+    }
+
+    // ==========================================
+    // 会社ごとのToDo
+    // オファー・選考中・保管庫の各データの中に todos（やること）の一覧を持たせる。
+    // 形：{ id, text, due: 'YYYY-MM-DD' または '', done: true / false }
+    // 追加・チェック・削除は、その場で保存する（選考メモの「保存」は押さなくてよい）
+    // ==========================================
+    function getTodos(item) {
+      return item && Array.isArray(item.todos) ? item.todos.filter(t => t && t.id && t.text) : [];
+    }
+
+    function openTodoCount(item) {
+      return getTodos(item).filter(t => !t.done).length;
+    }
+
+    // 未完了を期限の近い順（期限なしは後ろ）、完了済みはその後ろに並べる
+    function sortTodos(todos) {
+      return todos.slice().sort((a, b) => {
+        if (!!a.done !== !!b.done) return a.done ? 1 : -1;
+        if (a.due && b.due) return a.due.localeCompare(b.due);
+        if (a.due) return -1;
+        if (b.due) return 1;
+        return 0;
+      });
+    }
+
+    function findItemById(id) {
+      return offers.find(o => o.id === id) || pipeline.find(p => p.id === id) || archivedPipeline.find(a => a.id === id) || null;
+    }
+
+    function todoDueHtml(due) {
+      if (!due) return '';
+      const d = daysFromToday(due);
+      if (d === null) return '';
+      if (d < 0) return `<span class="ds-badge ds-badge-danger">${-d}日超過</span>`;
+      return dsDeadlineHtml(due);
+    }
+
+    function fillTodoText(text) {
+      const input = document.getElementById('todoTextInput');
+      input.value = text;
+      input.focus();
+    }
+
+    // ToDo を変えたあと、開いている画面（ホームの「やること」や企業一覧の件数）も描き直す
+    function afterTodoChange() {
+      saveState();
+      renderModalTodos();
+      refreshCurrentView();
+    }
+
+    function renderModalTodos() {
+      const list = document.getElementById('modalTodoList');
+      const countEl = document.getElementById('modalTodoCount');
+      if (!list || !activeDetailItem) return;
+      const todos = sortTodos(getTodos(activeDetailItem));
+      const open = todos.filter(t => !t.done).length;
+      countEl.innerText = open ? String(open) : '';
+
+      if (!todos.length) {
+        list.innerHTML = `<p class="ds-sub px-4 py-4">この会社のやることはまだありません。上の入力欄から追加できます。</p>`;
+        return;
       }
+      list.innerHTML = todos.map(t => `
+        <div class="ds-todo-row">
+          <input type="checkbox" class="ds-todo-check" ${t.done ? 'checked' : ''} onchange="toggleTodo('${safeId(t.id)}')" aria-label="完了にする：${escapeHtml(t.text)}">
+          <span class="min-w-0 flex-1 truncate ${t.done ? 'ds-todo-done' : ''}">${escapeHtml(t.text)}</span>
+          ${t.done ? '' : todoDueHtml(t.due)}
+          ${t.due && t.done ? `<span class="ds-sub ds-num">${escapeHtml(formatDateLabel(t.due))}</span>` : ''}
+          <button type="button" class="ds-icon-btn shrink-0" onclick="deleteTodo('${safeId(t.id)}')" aria-label="削除：${escapeHtml(t.text)}" title="削除"><i data-lucide="trash-2"></i></button>
+        </div>
+      `).join('');
+      if (window.lucide) lucide.createIcons();
+    }
+
+    function addTodoFromModal(e) {
+      e.preventDefault();
+      if (!activeDetailItem) return;
+      const textInput = document.getElementById('todoTextInput');
+      const dueInput = document.getElementById('todoDueInput');
+      const text = textInput.value.trim();
+      if (!text) {
+        showToast('やることを入力してください', 'error');
+        textInput.focus();
+        return;
+      }
+      if (!Array.isArray(activeDetailItem.todos)) activeDetailItem.todos = [];
+      activeDetailItem.todos.push({
+        id: 'todo-' + Date.now().toString(36) + Math.random().toString(36).slice(2, 6),
+        text: text.slice(0, 80),
+        due: dueInput.value || '',
+        done: false
+      });
+      textInput.value = '';
+      dueInput.value = '';
+      afterTodoChange();
+      textInput.focus();
+    }
+
+    function toggleTodo(todoId) {
+      const todo = getTodos(activeDetailItem).find(t => t.id === todoId);
+      if (!todo) return;
+      todo.done = !todo.done;
+      afterTodoChange();
+    }
+
+    function deleteTodo(todoId) {
+      if (!activeDetailItem || !Array.isArray(activeDetailItem.todos)) return;
+      activeDetailItem.todos = activeDetailItem.todos.filter(t => t.id !== todoId);
+      afterTodoChange();
+    }
+
+    // ホームの「やること」からチェックしたとき（詳細画面を開かずに完了にできる）
+    function toggleTodoFromHome(itemId, todoId) {
+      const todo = getTodos(findItemById(itemId)).find(t => t.id === todoId);
+      if (!todo) return;
+      todo.done = !todo.done;
+      saveState();
+      renderHome();
+    }
+
+    // ホームの「やること」の1行から、その会社の詳細（ToDo タブ）を開く
+    function openCompanyTodos(itemId) {
+      if (pipeline.some(p => p.id === itemId)) openPipelineDetailModal(itemId);
+      else if (offers.some(o => o.id === itemId)) openOfferAsDetailModal(itemId);
+      else return;
+      switchModalTab('todos');
     }
 
     function openPipelineDetailModal(id) {
@@ -6595,6 +6790,11 @@
       document.getElementById('detailMediaBadge').innerText = mediaText;
       
       document.getElementById('detailPriorityBadge').innerText = `志望度 ${priority || '-'}`;
+
+      // ToDo タブの中身もここで用意する（3つの詳細画面のどれから開いても、先に activeDetailItem が入っている）
+      document.getElementById('todoTextInput').value = '';
+      document.getElementById('todoDueInput').value = '';
+      renderModalTodos();
     }
 
     function populateProgressForm(item) {
