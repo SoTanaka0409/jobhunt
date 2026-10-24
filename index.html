@@ -653,6 +653,27 @@
     .ds-row:hover { background: var(--ds-row-hover); }
     .ds-company { font-size: 0.875rem; font-weight: 600; color: var(--ds-text); cursor: pointer; text-align: left; background: none; border: 0; padding: 0; }
     .ds-company:hover { color: var(--ds-main); text-decoration: underline; }
+    /* 企業：表で見る（列の見出しを押すと並び替え。画面が狭いときは横にスクロールし、企業名の列は動かさない） */
+    .ds-table-wrap { overflow-x: auto; }
+    .ds-table { width: 100%; min-width: 52rem; border-collapse: separate; border-spacing: 0; font-size: 0.875rem; }
+    .ds-table th {
+      position: sticky; top: 0; height: 2.25rem; padding: 0; text-align: left; white-space: nowrap;
+      background: var(--ds-head); color: var(--ds-text-sub); font-size: 0.8125rem; font-weight: 400;
+      border-bottom: 1px solid var(--ds-border);
+    }
+    .ds-table td { padding: 0.5rem 0.75rem; border-bottom: 1px solid var(--ds-border); vertical-align: middle; }
+    .ds-table tbody tr:last-child td { border-bottom: 0; }
+    .ds-table tbody tr:hover td { background: var(--ds-row-hover); }
+    .ds-table th:first-child, .ds-table td:first-child { position: sticky; left: 0; z-index: 1; background: var(--ds-surface); }
+    .ds-table th:first-child { background: var(--ds-head); z-index: 2; }
+    .ds-table tbody tr:hover td:first-child { background: var(--ds-row-hover); }
+    .ds-th-btn {
+      display: inline-flex; align-items: center; gap: 0.25rem; width: 100%; height: 2.25rem; padding: 0 0.75rem;
+      background: none; border: 0; color: inherit; font: inherit; cursor: pointer;
+    }
+    .ds-th-btn:hover { color: var(--ds-text); }
+    .ds-th-btn svg { width: 0.875rem; height: 0.875rem; }
+    .ds-table th[aria-sort="ascending"], .ds-table th[aria-sort="descending"] { color: var(--ds-text); }
     .ds-actions { display: flex; align-items: center; justify-content: flex-end; gap: 0.25rem; }
     @media (max-width: 899px) {
       .ds-list-head { display: none; }
@@ -891,9 +912,22 @@
 
     <!-- 企業：すべて（オファー・選考中・保管庫をまとめた一覧） -->
     <section id="viewCompaniesAll" class="ds-page flex-1 flex flex-col gap-4 hidden">
-      <div>
-        <h2 class="ds-h1">企業</h2>
-        <p class="ds-sub mt-1">オファー・選考中・保管庫の企業をまとめて表示します。<span id="companiesAllCount" class="ds-num">0社</span></p>
+      <div class="flex items-end justify-between gap-3 flex-wrap">
+        <div>
+          <h2 class="ds-h1">企業</h2>
+          <p class="ds-sub mt-1">オファー・選考中・保管庫の企業をまとめて表示します。<span id="companiesAllCount" class="ds-num">0社</span></p>
+        </div>
+        <div class="flex items-center gap-2">
+          <button type="button" class="ds-btn" onclick="exportCompaniesCsv()" title="いま表示している企業を、Excel などで開ける CSV ファイルに書き出す"><i data-lucide="download"></i><span>CSVで書き出す</span></button>
+          <div class="ds-seg" role="group" aria-label="表示の切り替え">
+            <button type="button" id="companiesViewListBtn" onclick="setCompaniesViewMode('list')" aria-pressed="true">
+              <i data-lucide="list"></i><span>リスト</span>
+            </button>
+            <button type="button" id="companiesViewTableBtn" onclick="setCompaniesViewMode('table')" aria-pressed="false">
+              <i data-lucide="table"></i><span>表</span>
+            </button>
+          </div>
+        </div>
       </div>
       <div class="flex flex-col sm:flex-row gap-2">
         <label class="ds-input-icon flex-1">
@@ -901,7 +935,16 @@
           <i data-lucide="search"></i>
           <input type="text" id="companiesAllSearch" oninput="renderCompaniesAll()" placeholder="企業名・媒体・状態で検索" class="ds-input">
         </label>
-        <label class="sm:w-60">
+        <label class="sm:w-56">
+          <span class="sr-only">状態で絞り込む</span>
+          <select id="companiesAllStatus" onchange="renderCompaniesAll()" class="ds-select">
+            <option value="all">状態：すべて</option>
+            <option value="offer">状態：オファー</option>
+            <option value="pipeline">状態：選考中（すべての段階）</option>
+            <option value="archived">状態：保管庫</option>
+          </select>
+        </label>
+        <label id="companiesAllSortWrap" class="sm:w-60">
           <span class="sr-only">並び順</span>
           <select id="companiesAllSort" onchange="renderCompaniesAll()" class="ds-select">
             <option value="next">並び順：次の予定が近い順</option>
@@ -5048,19 +5091,98 @@
       return rows;
     }
 
-    function renderCompaniesAll() {
-      const container = document.getElementById('companiesAllContainer');
-      if (!container) return;
-      const search = (document.getElementById('companiesAllSearch')?.value || '').toLowerCase().trim();
-      const sort = document.getElementById('companiesAllSort')?.value || 'next';
+    // 表示のしかた：'list'（リスト）か 'table'（表）。この端末のブラウザに覚えておく
+    const COMPANIES_VIEW_MODE_KEY = 'jobhunt_companies_view_mode';
+    let companiesViewMode = (() => {
+      try { return localStorage.getItem(COMPANIES_VIEW_MODE_KEY) === 'table' ? 'table' : 'list'; } catch (e) { return 'list'; }
+    })();
+    // 表の並び替え（列の見出しを押すたびに、昇順 → 降順 → 昇順…と切り替わる）
+    let companiesTableSort = { key: 'next', dir: 'asc' };
 
-      let rows = getAllCompanyRows();
-      if (search) {
-        rows = rows.filter(r => [r.item.companyName, r.item.media, r.status, r.item.notes]
-          .some(v => (v || '').toLowerCase().includes(search)));
-      }
+    function setCompaniesViewMode(mode) {
+      companiesViewMode = mode === 'table' ? 'table' : 'list';
+      try { localStorage.setItem(COMPANIES_VIEW_MODE_KEY, companiesViewMode); } catch (e) { /* 保存できなくても表示は切り替える */ }
+      renderCompaniesAll();
+    }
+
+    function sortCompaniesTable(key) {
+      companiesTableSort = {
+        key,
+        dir: companiesTableSort.key === key && companiesTableSort.dir === 'asc' ? 'desc' : 'asc'
+      };
+      renderCompaniesAll();
+    }
+
+    // 志望度：選考中・保管庫は「高・中・低」、オファーは星の数（1〜3）から換算する
+    function companyPriorityLabel(r) {
+      if (r.kind === 'offer') return r.item.rating >= 3 ? '高' : (r.item.rating === 2 ? '中' : (r.item.rating ? '低' : ''));
+      return ['高', '中', '低'].includes(r.item.priority) ? r.item.priority : '';
+    }
+
+    // 画面に出す企業（検索・状態の絞り込みを反映。並び順は含まない）
+    function getVisibleCompanyRows() {
+      const search = (document.getElementById('companiesAllSearch')?.value || '').toLowerCase().trim();
+      const statusFilter = document.getElementById('companiesAllStatus')?.value || 'all';
+      return getAllCompanyRows().filter(r => {
+        if (statusFilter === 'offer' || statusFilter === 'archived') { if (r.kind !== statusFilter) return false; }
+        else if (statusFilter === 'pipeline') { if (r.kind !== 'pipeline') return false; }
+        else if (statusFilter !== 'all') { if (!(r.kind === 'pipeline' && r.status === statusFilter)) return false; }
+        if (!search) return true;
+        return [r.item.companyName, r.item.media, r.status, r.item.notes].some(v => (v || '').toLowerCase().includes(search));
+      });
+    }
+
+    function companyStatusBadgeHtml(r) {
+      if (r.kind === 'archived') return `<span class="ds-badge ds-badge-neutral">保管庫</span>`;
+      if (r.kind === 'offer') return `<span class="ds-badge ds-badge-info">${escapeHtml(r.status)}</span>`;
+      if ((r.status || '').includes('内定')) return `<span class="ds-badge ds-badge-good">${escapeHtml(r.status)}</span>`;
+      return `<span class="ds-badge ds-badge-neutral" style="color: var(--ds-text);">${escapeHtml(r.status)}</span>`;
+    }
+
+    function companyNextHtml(r) {
+      return r.nextDate
+        ? `<span class="ds-num">${formatDateLabel(r.nextDate)}</span> <span class="ds-sub">${escapeHtml(r.nextText)}</span>`
+        : '<span class="ds-sub">予定なし</span>';
+    }
+
+    // 状態の並び：選考中（段階の順）→ オファー → 保管庫
+    function companyStatusRank(r) {
+      if (r.kind === 'pipeline') return PIPELINE_STAGES.indexOf(r.status) + 1 || 50;
+      return r.kind === 'offer' ? 100 : 200;
+    }
+
+    const PRIORITY_RANK = { '高': 3, '中': 2, '低': 1, '': 0 };
+
+    function sortCompanyRowsForTable(rows) {
+      const { key, dir } = companiesTableSort;
+      const sign = dir === 'asc' ? 1 : -1;
+      const text = (a, b) => (a || '').localeCompare(b || '', 'ja');
+      // 値のないもの（予定なし、スコアなしなど）は、昇順でも降順でも最後に置く
+      const withBlankLast = (va, vb, cmp) => {
+        const blankA = va === '' || va === null || va === undefined || va === -1;
+        const blankB = vb === '' || vb === null || vb === undefined || vb === -1;
+        if (blankA && blankB) return 0;
+        if (blankA) return 1;
+        if (blankB) return -1;
+        return sign * cmp(va, vb);
+      };
+      return rows.slice().sort((a, b) => {
+        let result = 0;
+        if (key === 'name') result = sign * text(a.item.companyName, b.item.companyName);
+        else if (key === 'status') result = sign * (companyStatusRank(a) - companyStatusRank(b));
+        else if (key === 'media') result = withBlankLast(a.item.media, b.item.media, text);
+        else if (key === 'priority') result = withBlankLast(companyPriorityLabel(a), companyPriorityLabel(b), (x, y) => PRIORITY_RANK[x] - PRIORITY_RANK[y]);
+        else if (key === 'score') result = withBlankLast(a.score, b.score, (x, y) => x - y);
+        else if (key === 'todo') result = sign * (openTodoCount(a.item) - openTodoCount(b.item));
+        else result = withBlankLast(a.nextDate, b.nextDate, (x, y) => x.localeCompare(y)); // 'next'
+        return result || text(a.item.companyName, b.item.companyName);
+      });
+    }
+
+    // リスト表示の並び順（並び順の選択欄の値に合わせる）。rows をその場で並べ替える
+    function sortCompanyRowsForList(rows, sort) {
       const kindOrder = { pipeline: 0, offer: 1, archived: 2 };
-      rows.sort((a, b) => {
+      return rows.sort((a, b) => {
         if (sort === 'score') return b.score - a.score;
         if (sort === 'name') return (a.item.companyName || '').localeCompare(b.item.companyName || '', 'ja');
         // 次の予定が近い順（予定がないものは後ろ、保管庫はいちばん後ろ）
@@ -5070,7 +5192,66 @@
         if (b.nextDate) return 1;
         return kindOrder[a.kind] - kindOrder[b.kind];
       });
+    }
 
+    function renderCompaniesTable(rows, container) {
+      const columns = [
+        { key: 'name', label: '企業' },
+        { key: 'status', label: '状態' },
+        { key: 'media', label: '媒体' },
+        { key: 'priority', label: '志望度' },
+        { key: 'score', label: 'スコア' },
+        { key: 'next', label: '次の予定' },
+        { key: 'todo', label: 'ToDo' }
+      ];
+      const sorted = sortCompanyRowsForTable(rows);
+      const head = columns.map(c => {
+        const active = companiesTableSort.key === c.key;
+        const ariaSort = active ? (companiesTableSort.dir === 'asc' ? 'ascending' : 'descending') : 'none';
+        const icon = active ? (companiesTableSort.dir === 'asc' ? 'arrow-up' : 'arrow-down') : 'chevrons-up-down';
+        return `<th scope="col" aria-sort="${ariaSort}"><button type="button" class="ds-th-btn" onclick="sortCompaniesTable('${c.key}')"><span>${c.label}</span><i data-lucide="${icon}"></i></button></th>`;
+      }).join('');
+      const body = sorted.map(r => {
+        const todoCount = openTodoCount(r.item);
+        return `
+          <tr>
+            <td><button type="button" class="ds-company" onclick="${r.open}">${escapeHtml(r.item.companyName)}</button></td>
+            <td>${companyStatusBadgeHtml(r)}</td>
+            <td>${escapeHtml(r.item.media || '')}</td>
+            <td>${escapeHtml(companyPriorityLabel(r)) || '<span class="ds-sub">-</span>'}</td>
+            <td>${dsScoreHtml(r.item)}</td>
+            <td>${companyNextHtml(r)}</td>
+            <td class="ds-num">${todoCount ? `${todoCount}件` : '<span class="ds-sub">-</span>'}</td>
+          </tr>`;
+      }).join('');
+      container.innerHTML = `
+        <div class="ds-panel ds-table-wrap">
+          <table class="ds-table">
+            <thead><tr>${head}</tr></thead>
+            <tbody>${body}</tbody>
+          </table>
+        </div>
+      `;
+    }
+
+    function renderCompaniesAll() {
+      const container = document.getElementById('companiesAllContainer');
+      if (!container) return;
+
+      // 状態の絞り込みに、選考中の段階ごとの項目を足す（最初の1回だけ）
+      const statusSelect = document.getElementById('companiesAllStatus');
+      if (statusSelect && statusSelect.options.length === 4) {
+        PIPELINE_STAGES.forEach(stage => statusSelect.add(new Option(`　└ ${stage}`, stage)));
+      }
+
+      const isTable = companiesViewMode === 'table';
+      document.getElementById('companiesViewListBtn').setAttribute('aria-pressed', String(!isTable));
+      document.getElementById('companiesViewTableBtn').setAttribute('aria-pressed', String(isTable));
+      // 表のときは列の見出しで並び替えるので、並び順の選択欄は隠す
+      document.getElementById('companiesAllSortWrap').classList.toggle('hidden', isTable);
+
+      const sort = document.getElementById('companiesAllSort')?.value || 'next';
+      const rows = getVisibleCompanyRows();
       document.getElementById('companiesAllCount').innerText = `${rows.length}社`;
 
       if (!rows.length) {
@@ -5078,12 +5259,13 @@
         return;
       }
 
-      const statusBadge = r => {
-        if (r.kind === 'archived') return `<span class="ds-badge ds-badge-neutral">保管庫</span>`;
-        if (r.kind === 'offer') return `<span class="ds-badge ds-badge-info">${escapeHtml(r.status)}</span>`;
-        if ((r.status || '').includes('内定')) return `<span class="ds-badge ds-badge-good">${escapeHtml(r.status)}</span>`;
-        return `<span class="ds-badge ds-badge-neutral" style="color: var(--ds-text);">${escapeHtml(r.status)}</span>`;
-      };
+      if (isTable) {
+        renderCompaniesTable(rows, container);
+        lucide.createIcons();
+        return;
+      }
+
+      sortCompanyRowsForList(rows, sort);
 
       container.innerHTML = `
         <div class="ds-panel">
@@ -5096,11 +5278,9 @@
                 <button type="button" class="ds-company" onclick="${r.open}">${escapeHtml(r.item.companyName)}</button>
                 <div class="ds-sub truncate">${escapeHtml(r.item.media || '')}${openTodoCount(r.item) ? ` ・ ToDo ${openTodoCount(r.item)}件` : ''}</div>
               </div>
-              <div class="ds-col-status">${statusBadge(r)}</div>
+              <div class="ds-col-status">${companyStatusBadgeHtml(r)}</div>
               <div class="ds-col-score">${dsScoreHtml(r.item)}</div>
-              <div class="ds-col-next">
-                ${r.nextDate ? `<span class="ds-num">${formatDateLabel(r.nextDate)}</span> <span class="ds-sub">${escapeHtml(r.nextText)}</span>` : '<span class="ds-sub">予定なし</span>'}
-              </div>
+              <div class="ds-col-next">${companyNextHtml(r)}</div>
               <div class="ds-actions">
                 <button type="button" class="ds-btn ds-btn-text" onclick="${r.open}">詳細</button>
               </div>
@@ -5109,6 +5289,53 @@
         </div>
       `;
       lucide.createIcons();
+    }
+
+    // ---- CSV で書き出す（いま画面に出している企業を、画面と同じ並びで） ----
+    // Excel で開いたときに「=」「+」「-」「@」で始まる文字が数式として動かないよう、先頭に「'」を付ける
+    function csvCell(value) {
+      let s = String(value === null || value === undefined ? '' : value);
+      if (/^[=+\-@\t\r]/.test(s)) s = "'" + s;
+      return /[",\n\r]/.test(s) ? `"${s.replace(/"/g, '""')}"` : s;
+    }
+
+    function companiesToCsv(rows) {
+      const header = ['企業', '状態', '媒体', '志望度', 'スコア', '次の予定の日付', '次の予定', '未完了のToDo件数', '未完了のToDo'];
+      const lines = [header].concat(rows.map(r => {
+        const open = getTodos(r.item).filter(t => !t.done);
+        return [
+          r.item.companyName,
+          r.status,
+          r.item.media,
+          companyPriorityLabel(r),
+          r.score >= 0 ? r.score : '',
+          r.nextDate || '',
+          r.nextText || '',
+          open.length,
+          open.map(t => t.due ? `${t.text}（${t.due}まで）` : t.text).join(' / ')
+        ];
+      }));
+      return lines.map(line => line.map(csvCell).join(',')).join('\r\n');
+    }
+
+    function exportCompaniesCsv() {
+      let rows = getVisibleCompanyRows();
+      if (!rows.length) {
+        showToast('書き出す企業がありません', 'error');
+        return;
+      }
+      rows = companiesViewMode === 'table'
+        ? sortCompanyRowsForTable(rows)
+        : sortCompanyRowsForList(rows, document.getElementById('companiesAllSort')?.value || 'next');
+      // 先頭に BOM（目印）を付けると、Excel でも日本語が文字化けしない
+      const blob = new Blob(['﻿' + companiesToCsv(rows)], { type: 'text/csv;charset=utf-8' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `企業一覧_${toLocalDateString(new Date())}.csv`;
+      a.click();
+      URL.revokeObjectURL(url);
+      showToast(`${rows.length}社をCSVに書き出しました`, 'success');
     }
 
     function toggleOffersLayout(layout) {
