@@ -832,6 +832,10 @@
           </button>
           <!-- テーマ切り替え -->
           <button type="button" onclick="toggleQuickTheme()" class="quick-theme-btn hdr-btn flex items-center" title="暗いテーマに切り替える" aria-label="暗いテーマに切り替える"><i data-lucide="moon"></i><span>テーマ</span></button>
+          <!-- 言葉で直す -->
+          <button type="button" onclick="openCommandModal()" title="言葉で直す（日程やオファーの種類を文章で伝えて直す）" aria-label="言葉で直す" class="hdr-btn p-2 rounded-lg bg-slate-800 border border-slate-700 text-slate-200 active:scale-95 transition">
+            <i data-lucide="wand-sparkles" class="w-3.5 h-3.5 text-indigo-400"></i>
+          </button>
           <!-- 設定 -->
           <button onclick="openSettingsModal('ui')" title="設定ハブ" class="hdr-btn p-2 rounded-lg bg-slate-800 border border-slate-700 text-slate-200 active:scale-95 transition">
             <i data-lucide="settings" class="w-3.5 h-3.5 text-indigo-400"></i>
@@ -875,6 +879,12 @@
 
         <!-- テーマ切り替え -->
         <button type="button" onclick="toggleQuickTheme()" class="quick-theme-btn hdr-btn flex items-center" title="暗いテーマに切り替える" aria-label="暗いテーマに切り替える"><i data-lucide="moon"></i><span>テーマ</span></button>
+
+        <!-- 言葉で直す -->
+        <button type="button" onclick="openCommandModal()" title="日程やオファーの種類を、文章で伝えて直す" class="hdr-btn flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 border border-slate-700 hover:border-indigo-500/50 text-slate-200 hover:text-white text-xs font-semibold transition active:scale-95 shadow-sm">
+          <i data-lucide="wand-sparkles" class="w-3.5 h-3.5 text-indigo-400"></i>
+          <span>言葉で直す</span>
+        </button>
 
         <!-- 3. 設定 -->
         <button onclick="openSettingsModal('ui')" title="設定ハブ（明るさ設定、UI外観、自身の希望する条件、データ管理）" class="hdr-btn flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 border border-slate-700 hover:border-indigo-500/50 text-slate-200 hover:text-white text-xs font-semibold transition active:scale-95 shadow-sm">
@@ -2375,6 +2385,40 @@
             <button type="submit" class="px-5 py-2 rounded-lg text-xs font-medium bg-indigo-600 hover:bg-indigo-500 text-white transition shadow-lg shadow-indigo-600/30">選考企業を保存</button>
           </div>
         </form>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============================================== -->
+  <!-- MODAL: 言葉で直す（文章で日程・オファーの種類を直す） -->
+  <!-- ============================================== -->
+  <div id="commandModal" class="fixed inset-0 z-50 bg-black/70 backdrop-blur-sm hidden items-start sm:items-center justify-center p-2 sm:p-4 overflow-y-auto">
+    <div class="bg-slate-900 border border-slate-700 rounded-2xl w-full max-w-2xl shadow-2xl overflow-hidden my-4">
+      <div class="px-4 sm:px-6 pt-4 pb-3 border-b border-slate-700 flex items-start justify-between gap-3">
+        <div>
+          <h3 class="ds-h1" style="font-size: 1.25rem;">言葉で直す</h3>
+          <p class="ds-sub mt-1">日程やオファーの種類を、文章で伝えて直します。反映する前に、必ず内容を確認できます。</p>
+        </div>
+        <button type="button" onclick="closeModal('commandModal')" class="ds-icon-btn shrink-0" aria-label="閉じる" title="閉じる"><i data-lucide="x"></i></button>
+      </div>
+      <div class="p-4 sm:p-6 space-y-4">
+        <form onsubmit="submitCommand(event)" class="space-y-2">
+          <label for="commandInput" class="sr-only">直したい内容</label>
+          <textarea id="commandInput" rows="2" class="ds-input" style="height: auto; padding: 0.5rem 0.75rem;" placeholder="例：セガの10/28の予定を10/30にして、面談確約にして" onkeydown="if ((event.ctrlKey || event.metaKey) && event.key === 'Enter') submitCommand(event)"></textarea>
+          <div class="flex items-center justify-between gap-2 flex-wrap">
+            <span class="ds-sub">Ctrl + Enter でも実行できます</span>
+            <button type="submit" class="ds-btn ds-btn-primary"><i data-lucide="search-check"></i><span>内容を確認する</span></button>
+          </div>
+        </form>
+        <div class="flex flex-wrap items-center gap-1">
+          <span class="ds-sub">言い方の例：</span>
+          <button type="button" class="ds-btn ds-btn-text" onclick="fillCommand('○○の10/28の予定を10/30にして')">予定の日付を変える</button>
+          <button type="button" class="ds-btn ds-btn-text" onclick="fillCommand('○○の一次面接を11/2 14時に変更')">日時を変える</button>
+          <button type="button" class="ds-btn ds-btn-text" onclick="fillCommand('○○の面談を11/5 14時に追加')">予定を追加</button>
+          <button type="button" class="ds-btn ds-btn-text" onclick="fillCommand('○○を面談確約にして')">面談確約にする</button>
+          <button type="button" class="ds-btn ds-btn-text" onclick="fillCommand('○○の返信期限を11/5に')">返信期限を変える</button>
+        </div>
+        <div id="commandResult"></div>
       </div>
     </div>
   </div>
@@ -7113,6 +7157,504 @@
       showToast(`「${activeDetailItem.companyName}」のオファーを変更しました`, 'success');
     }
 
+    // ==========================================
+    // 言葉で直す（ヘッダーの「言葉で直す」）
+    // 「セガの10/28の予定を10/30にして」のような文章を読み取り、
+    // 日程・オファーの種類・選考の段階を直す。AI や外部のサービスは使わず、この端末の中だけで読み取る。
+    // 反映する前に必ず内容を見せ、反映したあとも元に戻せる。
+    // 読み取れるのは決まった言い方だけ。わからないときは、わからないと伝える（勝手に推測して直さない）。
+    // ==========================================
+    const CMD_HINT = '例：「セガの10/28の予定を10/30にして」「NCDの一次面接を11/2 14時に変更」「エスピックを面談確約にして」「セガの返信期限を11/5に」「MJEの面談を11/5 14時に追加」';
+
+    // 日付：「10/28」「10月28日」「2026/10/28」「今日」「明日」「明後日」（全角の数字は NFKC で半角にそろえてから読む）
+    const CMD_DATE_SRC = '(?:\\d{4}\\s*[\\/年.\\-]\\s*\\d{1,2}\\s*[\\/月.\\-]\\s*\\d{1,2}\\s*日?|\\d{1,2}\\s*[\\/月]\\s*\\d{1,2}\\s*日?|明後日|あさって|明日|あした|今日|きょう)';
+    // 時刻：「14時」「14時30分」「14:30」「14時半」「午後2時」
+    const CMD_TIME_SRC = '(午前|午後)?\\s*(\\d{1,2})\\s*(?:(?::\\s*(\\d{2}))|時\\s*(半|(?:(\\d{1,2})\\s*分)?))';
+
+    // オファーの種類（オファー一覧の選択肢と同じ値）
+    const CMD_OFFER_TYPES = [
+      { re: /カジュアル面談確約|面談確約/, value: 'カジュアル面談確約' },
+      { re: /特別選考|(?:1|一)次免除|選考免除|書類免除|特別ルート/, value: '特別選考/1次免除' },
+      { re: /通常選考(?:案内)?\s*(?:に|へ)/, value: '通常選考案内' },
+      { re: /説明会案内/, value: '会社説明会案内' },
+      { re: /インターン(?:・説明会)?案内/, value: 'インターン・説明会案内' }
+    ];
+    const CMD_OFFER_PHRASES_RE = /カジュアル面談確約|面談確約|特別選考|(?:1|一)次免除|選考免除|書類免除|特別ルート|通常選考案内|通常選考|説明会案内|インターン・説明会案内|インターン案内/g;
+
+    // 予定の種類（カレンダーの「予定種別」の値）。上から順に当てはめる
+    const CMD_EVENT_TYPES = [
+      { re: /最終(?:面接)?/, value: '最終面接' },
+      { re: /(?:二|2|三|3)次(?:面接)?/, value: '二次 / 三次面接' },
+      { re: /(?:一|1)次(?:面接)?/, value: '一次面接' },
+      { re: /面接/, value: null },
+      { re: /説明会/, value: '会社説明会' },
+      { re: /座談会|セミナー/, value: '座談会・セミナー' },
+      { re: /仕事体験|ワークショップ|インターン/, value: '仕事体験・ワークショップ' },
+      { re: /面談|リクルーター|カジュアル/, value: '面談 (カジュアル/リクルーター)' },
+      { re: /Webテスト|ウェブテスト|テスト|課題/i, value: 'Webテスト / 課題締切' },
+      { re: /(?:^|[^A-Za-z])ES(?:[^A-Za-z]|$)|エントリーシート/, value: 'ES提出締切' }
+    ];
+
+    // 選考中の企業の「段階」を言葉で変えるとき
+    const CMD_STAGES = [
+      { re: /内定/, value: '内定獲得' },
+      { re: /最終/, value: '最終面接' },
+      { re: /(?:二|2|三|3)次/, value: '二次 / 三次面接' },
+      { re: /(?:一|1)次/, value: '一次面接' },
+      { re: /面談|カジュアル|リクルーター/, value: '面談 (カジュアル / リクルーター)' },
+      { re: /Webテスト|ウェブテスト|テスト|課題/i, value: 'Webテスト / 課題' },
+      { re: /書類|エントリーシート/, value: '書類選考' },
+      { re: /説明会.*(?:済|参加済)/, value: '会社説明会 (参加済み)' },
+      { re: /説明会/, value: '会社説明会 (参加予定)' }
+    ];
+
+    // 会社名を探すときに、先に取り除く言葉（これらは会社名ではない）
+    const CMD_STRIP_RE = /カジュアル面談確約|面談確約|特別選考|(?:1|一)次免除|選考免除|書類免除|特別ルート|通常選考案内|通常選考|説明会案内|インターン・説明会案内|インターン案内|カジュアル|リクルーター|(?:一|二|三|最終|1|2|3)次面接|最終面接|(?:二|三|1|2|3|一)次|説明会|座談会|セミナー|仕事体験|ワークショップ|インターン|面談|面接|Webテスト|ウェブテスト|テスト|課題|エントリーシート|返信期限|返信|締め切り|締切|期限|予定|日程|追加|登録|変更|午前|午後|ずらして|直して|変えて|入れて|作って|ください|お願い|から|まで/gi;
+
+    function cmdToDateString(raw) {
+      const today = new Date();
+      today.setHours(0, 0, 0, 0);
+      const offsetDays = /明後日|あさって/.test(raw) ? 2 : (/明日|あした/.test(raw) ? 1 : (/今日|きょう/.test(raw) ? 0 : null));
+      let result = '';
+      if (offsetDays !== null) {
+        const d = new Date(today);
+        d.setDate(d.getDate() + offsetDays);
+        result = toLocalDateString(d);
+      } else {
+        result = parseJapaneseDate(raw, today);
+      }
+      // 2月30日のようにありえない日付は読み取らない
+      const check = new Date(result);
+      const m = result.match(/^(\d{4})-(\d{2})-(\d{2})$/);
+      if (!m || isNaN(check) || check.getMonth() + 1 !== Number(m[2]) || check.getDate() !== Number(m[3])) return '';
+      return result;
+    }
+
+    function cmdFindDates(text) {
+      const re = new RegExp(CMD_DATE_SRC, 'g');
+      const found = [];
+      found.invalid = []; // 「2/30」のように、日付の形だが実在しないもの
+      let m;
+      while ((m = re.exec(text))) {
+        const date = cmdToDateString(m[0]);
+        if (date) found.push({ raw: m[0], index: m.index, end: m.index + m[0].length, date });
+        else found.invalid.push(m[0].trim());
+      }
+      return found;
+    }
+
+    // text の fromIndex 以降で最初に出てくる時刻を 'HH:MM' にして返す
+    function cmdFindTime(text, fromIndex) {
+      const re = new RegExp(CMD_TIME_SRC, 'g');
+      re.lastIndex = fromIndex || 0;
+      const m = re.exec(text);
+      if (!m) return '';
+      let hour = Number(m[2]);
+      const minute = m[3] !== undefined ? Number(m[3]) : (m[4] === '半' ? 30 : Number(m[5] || 0));
+      if (m[1] === '午後' && hour < 12) hour += 12;
+      if (m[1] === '午前' && hour === 12) hour = 0;
+      if (hour > 23 || minute > 59) return '';
+      return `${String(hour).padStart(2, '0')}:${String(minute).padStart(2, '0')}`;
+    }
+
+    function cmdMinutes(time) {
+      const [h, m] = String(time).split(':').map(Number);
+      return h * 60 + m;
+    }
+
+    function cmdTimeFromMinutes(total) {
+      const t = Math.max(0, Math.min(total, 23 * 60 + 59));
+      return `${String(Math.floor(t / 60)).padStart(2, '0')}:${String(t % 60).padStart(2, '0')}`;
+    }
+
+    function cmdFmtDate(dateStr) {
+      if (!dateStr) return '日付なし';
+      const d = new Date(dateStr);
+      return `${d.getMonth() + 1}/${d.getDate()}（${['日', '月', '火', '水', '木', '金', '土'][d.getDay()]}）`;
+    }
+
+    // 登録されている会社の一覧（選考中 → オファー → 保管庫の順。同じ会社は1回だけ）
+    function cmdCompanyList() {
+      const list = [];
+      const seen = new Set();
+      const add = (kind, item) => {
+        const key = normalizeCompanyName(item.companyName);
+        if (!key || seen.has(key)) return;
+        seen.add(key);
+        list.push({ kind, item, core: key });
+      };
+      pipeline.forEach(p => add('pipeline', p));
+      offers.forEach(o => { if (!isCompanyInPipeline(o.companyName)) add('offer', o); });
+      archivedPipeline.forEach(a => add('archived', a));
+      return list;
+    }
+
+    // 文章の中から会社を探す。会社名がそのまま入っていればそれを、なければ「セガ」のような一部の言葉から探す
+    function cmdFindCompanies(text, residue) {
+      const companies = cmdCompanyList();
+      const lowerText = text.toLowerCase();
+      const compact = normalizeCompanyName(text);
+
+      const exact = companies.filter(c => {
+        if (c.core.length < 2) return false;
+        if (/^[a-z0-9]{1,4}$/.test(c.core)) return new RegExp(`(?<![a-z0-9])${c.core}(?![a-z0-9])`).test(lowerText);
+        return compact.includes(c.core);
+      });
+      if (exact.length) {
+        const longest = Math.max(...exact.map(c => c.core.length));
+        return exact.filter(c => c.core.length === longest);
+      }
+
+      // 一部の言葉：カタカナ・英数字・漢字が2文字以上続く部分を、長いものから順に会社名と照らし合わせる
+      const runs = (residue.match(/[ァ-ヶー]{2,}|[A-Za-z0-9]{2,}|[一-龥々]{2,}/g) || [])
+        .map(r => ({ run: r, key: normalizeCompanyName(r) }))
+        .filter(r => r.key.length >= 2)
+        .sort((a, b) => b.key.length - a.key.length);
+      for (const r of runs) {
+        const hits = companies.filter(c => c.core.includes(r.key));
+        if (hits.length) return hits.slice(0, 6);
+      }
+      return [];
+    }
+
+    // 文章から「直す内容」の案を作る（まだ何も変えない）
+    function buildCommandPlan(rawText, companyIdx = 0) {
+      const text = String(rawText || '').normalize('NFKC').replace(/\s+/g, ' ').trim();
+      const plan = { text: rawText, ok: false, error: '', hint: CMD_HINT, candidates: [], companyIdx: 0, company: null, changes: [] };
+      const fail = (error, hint) => { plan.error = error; if (hint) plan.hint = hint; return plan; };
+
+      if (!text) return fail('直したい内容を入力してください。');
+
+      const dates = cmdFindDates(text);
+      if (dates.invalid.length) return fail(`日付「${dates.invalid[0]}」は存在しない日付です。入力をたしかめてください。`);
+      const residue =text.replace(new RegExp(CMD_DATE_SRC, 'g'), ' ').replace(new RegExp(CMD_TIME_SRC, 'g'), ' ').replace(CMD_STRIP_RE, ' ');
+
+      plan.candidates = cmdFindCompanies(text, residue);
+      if (!plan.candidates.length) return fail('会社名が見つかりませんでした。登録されている会社の名前（「セガ」のような一部でも大丈夫です）を入れてください。');
+      plan.companyIdx = Math.min(companyIdx, plan.candidates.length - 1);
+      const { kind, item } = plan.company = plan.candidates[plan.companyIdx];
+
+      const withoutOfferPhrases = text.replace(CMD_OFFER_PHRASES_RE, ' ');
+      const offerTypeHit = CMD_OFFER_TYPES.find(t => t.re.test(text));
+      const eventTypeHit = CMD_EVENT_TYPES.find(t => t.re.test(withoutOfferPhrases));
+      const isAdd = /追加|登録|入れて|作って|作成|新しく/.test(text);
+      const hasExplicitEventWord = /(?:^|[^A-Za-z])ES(?:[^A-Za-z]|$)|エントリーシート|テスト|課題/i.test(text);
+      const deadlineWord = /返信期限|返信|期限|締切|締め切り/.test(withoutOfferPhrases) && !hasExplicitEventWord;
+      const events = eventsForCompany(item);
+
+      // --- 予定の追加 ---
+      if (isAdd) {
+        if (!dates.length) return fail('追加する予定の日付が読み取れませんでした。「11/5」のように入れてください。');
+        if (!eventTypeHit || !eventTypeHit.value) return fail('どんな予定か（面談・一次面接・説明会など）も入れてください。');
+        const date = dates[0].date;
+        const time = cmdFindTime(text, dates[0].end) || cmdFindTime(text, 0);
+        if (events.some(e => e.startDate === date && e.eventType === eventTypeHit.value && (e.startTime || '') === time)) {
+          return fail(`同じ予定がすでにあります：${cmdFmtDate(date)} ${time} ${eventTypeHit.value}`);
+        }
+        plan.changes.push({
+          type: 'addEvent', eventType: eventTypeHit.value, date, time,
+          endTime: time ? cmdTimeFromMinutes(cmdMinutes(time) + 60) : ''
+        });
+        plan.ok = true;
+        return plan;
+      }
+
+      // --- オファーの返信期限 ---
+      const deadlineOp = kind === 'offer' && deadlineWord && dates.length >= 1;
+      if (deadlineOp) {
+        plan.changes.push({ type: 'deadline', to: dates[dates.length - 1].date });
+      }
+
+      // --- オファーの種類 / 選考の段階 ---
+      if (offerTypeHit) {
+        if (kind === 'offer') {
+          plan.changes.push({ type: 'offerType', to: offerTypeHit.value });
+        } else if (kind === 'pipeline' && offerTypeHit.value === 'カジュアル面談確約') {
+          // 選考中の企業にはオファーの種類がないので、「面談」の段階にする
+          plan.changes.push({ type: 'stage', to: '面談 (カジュアル / リクルーター)' });
+        } else {
+          return fail(`「${item.companyName}」は${kind === 'pipeline' ? '選考中' : '保管庫'}の企業なので、オファーの種類は変えられません。`);
+        }
+      } else if (kind === 'pipeline' && !dates.length && /に(?:して|する|変更|進|移|し)|へ(?:変更|進|移)/.test(text)) {
+        const stageHit = CMD_STAGES.find(s => s.re.test(text));
+        if (stageHit) plan.changes.push({ type: 'stage', to: stageHit.value });
+      }
+
+      // --- 予定の日付・時間を変える ---
+      if (!deadlineOp && dates.length >= 1) {
+        const to = dates[dates.length - 1];
+        const from = dates.length >= 2 ? dates[0] : null;
+        let toTime = cmdFindTime(text, to.end);
+        if (!toTime && dates.length === 1) toTime = cmdFindTime(text, 0);
+
+        let matches = events.filter(e => {
+          if (from && e.startDate !== from.date) return false;
+          if (eventTypeHit) {
+            if (!eventTypeHit.value) return /面接/.test(`${e.eventType || ''}${e.title || ''}`);
+            return e.eventType === eventTypeHit.value || eventTypeHit.re.test(`${e.eventType || ''}${e.title || ''}`);
+          }
+          return true;
+        });
+        if (!matches.length) {
+          const known = events.slice(0, 5).map(e => `${cmdFmtDate(e.startDate)} ${e.eventType || '予定'}`).join('、');
+          return fail(`「${item.companyName}」に、直す対象の予定が見つかりませんでした。${known ? `登録されている予定：${known}` : 'この会社の予定はまだ登録されていません。'}`,
+            '新しく入れるときは「…を11/5 14時に追加」のように「追加」と入れてください。');
+        }
+        // 候補が複数あるときは、今日以降でいちばん近いものを最初に選んでおく（画面で選び直せる）
+        matches = matches.slice().sort((a, b) => {
+          const da = daysFromToday(a.startDate), db = daysFromToday(b.startDate);
+          const fa = da >= 0 ? da : 9999 - da, fb = db >= 0 ? db : 9999 - db;
+          return fa - fb;
+        });
+        plan.changes.push({
+          type: 'moveEvent', candidates: matches.map(e => e.id), eventId: matches[0].id,
+          toDate: to.date, toTime
+        });
+      }
+
+      if (!plan.changes.length) {
+        if (kind === 'offer' && CMD_STAGES.some(s => s.re.test(text)) && /に(?:して|する|変更|進|移|し)|へ(?:変更|進|移)/.test(text)) {
+          return fail(`「${item.companyName}」はまだオファーの段階なので、選考の段階（一次面接など）は変えられません。選考に進めたあとで直してください。`);
+        }
+        return fail('直す内容が読み取れませんでした。日付（10/30）や、オファーの種類（面談確約など）を入れてください。');
+      }
+      plan.ok = true;
+      return plan;
+    }
+
+    // ---- 画面 ----
+    let commandPlan = null;
+    let commandUndo = null;
+
+    function openCommandModal(prefill) {
+      commandPlan = null;
+      commandUndo = null;
+      document.getElementById('commandInput').value = prefill || '';
+      document.getElementById('commandResult').innerHTML = '';
+      openModal('commandModal');
+      document.getElementById('commandInput').focus();
+    }
+
+    function fillCommand(text) {
+      const input = document.getElementById('commandInput');
+      input.value = text;
+      input.focus();
+    }
+
+    function submitCommand(e) {
+      if (e) e.preventDefault();
+      commandUndo = null;
+      commandPlan = buildCommandPlan(document.getElementById('commandInput').value);
+      renderCommandResult();
+    }
+
+    function chooseCommandCompany(idx) {
+      commandPlan = buildCommandPlan(commandPlan.text, Number(idx));
+      renderCommandResult();
+    }
+
+    function chooseCommandEvent(changeIdx, eventId) {
+      const change = commandPlan && commandPlan.changes[changeIdx];
+      if (!change || !change.candidates.includes(eventId)) return;
+      change.eventId = eventId;
+      renderCommandResult();
+    }
+
+    function commandKindLabel(kind) {
+      return kind === 'offer' ? 'オファー' : (kind === 'pipeline' ? '選考中' : '保管庫');
+    }
+
+    // 1つの変更を「何を」「いまの値 → 新しい値」の文字にする
+    function describeCommandChange(change, plan) {
+      const item = plan.company.item;
+      if (change.type === 'moveEvent') {
+        const evt = calendarEvents.find(e => e.id === change.eventId);
+        if (!evt) return null;
+        const time = change.toTime || evt.startTime || '';
+        return {
+          label: `予定「${evt.eventType || '予定'}」`,
+          before: `${cmdFmtDate(evt.startDate)} ${evt.startTime || ''}`.trim(),
+          after: `${cmdFmtDate(change.toDate)} ${time}`.trim()
+        };
+      }
+      if (change.type === 'addEvent') {
+        return { label: '予定を追加', before: '（なし）', after: `${cmdFmtDate(change.date)} ${change.time || '時間は未設定'} ${change.eventType}` };
+      }
+      if (change.type === 'deadline') {
+        return { label: '返信期限', before: item.deadline ? cmdFmtDate(item.deadline) : '未設定', after: cmdFmtDate(change.to) };
+      }
+      if (change.type === 'offerType') {
+        return { label: 'オファーの種類', before: item.offerType || '未設定', after: change.to };
+      }
+      if (change.type === 'stage') {
+        return { label: '選考の段階', before: item.stage || '未設定', after: change.to };
+      }
+      return null;
+    }
+
+    function renderCommandResult() {
+      const box = document.getElementById('commandResult');
+      const plan = commandPlan;
+      if (!plan) { box.innerHTML = ''; return; }
+
+      if (!plan.ok) {
+        box.innerHTML = `
+          <div class="ds-panel p-4 space-y-2">
+            <span class="ds-badge ds-badge-danger">読み取れませんでした</span>
+            <p>${escapeHtml(plan.error)}</p>
+            <p class="ds-sub">${escapeHtml(plan.hint)}</p>
+          </div>`;
+        return;
+      }
+
+      const company = plan.company;
+      const companySelect = plan.candidates.length > 1 ? `
+        <label class="block">
+          <span class="ds-badge ds-badge-warn" style="white-space: normal;">会社が複数見つかりました。正しい会社を選んでください</span>
+          <select class="ds-select mt-2" onchange="chooseCommandCompany(this.value)" aria-label="会社を選ぶ">
+            ${plan.candidates.map((c, i) => `<option value="${i}" ${i === plan.companyIdx ? 'selected' : ''}>${escapeHtml(c.item.companyName)}（${commandKindLabel(c.kind)}）</option>`).join('')}
+          </select>
+        </label>` : '';
+
+      const rows = plan.changes.map((change, idx) => {
+        const d = describeCommandChange(change, plan);
+        if (!d) return '';
+        const picker = change.type === 'moveEvent' && change.candidates.length > 1 ? `
+          <select class="ds-select mt-2" onchange="chooseCommandEvent(${idx}, this.value)" aria-label="直す予定を選ぶ">
+            ${change.candidates.map(id => {
+              const e = calendarEvents.find(x => x.id === id);
+              return `<option value="${escapeHtml(id)}" ${id === change.eventId ? 'selected' : ''}>${escapeHtml(`${cmdFmtDate(e.startDate)} ${e.startTime || ''} ${e.eventType || '予定'}`.replace(/\s+/g, ' '))}</option>`;
+            }).join('')}
+          </select>
+          <span class="ds-sub block mt-1">当てはまる予定が複数あります。直したい予定を選んでください。</span>` : '';
+        return `
+          <div class="px-4 py-3" style="border-bottom: 1px solid var(--ds-border);">
+            <div class="ds-sub">${escapeHtml(d.label)}</div>
+            <div class="font-medium"><span class="ds-sub">${escapeHtml(d.before)}</span> → ${escapeHtml(d.after)}</div>
+            ${picker}
+          </div>`;
+      }).join('');
+
+      box.innerHTML = `
+        <div class="space-y-3">
+          <div class="ds-panel">
+            <div class="px-4 py-3" style="border-bottom: 1px solid var(--ds-border);">
+              <div class="flex items-center gap-2 flex-wrap">
+                <span class="font-medium">${escapeHtml(company.item.companyName)}</span>
+                <span class="ds-badge ds-badge-neutral">${commandKindLabel(company.kind)}</span>
+              </div>
+              ${companySelect}
+            </div>
+            ${rows}
+          </div>
+          <p class="ds-sub">次の内容で直します。まちがいがなければ「反映する」を押してください。</p>
+          <div class="flex justify-end gap-2">
+            <button type="button" class="ds-btn" onclick="submitCommand()">もう一度読み取る</button>
+            <button type="button" class="ds-btn ds-btn-primary" onclick="applyCommandPlan()">反映する</button>
+          </div>
+        </div>`;
+    }
+
+    function applyCommandPlan() {
+      const plan = commandPlan;
+      if (!plan || !plan.ok) return;
+      const item = plan.company.item;
+
+      // 元に戻せるように、変える前の値を控えておく
+      const undo = {
+        events: JSON.stringify(calendarEvents),
+        fields: { id: item.id, kind: plan.company.kind, deadline: item.deadline, offerType: item.offerType, stage: item.stage }
+      };
+      const summary = [];
+
+      plan.changes.forEach(change => {
+        const d = describeCommandChange(change, plan);
+        if (!d) return;
+        summary.push(d);
+        if (change.type === 'moveEvent') {
+          const evt = calendarEvents.find(e => e.id === change.eventId);
+          if (!evt) return;
+          evt.startDate = change.toDate;
+          evt.endDate = change.toDate;
+          if (change.toTime) {
+            if (evt.startTime && evt.endTime) {
+              const duration = Math.max(cmdMinutes(evt.endTime) - cmdMinutes(evt.startTime), 0) || 60;
+              evt.endTime = cmdTimeFromMinutes(cmdMinutes(change.toTime) + duration);
+            }
+            evt.startTime = change.toTime;
+          }
+        } else if (change.type === 'addEvent') {
+          calendarEvents.push({
+            id: 'cal-' + Date.now().toString(36) + Math.random().toString(36).slice(2, 6),
+            companyName: item.companyName,
+            title: change.eventType,
+            eventType: change.eventType,
+            startDate: change.date,
+            endDate: change.date,
+            startTime: change.time,
+            endTime: change.endTime,
+            locationType: '',
+            meetingUrl: '',
+            notes: '',
+            gmailUrl: `https://mail.google.com/mail/u/0/#search/${encodeURIComponent(item.companyName)}`,
+            completed: false
+          });
+        } else if (change.type === 'deadline') {
+          item.deadline = change.to;
+          syncOfferDeadlineEvent(item);
+        } else if (change.type === 'offerType') {
+          item.offerType = change.to;
+          syncOfferDeadlineEvent(item);
+        } else if (change.type === 'stage') {
+          item.stage = change.to;
+        }
+      });
+
+      saveState();
+      refreshCurrentView();
+      renderModalSchedule();
+      commandUndo = undo;
+      commandPlan = null;
+
+      document.getElementById('commandResult').innerHTML = `
+        <div class="space-y-3">
+          <div class="ds-panel">
+            <div class="px-4 py-3" style="border-bottom: 1px solid var(--ds-border);">
+              <span class="ds-badge ds-badge-good">反映しました</span>
+              <span class="font-medium ml-2">${escapeHtml(item.companyName)}</span>
+            </div>
+            ${summary.map(d => `
+              <div class="px-4 py-3" style="border-bottom: 1px solid var(--ds-border);">
+                <div class="ds-sub">${escapeHtml(d.label)}</div>
+                <div class="font-medium"><span class="ds-sub">${escapeHtml(d.before)}</span> → ${escapeHtml(d.after)}</div>
+              </div>`).join('')}
+          </div>
+          <div class="flex justify-end gap-2">
+            <button type="button" class="ds-btn" onclick="undoCommand()">元に戻す</button>
+            <button type="button" class="ds-btn ds-btn-primary" onclick="closeModal('commandModal')">閉じる</button>
+          </div>
+        </div>`;
+      showToast(`「${item.companyName}」を直しました`, 'success');
+    }
+
+    function undoCommand() {
+      if (!commandUndo) return;
+      calendarEvents = JSON.parse(commandUndo.events);
+      const f = commandUndo.fields;
+      const target = (f.kind === 'pipeline' ? pipeline : (f.kind === 'archived' ? archivedPipeline : offers)).find(x => x.id === f.id);
+      if (target) {
+        if (f.kind === 'offer') { target.deadline = f.deadline; target.offerType = f.offerType; }
+        if (f.kind === 'pipeline') target.stage = f.stage;
+      }
+      commandUndo = null;
+      saveState();
+      refreshCurrentView();
+      renderModalSchedule();
+      document.getElementById('commandResult').innerHTML = `
+        <div class="ds-panel p-4 space-y-1"><span class="ds-badge ds-badge-neutral">元に戻しました</span></div>`;
+      showToast('直す前の状態に戻しました', 'info');
+    }
+
     function openPipelineDetailModal(id) {
       const item = pipeline.find(p => p.id === id);
       if (!item) return;
@@ -7554,7 +8096,8 @@
           'pipelineDetailModal',
           'calendarEventDetailModal',
           'calendarEventModal',
-          'calendarEmailImportModal'
+          'calendarEmailImportModal',
+          'commandModal'
         ];
         modals.forEach(id => closeModal(id));
       }
@@ -7568,7 +8111,8 @@
         'pipelineDetailModal',
         'calendarEventDetailModal',
         'calendarEventModal',
-        'calendarEmailImportModal'
+        'calendarEmailImportModal',
+        'commandModal'
       ];
       modalIds.forEach(id => {
         const m = document.getElementById(id);
