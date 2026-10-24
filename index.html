@@ -703,6 +703,12 @@
     .ds-todo-row:hover { background: var(--ds-row-hover); }
     .ds-todo-check { width: 1.125rem; height: 1.125rem; flex-shrink: 0; accent-color: var(--ds-primary-bg); cursor: pointer; }
     .ds-todo-done { color: var(--ds-text-sub); text-decoration: line-through; }
+    /* 企業の詳細「予定」タブの1件 */
+    .ds-event-row { display: flex; flex-direction: column; gap: 0.5rem; padding: 0.75rem 1rem; border-bottom: 1px solid var(--ds-border); }
+    .ds-event-row:last-child { border-bottom: 0; }
+    .ds-event-past { background: var(--ds-sunken); }
+    .ds-event-date { width: 10.5rem; }
+    .ds-event-time { width: 7rem; }
     .ds-todo-open { min-width: 0; flex: 1; text-align: left; background: none; border: 0; padding: 0; color: inherit; font: inherit; cursor: pointer; }
     @media (max-width: 639px) { .ds-home-when { width: 4.75rem; } }
     .ds-home-stage {
@@ -2509,6 +2515,9 @@
         <button type="button" id="modalTabTodosBtn" class="ds-tab" role="tab" aria-selected="false" onclick="switchModalTab('todos')">
           ToDo <span id="modalTodoCount" class="ds-sub ds-num"></span>
         </button>
+        <button type="button" id="modalTabScheduleBtn" class="ds-tab" role="tab" aria-selected="false" onclick="switchModalTab('schedule')">
+          予定 <span id="modalScheduleCount" class="ds-sub ds-num"></span>
+        </button>
       </div>
 
       <!-- Modal Body (Scrollable Container) -->
@@ -2716,6 +2725,31 @@
             </div>
           </form>
           <div id="modalTodoList" class="ds-panel"></div>
+        </div>
+
+        <!-- ============================================== -->
+        <!-- TAB 4: この会社の予定（メールが届かなかった日程の追加・変更もここから） -->
+        <!-- ============================================== -->
+        <div id="modalSecSchedule" class="space-y-4 hidden">
+          <!-- オファーだけ：返信期限と、オファーの種類（面談確約など） -->
+          <div id="modalOfferFields" class="ds-panel p-4 hidden">
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              <label class="block">
+                <span class="ds-sub block mb-1">返信期限</span>
+                <input type="date" id="schedOfferDeadline" class="ds-input" onchange="updateActiveOfferField('deadline', this.value)">
+              </label>
+              <label class="block">
+                <span class="ds-sub block mb-1">オファーの種類</span>
+                <select id="schedOfferType" class="ds-select" onchange="updateActiveOfferField('offerType', this.value)"></select>
+              </label>
+            </div>
+          </div>
+          <div class="flex items-center justify-between gap-2">
+            <h4 class="ds-h2">カレンダーの予定</h4>
+            <button type="button" class="ds-btn" onclick="addEventForActiveCompany()"><i data-lucide="plus"></i><span>予定を追加</span></button>
+          </div>
+          <div id="modalEventList" class="ds-panel"></div>
+          <p class="ds-sub">日付・時間・種類は、ここで直すとすぐ保存されます。場所やメモを直すときは、鉛筆のボタンを押してください。</p>
         </div>
 
         <form id="pipelineDetailForm" onsubmit="handleUpdatePipeline(event)" class="space-y-5 hidden">
@@ -6793,14 +6827,17 @@
       const secAnalyst = document.getElementById('modalSecAnalyst');
       const formProgress = document.getElementById('pipelineDetailForm');
       const secTodos = document.getElementById('modalSecTodos');
-      if (!['analyst', 'progress', 'todos'].includes(tab)) tab = 'progress';
+      const secSchedule = document.getElementById('modalSecSchedule');
+      if (!['analyst', 'progress', 'todos', 'schedule'].includes(tab)) tab = 'progress';
 
       document.getElementById('modalTabAnalystBtn').setAttribute('aria-selected', String(tab === 'analyst'));
       document.getElementById('modalTabProgressBtn').setAttribute('aria-selected', String(tab === 'progress'));
       document.getElementById('modalTabTodosBtn').setAttribute('aria-selected', String(tab === 'todos'));
+      document.getElementById('modalTabScheduleBtn').setAttribute('aria-selected', String(tab === 'schedule'));
       secAnalyst.classList.toggle('hidden', tab !== 'analyst');
       formProgress.classList.toggle('hidden', tab !== 'progress');
       secTodos.classList.toggle('hidden', tab !== 'todos');
+      secSchedule.classList.toggle('hidden', tab !== 'schedule');
     }
 
     // ==========================================
@@ -6931,6 +6968,151 @@
       switchModalTab('todos');
     }
 
+    // ==========================================
+    // 会社ごとの予定（企業の詳細 →「予定」タブ）
+    // メールが届かなかった日程や、変更になった日程を、カレンダーを開かずに直せる。
+    // 予定の実体は、これまでどおり calendarEvents に入っている
+    // ==========================================
+    function eventsForCompany(item) {
+      const key = normalizeCompanyName(item && item.companyName);
+      if (!key) return [];
+      // オファーの返信期限から作られた予定（cal-offer-…）は、上の「返信期限」の欄で直すので、一覧には出さない
+      return calendarEvents
+        .filter(e => normalizeCompanyName(e.companyName) === key && !String(e.id).startsWith('cal-offer-'))
+        .sort((a, b) => `${a.startDate || ''} ${a.startTime || ''}`.localeCompare(`${b.startDate || ''} ${b.startTime || ''}`));
+    }
+
+    // 予定の種類の選択肢は、カレンダーの「予定の追加」画面と同じものを使う
+    function calendarEventTypeOptions() {
+      return [...document.querySelectorAll('#calEventType option')].map(o => ({ value: o.value, label: o.textContent.trim() }));
+    }
+
+    function selectOptionsHtml(options, current) {
+      const list = options.some(o => o.value === current) || !current ? options : options.concat({ value: current, label: current });
+      return list.map(o => `<option value="${escapeHtml(o.value)}" ${o.value === current ? 'selected' : ''}>${escapeHtml(o.label)}</option>`).join('');
+    }
+
+    function renderModalSchedule() {
+      const list = document.getElementById('modalEventList');
+      const countEl = document.getElementById('modalScheduleCount');
+      const offerBox = document.getElementById('modalOfferFields');
+      if (!list || !activeDetailItem) return;
+
+      // オファーだけ：返信期限とオファーの種類
+      const isOffer = activeDetailType === 'offer';
+      offerBox.classList.toggle('hidden', !isOffer);
+      if (isOffer) {
+        document.getElementById('schedOfferDeadline').value = activeDetailItem.deadline || '';
+        const typeOptions = [...document.querySelectorAll('#editOfferType option')].map(o => ({ value: o.value, label: o.textContent.trim() }));
+        document.getElementById('schedOfferType').innerHTML = selectOptionsHtml(typeOptions, activeDetailItem.offerType || '');
+      }
+
+      const events = eventsForCompany(activeDetailItem);
+      const upcoming = events.filter(e => daysFromToday(e.startDate) !== null && daysFromToday(e.startDate) >= 0).length;
+      countEl.innerText = upcoming ? String(upcoming) : '';
+
+      if (!events.length) {
+        list.innerHTML = `<p class="ds-sub px-4 py-4">この会社の予定はまだありません。「予定を追加」から登録できます。</p>`;
+        return;
+      }
+      const typeOptions = calendarEventTypeOptions();
+      list.innerHTML = events.map(e => {
+        const id = safeId(e.id);
+        const past = daysFromToday(e.startDate) !== null && daysFromToday(e.startDate) < 0;
+        return `
+          <div class="ds-event-row ${past ? 'ds-event-past' : ''}">
+            <div class="flex items-center gap-2">
+              <select class="ds-select flex-1 min-w-0" onchange="updateEventField('${id}', 'eventType', this.value)" aria-label="予定の種類">${selectOptionsHtml(typeOptions, e.eventType || '')}</select>
+              ${past ? '<span class="ds-badge ds-badge-neutral shrink-0">終了</span>' : ''}
+              <button type="button" class="ds-icon-btn shrink-0" onclick="openEventEditFromCompany('${id}')" aria-label="場所・メモなどを編集" title="場所・メモなども編集"><i data-lucide="pencil"></i></button>
+              <button type="button" class="ds-icon-btn shrink-0" onclick="deleteEventFromCompany('${id}')" aria-label="この予定を削除" title="削除"><i data-lucide="trash-2"></i></button>
+            </div>
+            <div class="flex flex-wrap items-center gap-2">
+              <input type="date" class="ds-input ds-event-date" value="${escapeHtml(e.startDate || '')}" onchange="updateEventField('${id}', 'startDate', this.value)" aria-label="日付">
+              <input type="time" class="ds-input ds-event-time" value="${escapeHtml(e.startTime || '')}" onchange="updateEventField('${id}', 'startTime', this.value)" aria-label="開始時刻">
+              <span class="ds-sub">〜</span>
+              <input type="time" class="ds-input ds-event-time" value="${escapeHtml(e.endTime || '')}" onchange="updateEventField('${id}', 'endTime', this.value)" aria-label="終了時刻">
+            </div>
+            ${e.locationType ? `<div class="ds-sub truncate">${escapeHtml(e.locationType)}</div>` : ''}
+          </div>`;
+      }).join('');
+      if (window.lucide) lucide.createIcons();
+    }
+
+    // 予定を直したあとの共通の後始末（保存して、この画面とカレンダー・ホームを描き直す）
+    function afterScheduleChange() {
+      saveState();
+      renderModalSchedule();
+      refreshCurrentView();
+    }
+
+    function updateEventField(eventId, field, value) {
+      const evt = calendarEvents.find(e => e.id === eventId);
+      if (!evt) return;
+      if (field === 'startDate') {
+        if (!value) { renderModalSchedule(); return; } // 日付は空にできない（入れ直しの途中で消えたときは元に戻す）
+        evt.startDate = value;
+        evt.endDate = value;
+      } else if (field === 'eventType' || field === 'startTime' || field === 'endTime') {
+        evt[field] = value;
+        if (field === 'eventType') evt.title = value;
+      } else {
+        return;
+      }
+      afterScheduleChange();
+      showToast(`「${evt.companyName}」の予定を変更しました`, 'success');
+    }
+
+    function deleteEventFromCompany(eventId) {
+      const evt = calendarEvents.find(e => e.id === eventId);
+      if (!evt) return;
+      if (!confirm(`「${evt.companyName}」の「${evt.eventType || '予定'}」（${evt.startDate}）を削除しますか？`)) return;
+      calendarEvents = calendarEvents.filter(e => e.id !== eventId);
+      afterScheduleChange();
+      showToast('予定を削除しました', 'info');
+    }
+
+    // 場所・メモなども含めて直したいときは、カレンダーの編集画面を使う（保存後にこの画面も描き直す）
+    function openEventEditFromCompany(eventId) {
+      activeCalendarEventId = eventId;
+      editCurrentCalendarEvent();
+    }
+
+    function addEventForActiveCompany() {
+      if (!activeDetailItem) return;
+      openCalendarEventModal(toLocalDateString(new Date()));
+      document.getElementById('calEventCompany').value = activeDetailItem.companyName || '';
+    }
+
+    // オファーの返信期限・種類を直す。カレンダーに出ている返信期限の予定（cal-offer-…）の日付も合わせる
+    function syncOfferDeadlineEvent(offer) {
+      const id = `cal-offer-${offer.id}`;
+      const evt = calendarEvents.find(e => e.id === id);
+      if (!evt) return;
+      if (!offer.deadline) {
+        calendarEvents = calendarEvents.filter(e => e.id !== id);
+        return;
+      }
+      evt.startDate = offer.deadline;
+      evt.endDate = offer.deadline;
+      evt.title = `【締切】${offer.offerType}`;
+    }
+
+    function updateActiveOfferField(field, value) {
+      if (activeDetailType !== 'offer' || !activeDetailItem) return;
+      if (field === 'deadline') {
+        activeDetailItem.deadline = value;
+      } else if (field === 'offerType') {
+        if (!value) return;
+        activeDetailItem.offerType = value;
+      } else {
+        return;
+      }
+      syncOfferDeadlineEvent(activeDetailItem);
+      afterScheduleChange();
+      showToast(`「${activeDetailItem.companyName}」のオファーを変更しました`, 'success');
+    }
+
     function openPipelineDetailModal(id) {
       const item = pipeline.find(p => p.id === id);
       if (!item) return;
@@ -7022,6 +7204,7 @@
       document.getElementById('todoTextInput').value = '';
       document.getElementById('todoDueInput').value = '';
       renderModalTodos();
+      renderModalSchedule();
     }
 
     function populateProgressForm(item) {
@@ -7794,6 +7977,7 @@
       offer.media = document.getElementById('editOfferMedia').value;
       offer.deadline = document.getElementById('editOfferDeadline').value;
       offer.offerType = document.getElementById('editOfferType').value;
+      syncOfferDeadlineEvent(offer);
       offer.rating = Number(document.getElementById('editOfferRating').value);
       offer.status = document.getElementById('editOfferStatus').value;
       offer.url = document.getElementById('editOfferUrl').value.trim();
@@ -9187,6 +9371,8 @@
       saveState();
       closeModal('calendarEventModal');
       renderCalendar();
+      renderModalSchedule(); // 企業の詳細から開いていたときは、その画面の予定も描き直す
+      refreshCurrentView();
     }
 
     function deleteCurrentCalendarEvent() {
@@ -9196,6 +9382,8 @@
       saveState();
       closeModal('calendarEventModal');
       renderCalendar();
+      renderModalSchedule();
+      refreshCurrentView();
       showToast('予定を削除しました');
     }
 
