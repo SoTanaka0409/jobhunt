@@ -1672,8 +1672,17 @@
               <span>アプリを開いたときに自動で取り込む</span>
             </label>
 
+            <div class="space-y-1">
+              <label class="flex items-center gap-2">
+                <input type="checkbox" id="gmailImportCalendar" checked onchange="saveGmailImportSettings({ silent: true })">
+                <span>Google カレンダーの予定も取り込み、日時が変わったら更新する</span>
+              </label>
+              <p class="ds-sub">会社名が登録されている予定だけを対象にします。Google カレンダーを正として、日時を合わせます（Google 側のスクリプトの更新が必要です）。状態：<span id="gcalSyncStatus" role="status">未設定</span></p>
+            </div>
+
             <div class="flex flex-wrap gap-2">
               <button type="button" class="ds-btn ds-btn-primary" onclick="saveAndRunGmailImport()"><i data-lucide="mail-plus"></i><span>保存して今すぐ取り込む</span></button>
+              <button type="button" class="ds-btn" onclick="saveAndRunCalendarSync()"><i data-lucide="calendar-sync"></i><span>カレンダーと今すぐ同期</span></button>
               <button type="button" class="ds-btn ds-btn-text" onclick="saveGmailImportSettings()">保存だけする</button>
               <button type="button" class="ds-btn ds-btn-danger-text" onclick="clearGmailImportSettings()">設定を消す</button>
             </div>
@@ -5128,6 +5137,7 @@
         ? `<p class="ds-sub px-4 py-3">ほかに${openTodos.length - HOME_TODO_LIMIT}件あります。各企業の詳細の「ToDo」で確認できます。</p>` : '');
 
       container.innerHTML = `
+        ${calendarNoticeHtml()}
         <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
           ${homeSectionHtml('今日と明日の予定', upcomingRows, '今日と明日の予定はありません。', `<button type="button" class="ds-btn ds-btn-text" onclick="switchTab('calendar')">カレンダー</button>`)}
           ${homeSectionHtml(`やること <span class="ds-sub ds-num">${openTodos.length}件</span>`, todoRows, 'やることはありません。企業の詳細の「ToDo」から追加できます。')}
@@ -8232,10 +8242,17 @@
           autoOnOpen: c.autoOnOpen !== false,
           lastRunAt: c.lastRunAt || null,
           lastResult: c.lastResult || '',
-          importedIds: Array.isArray(c.importedIds) ? c.importedIds : []
+          importedIds: Array.isArray(c.importedIds) ? c.importedIds : [],
+          // Google カレンダーとの同期
+          calendarSync: c.calendarSync !== false,
+          calendarNeedsUpdate: !!c.calendarNeedsUpdate,
+          lastCalendarAt: c.lastCalendarAt || null,
+          lastCalendarResult: c.lastCalendarResult || '',
+          calendarNotice: c.calendarNotice && typeof c.calendarNotice === 'object' ? c.calendarNotice : null,
+          calendarIgnoredIds: Array.isArray(c.calendarIgnoredIds) ? c.calendarIgnoredIds : []
         };
       } catch (e) {
-        return { url: '', key: '', autoOnOpen: true, lastRunAt: null, lastResult: '', importedIds: [] };
+        return { url: '', key: '', autoOnOpen: true, lastRunAt: null, lastResult: '', importedIds: [], calendarSync: true, calendarNeedsUpdate: false, lastCalendarAt: null, lastCalendarResult: '', calendarNotice: null, calendarIgnoredIds: [] };
       }
     }
 
@@ -8364,6 +8381,7 @@
       const keyInput = document.getElementById('gmailImportKey');
       const autoInput = document.getElementById('gmailImportAuto');
       const status = document.getElementById('gmailImportStatus');
+      updateCalendarSyncStatus();
       if (urlInput && document.activeElement !== urlInput) urlInput.value = config.url;
       if (keyInput && document.activeElement !== keyInput) keyInput.value = config.key;
       if (autoInput) autoInput.checked = config.autoOnOpen;
@@ -8410,6 +8428,7 @@
       config.url = document.getElementById('gmailImportUrl').value.trim();
       config.key = document.getElementById('gmailImportKey').value.trim();
       config.autoOnOpen = document.getElementById('gmailImportAuto').checked;
+      config.calendarSync = document.getElementById('gmailImportCalendar').checked;
       saveGmailImportConfig(config);
       updateGmailImportStatus();
       if (options.silent) return;
@@ -8430,6 +8449,316 @@
       localStorage.removeItem(GMAIL_IMPORT_KEY);
       updateGmailImportStatus();
       showToast('Gmail の取り込み設定を消しました', 'info');
+    }
+
+    // ==========================================
+    // Google カレンダーとの自動同期
+    // Gmail の取り込みと同じ Google Apps Script（合言葉つきの自分専用の窓口）から、これからの予定を受け取り、
+    // 会社名と予定の種類でアプリの予定と見比べて、追加・日時の更新をする。
+    // 第三者のサービスは通らない。Google カレンダーを正とし、変えたときはホームに知らせて、元に戻せる。
+    // ==========================================
+    const GCAL_SYNC_DAYS = 120;
+    const GCAL_UNDO_KEY = 'jobhunt_gcal_undo_v1';
+    const GCAL_IGNORED_LIMIT = 200;
+
+    // Google の予定のタイトル（と説明）から、アプリの「予定種別」を決める。上から順に当てはめる
+    const GCAL_TYPE_RULES = [
+      { re: /最終面接|役員面接|最終選考/, value: '最終面接' },
+      { re: /(?:二|2|三|3)次(?:面接|選考)?/, value: '二次 / 三次面接' },
+      { re: /(?:一|1)次(?:面接|選考)?|面接/, value: '一次面接' },
+      { re: /面談|リクルーター|カジュアル/, value: '面談 (カジュアル/リクルーター)' },
+      { re: /インターン|仕事体験|ワークショップ|1day|ワンデー|体験/i, value: '仕事体験・ワークショップ' },
+      { re: /座談会|セミナー|質問会|交流会/, value: '座談会・セミナー' },
+      { re: /Webテスト|ウェブテスト|適性検査|SPI|玉手箱|受検/i, value: 'Webテスト / 課題締切' },
+      { re: /エントリーシート|ES提出|(?:^|[^A-Za-z])ES(?:[^A-Za-z]|$)|締切|締め切り|期限/, value: 'ES提出締切' },
+      { re: /説明会/, value: '会社説明会' }
+    ];
+
+    function gcalEventType(g) {
+      const title = String(g.title || '');
+      const hit = GCAL_TYPE_RULES.find(r => r.re.test(title)) || GCAL_TYPE_RULES.find(r => r.re.test(String(g.description || '').slice(0, 200)));
+      return hit ? hit.value : '';
+    }
+
+    // タイトルと説明に、登録済みの会社の名前がそのまま入っているものだけを対象にする（授業やバイトなど、就活と関係ない予定は無視）
+    function gcalFindCompany(g) {
+      const text = `${g.title || ''} ${String(g.description || '').slice(0, 300)}`.normalize('NFKC');
+      const hits = cmdFindCompanies(text, '');
+      if (hits.length !== 1) return null; // 見つからない、または複数の会社に当てはまる
+      return hits[0];
+    }
+
+    function gcalCleanText(s, max) {
+      return String(s || '').replace(/<br\s*\/?>/gi, '\n').replace(/<[^>]*>/g, '').replace(/&nbsp;/g, ' ').replace(/&amp;/g, '&').trim().slice(0, max);
+    }
+
+    function gcalFmt(date, time) {
+      return `${cmdFmtDate(date)}${time ? ' ' + time : ''}`;
+    }
+
+    // アプリの予定1件を、Google の予定の内容に合わせる。変えたところがあれば true
+    function gcalApplyToEvent(evt, g, overwriteLocation) {
+      let changed = false;
+      const set = (key, value) => { if ((evt[key] || '') !== (value || '')) { evt[key] = value; changed = true; } };
+      set('startDate', g.date);
+      set('endDate', g.date);
+      if (!g.allDay) {
+        set('startTime', g.time);
+        set('endTime', g.endTime || '');
+      }
+      if (overwriteLocation && g.location) set('locationType', g.location);
+      evt.gcalId = g.id;
+      return changed;
+    }
+
+    // Google の予定の一覧をアプリの予定と見比べて、追加・更新する。何を変えたかを返す
+    function applyGoogleCalendarEvents(gEvents, ignoredIds) {
+      const result = { added: [], updated: [], ambiguous: [], touchedGoogleIds: [] };
+      const today = toLocalDateString(new Date());
+      const ignored = new Set(ignoredIds || []);
+      const targets = [];
+
+      gEvents.forEach(g => {
+        if (!g || !g.id || !g.date || g.date < today || ignored.has(g.id)) return;
+        const company = gcalFindCompany(g);
+        const type = company ? gcalEventType(g) : '';
+        if (company && type) targets.push({ g, company, type });
+      });
+      targets.sort((a, b) => `${a.g.date} ${a.g.time}`.localeCompare(`${b.g.date} ${b.g.time}`));
+
+      const eventsOf = company => calendarEvents.filter(e => normalizeCompanyName(e.companyName) === normalizeCompanyName(company.item.companyName) && !String(e.id).startsWith('cal-offer-'));
+      const claimed = new Set(); // すでに Google の予定と結びついたアプリの予定
+
+      // 1回目：すでに結びついている予定と、日付も種類・時間も合っている予定を結びつける（日時が変わっていれば更新）
+      const rest = [];
+      targets.forEach(t => {
+        const mine = eventsOf(t.company);
+        const linked = mine.find(e => e.gcalId === t.g.id);
+        if (linked) {
+          claimed.add(linked.id);
+          const before = gcalFmt(linked.startDate, linked.startTime);
+          if (gcalApplyToEvent(linked, t.g, false)) {
+            result.updated.push({ company: t.company.item.companyName, type: linked.eventType, before, after: gcalFmt(t.g.date, t.g.time) });
+            result.touchedGoogleIds.push(t.g.id);
+          }
+          return;
+        }
+        const same = mine.find(e => !e.gcalId && !claimed.has(e.id) && e.startDate === t.g.date && (e.eventType === t.type || (e.startTime || '') === t.g.time));
+        if (same) {
+          claimed.add(same.id);
+          const before = gcalFmt(same.startDate, same.startTime);
+          if (gcalApplyToEvent(same, t.g, false)) {
+            result.updated.push({ company: t.company.item.companyName, type: same.eventType, before, after: gcalFmt(t.g.date, t.g.time) });
+            result.touchedGoogleIds.push(t.g.id);
+          }
+          return;
+        }
+        rest.push(t);
+      });
+
+      // 2回目：残った Google の予定を、同じ会社・同じ種類の「まだ結びついていない」アプリの予定に当てはめる
+      rest.forEach(t => {
+        const mine = eventsOf(t.company);
+        // 1回目のあとに追加された、同じ日時の予定（Google に同じ予定が2つあるとき）
+        if (mine.some(e => e.gcalId && e.startDate === t.g.date && (e.startTime || '') === t.g.time)) return;
+        const candidates = mine.filter(e => !e.gcalId && !claimed.has(e.id) && e.eventType === t.type);
+        if (candidates.length === 1) {
+          const evt = candidates[0];
+          claimed.add(evt.id);
+          const before = gcalFmt(evt.startDate, evt.startTime);
+          gcalApplyToEvent(evt, t.g, true);
+          result.updated.push({ company: t.company.item.companyName, type: evt.eventType, before, after: gcalFmt(t.g.date, t.g.time) });
+          result.touchedGoogleIds.push(t.g.id);
+        } else if (candidates.length > 1) {
+          result.ambiguous.push({ company: t.company.item.companyName, type: t.type, after: gcalFmt(t.g.date, t.g.time) });
+        } else {
+          const urlMatch = `${t.g.description || ''} ${t.g.location || ''}`.match(/https?:\/\/[^\s<>"']+/);
+          const evt = {
+            id: 'gcal-' + String(t.g.id).replace(/[^a-zA-Z0-9_-]/g, '').slice(0, 40),
+            gcalId: t.g.id,
+            companyName: t.company.item.companyName,
+            title: t.type,
+            eventType: t.type,
+            startDate: t.g.date,
+            endDate: t.g.date,
+            startTime: t.g.allDay ? '' : t.g.time,
+            endTime: t.g.allDay ? '' : (t.g.endTime || ''),
+            locationType: t.g.location || 'オンライン',
+            meetingUrl: urlMatch ? urlMatch[0] : '',
+            notes: gcalCleanText(t.g.description, 200),
+            gmailUrl: `https://mail.google.com/mail/u/0/#search/${encodeURIComponent(t.company.item.companyName)}`,
+            completed: false,
+            source: 'google_calendar'
+          };
+          calendarEvents.push(evt);
+          result.added.push({ company: evt.companyName, type: evt.eventType, after: gcalFmt(evt.startDate, evt.startTime) });
+          result.touchedGoogleIds.push(t.g.id);
+        }
+      });
+      return result;
+    }
+
+    let calendarSyncRunning = false;
+
+    // options.manual が true のときは、結果を必ずメッセージで知らせる
+    async function runCalendarSync(options = {}) {
+      const config = loadGmailImportConfig();
+      if (!isGmailImportConfigured(config) || !config.calendarSync) {
+        if (options.manual) showToast('先に Gmail の取り込み設定（合言葉とURL）を入れてください', 'error');
+        return null;
+      }
+      // Google 側のスクリプトが古いと分かっているあいだは、自動では呼ばない（手動の「今すぐ同期」で再確認する）
+      if (!options.manual && config.calendarNeedsUpdate) return null;
+      if (calendarSyncRunning) return null;
+      calendarSyncRunning = true;
+      updateCalendarSyncStatus('Googleカレンダーと同期中…');
+
+      try {
+        const requestUrl = new URL(config.url);
+        requestUrl.searchParams.set('key', config.key);
+        requestUrl.searchParams.set('type', 'calendar');
+        requestUrl.searchParams.set('days', String(GCAL_SYNC_DAYS));
+        const res = await fetch(requestUrl.toString(), { cache: 'no-store' });
+        const data = await res.json();
+        if (!data.ok) throw new Error(data.error === 'unauthorized' ? '合言葉が一致しません' : 'Google カレンダーを読み込めませんでした');
+
+        if (!Array.isArray(data.events)) {
+          // 古いスクリプトは type=calendar を知らないので、Gmail の結果だけが返ってくる
+          config.calendarNeedsUpdate = true;
+          config.lastCalendarAt = new Date().toISOString();
+          config.lastCalendarResult = 'Google 側のスクリプトを更新すると、カレンダーとも同期できます（設定ガイド参照）';
+          saveGmailImportConfig(config);
+          if (options.manual) showToast(config.lastCalendarResult, 'error');
+          return null;
+        }
+
+        const snapshot = JSON.stringify(calendarEvents);
+        const result = applyGoogleCalendarEvents(data.events, config.calendarIgnoredIds);
+        const changes = result.added.length + result.updated.length;
+
+        const lines = []
+          .concat(result.updated.map(u => `${u.company}　${u.type}：${u.before} → ${u.after}`))
+          .concat(result.added.map(a => `${a.company}　${a.type}を追加：${a.after}`))
+          .concat(result.ambiguous.map(a => `${a.company}　${a.type}（${a.after}）：当てはまる予定が複数あるため、変更していません`));
+
+        config.calendarNeedsUpdate = false;
+        config.lastCalendarAt = new Date().toISOString();
+        config.lastCalendarResult = changes
+          ? `更新${result.updated.length}件・追加${result.added.length}件`
+          : (result.ambiguous.length ? '変更はありません（決められない予定が' + result.ambiguous.length + '件あります）' : '変更はありませんでした');
+
+        const prevNotice = config.calendarNotice;
+        // 変更がない回は、まだ閉じていない前回のお知らせ（元に戻すボタンつき）をそのまま残す
+        const keepPrevious = !changes && prevNotice && !prevNotice.dismissed;
+        if (lines.length && !keepPrevious) {
+          const sig = lines.join('|');
+          const prev = config.calendarNotice;
+          config.calendarNotice = {
+            sig, lines, at: config.lastCalendarAt,
+            hasUndo: changes > 0,
+            dismissed: !!(prev && prev.sig === sig && prev.dismissed)
+          };
+        }
+        if (changes) {
+          try {
+            localStorage.setItem(GCAL_UNDO_KEY, JSON.stringify({ at: config.lastCalendarAt, events: snapshot, googleIds: result.touchedGoogleIds }));
+          } catch (e) { config.calendarNotice.hasUndo = false; }
+          saveState();
+        }
+        saveGmailImportConfig(config);
+        if (changes) refreshCurrentView();
+        else if (config.calendarNotice && lines.length) refreshCurrentView();
+        if (changes || options.manual) showToast(`Googleカレンダーと同期しました（${config.lastCalendarResult}）`, changes ? 'success' : 'info');
+        return result;
+      } catch (err) {
+        config.lastCalendarAt = new Date().toISOString();
+        config.lastCalendarResult = `失敗：${err.message || '通信できませんでした'}`;
+        saveGmailImportConfig(config);
+        if (options.manual) showToast(config.lastCalendarResult, 'error');
+        return null;
+      } finally {
+        calendarSyncRunning = false;
+        updateCalendarSyncStatus();
+      }
+    }
+
+    function updateCalendarSyncStatus(runningText) {
+      const config = loadGmailImportConfig();
+      const calInput = document.getElementById('gmailImportCalendar');
+      const status = document.getElementById('gcalSyncStatus');
+      if (calInput) calInput.checked = config.calendarSync;
+      if (!status) return;
+      if (runningText) {
+        status.textContent = runningText;
+      } else if (!isGmailImportConfigured(config) || !config.calendarSync) {
+        status.textContent = '未設定';
+      } else if (config.lastCalendarAt) {
+        const d = new Date(config.lastCalendarAt);
+        status.textContent = `最後の同期：${d.getMonth() + 1}/${d.getDate()} ${String(d.getHours()).padStart(2, '0')}:${String(d.getMinutes()).padStart(2, '0')}　${config.lastCalendarResult}`;
+      } else {
+        status.textContent = '設定済み（まだ同期していません）';
+      }
+    }
+
+    // アプリを開いたときの自動処理（Gmail の取り込みと、Google カレンダーの同期）
+    function runAutoImportsOnOpen() {
+      const config = loadGmailImportConfig();
+      if (!config.autoOnOpen) return;
+      runGmailImport();
+      if (config.calendarSync) runCalendarSync();
+    }
+
+    // ホームに出す「Googleカレンダーから予定を直しました」のお知らせ
+    function calendarNoticeHtml() {
+      const notice = loadGmailImportConfig().calendarNotice;
+      if (!notice || notice.dismissed || !Array.isArray(notice.lines) || !notice.lines.length) return '';
+      const shown = notice.lines.slice(0, 6);
+      return `
+        <section class="ds-panel mb-4" role="status" aria-label="Googleカレンダーとの同期の結果">
+          <div class="flex items-center justify-between gap-2 px-4 py-3" style="border-bottom: 1px solid var(--ds-border);">
+            <h3 class="ds-h2">Googleカレンダーの内容を反映しました</h3>
+            <div class="flex items-center gap-1">
+              ${notice.hasUndo ? `<button type="button" class="ds-btn" onclick="undoCalendarSync()">元に戻す</button>` : ''}
+              <button type="button" class="ds-btn ds-btn-text" onclick="dismissCalendarNotice()">閉じる</button>
+            </div>
+          </div>
+          <ul class="px-4 py-3 space-y-1">
+            ${shown.map(l => `<li>${escapeHtml(l)}</li>`).join('')}
+            ${notice.lines.length > shown.length ? `<li class="ds-sub">ほか${notice.lines.length - shown.length}件</li>` : ''}
+          </ul>
+        </section>`;
+    }
+
+    function dismissCalendarNotice() {
+      const config = loadGmailImportConfig();
+      if (config.calendarNotice) config.calendarNotice.dismissed = true;
+      saveGmailImportConfig(config);
+      renderHome();
+    }
+
+    // 直前の同期を元に戻す。同じ予定を、次に開いたときにまた書き換えないよう、その Google の予定は無視する
+    function undoCalendarSync() {
+      let snapshot = null;
+      try { snapshot = JSON.parse(localStorage.getItem(GCAL_UNDO_KEY)); } catch (e) { snapshot = null; }
+      if (!snapshot || !snapshot.events) {
+        showToast('元に戻す情報が見つかりませんでした', 'error');
+        return;
+      }
+      calendarEvents = JSON.parse(snapshot.events);
+      const config = loadGmailImportConfig();
+      config.calendarIgnoredIds = (config.calendarIgnoredIds || []).concat(snapshot.googleIds || []).slice(-GCAL_IGNORED_LIMIT);
+      if (config.calendarNotice) { config.calendarNotice.dismissed = true; config.calendarNotice.hasUndo = false; }
+      saveGmailImportConfig(config);
+      try { localStorage.removeItem(GCAL_UNDO_KEY); } catch (e) { /* 消せなくても問題ない */ }
+      saveState();
+      refreshCurrentView();
+      renderModalSchedule();
+      showToast('Googleカレンダーの反映を元に戻しました。この予定は、これ以降の同期では変えません', 'info');
+    }
+
+    async function saveAndRunCalendarSync() {
+      saveGmailImportSettings({ silent: true });
+      await runCalendarSync({ manual: true });
     }
 
     function handleCreatePipeline(e) {
@@ -8884,7 +9213,7 @@
       if (gcalConfig && gcalConfig.autoSyncOnRelog) {
         syncFromGoogleCalendar({ source: 'reload' });
       }
-      if (loadGmailImportConfig().autoOnOpen) runGmailImport();
+      runAutoImportsOnOpen();
 
       setTimeout(() => {
         icons.forEach(icon => icon.classList.remove('animate-spin'));
@@ -10981,7 +11310,7 @@ URL: https://www.ncd.co.jp/
 
       // 起動時 Gmail からの自動取り込み（設定済みで、「開いたときに取り込む」がオンのとき）
       updateGmailImportStatus();
-      if (loadGmailImportConfig().autoOnOpen) runGmailImport();
+      runAutoImportsOnOpen();
     });
   </script>
 </body>
