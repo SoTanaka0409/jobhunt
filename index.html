@@ -5202,6 +5202,7 @@
             r.nextText = ev.eventType || ev.title || '予定';
           }
         }
+        if (r.kind !== 'archived') r.interview = nextInterviewForCompany(r.item.companyName);
         const rep = getOfferReport(r.item);
         r.score = rep && typeof rep.score === 'number' ? rep.score : -1;
       });
@@ -5257,9 +5258,25 @@
     }
 
     function companyNextHtml(r) {
-      return r.nextDate
-        ? `<span class="ds-num">${formatDateLabel(r.nextDate)}</span> <span class="ds-sub">${escapeHtml(r.nextText)}</span>`
-        : '<span class="ds-sub">予定なし</span>';
+      const lines = [];
+      // いちばん近い面接は、次の予定とは別に、必ず見える行で出す（近くに別の予定があっても埋もれないように）
+      if (r.interview) {
+        lines.push(`<div><span class="ds-badge ds-badge-good">面接</span> <span class="ds-num">${escapeHtml(formatDateLabel(r.interview.date))}${r.interview.time ? ' ' + escapeHtml(r.interview.time) : ''}</span> <span class="ds-sub">${escapeHtml(r.interview.type)}</span></div>`);
+      }
+      const nextIsInterview = r.interview && r.nextDate === r.interview.date && r.nextText === r.interview.type;
+      if (r.nextDate && !nextIsInterview) {
+        lines.push(`<div><span class="ds-num">${formatDateLabel(r.nextDate)}</span> <span class="ds-sub">${escapeHtml(r.nextText)}</span></div>`);
+      }
+      return lines.length ? lines.join('') : '<span class="ds-sub">予定なし</span>';
+    }
+
+    // その会社の、今日以降でいちばん近い面接（なければ null）
+    function nextInterviewForCompany(companyName) {
+      const key = normalizeCompanyName(companyName);
+      const ev = calendarEvents
+        .filter(e => normalizeCompanyName(e.companyName) === key && /面接/.test(e.eventType || '') && daysFromToday(e.startDate) !== null && daysFromToday(e.startDate) >= 0)
+        .sort((a, b) => `${a.startDate} ${a.startTime || ''}`.localeCompare(`${b.startDate} ${b.startTime || ''}`))[0];
+      return ev ? { date: ev.startDate, time: ev.startTime || '', type: ev.eventType, id: ev.id } : null;
     }
 
     // 状態の並び：選考中（段階の順）→ オファー → 保管庫
@@ -6326,6 +6343,8 @@
       const meta = [item.media, item.selectionType, item.priority ? `志望度 ${item.priority}` : '']
         .filter(Boolean).map(escapeHtml).join(' ・ ');
       const mypage = safeUrl(item.mypageUrl);
+      // カレンダーに面接の日が入っているときは、手で書いたメモ（「面接日程予約中」など）より先に、その日付を出す
+      const cardInterview = nextInterviewForCompany(item.companyName);
       return `
         <div id="card-${id}"
              draggable="true"
@@ -6338,10 +6357,16 @@
             ${dsScoreHtml(item)}
           </div>
           ${meta ? `<div class="ds-sub">${meta}</div>` : ''}
-          ${item.nextSchedule ? `
+          ${cardInterview ? `
             <div class="flex items-start gap-1.5" style="font-size: 0.8125rem;">
+              <span class="ds-badge ds-badge-good">面接</span>
+              <span class="font-medium">${escapeHtml(formatDateLabel(cardInterview.date))}${cardInterview.time ? ' ' + escapeHtml(cardInterview.time) : ''}　${escapeHtml(cardInterview.type)}</span>
+            </div>
+          ` : ''}
+          ${item.nextSchedule ? `
+            <div class="flex items-start gap-1.5 ${cardInterview ? 'ds-sub' : ''}" style="font-size: 0.8125rem;">
               <i data-lucide="calendar" style="width: 0.875rem; height: 0.875rem; margin-top: 0.1875rem; flex-shrink: 0; color: var(--ds-text-sub);"></i>
-              <span>${escapeHtml(item.nextSchedule)}</span>
+              <span>${cardInterview ? 'メモ：' : ''}${escapeHtml(item.nextSchedule)}</span>
             </div>
           ` : ''}
           ${item.action ? `<div class="ds-sub truncate">次にやること：${escapeHtml(item.action)}</div>` : ''}
