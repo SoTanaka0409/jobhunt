@@ -4430,15 +4430,15 @@
       {
         id: 'cal-persol-20261026',
         companyName: 'パーソルクロステクノロジー株式会社',
-        title: '一次面接（IT領域・Web面談予約推奨枠）',
-        eventType: '一次面接',
+        title: '1dayインターン（オンライン）',
+        eventType: '仕事体験・ワークショップ',
         startDate: '2026-10-26',
-        startTime: '10:00',
+        startTime: '13:00',
         endDate: '2026-10-26',
-        endTime: '11:00',
-        locationType: 'オンライン (Web面接)',
+        endTime: '17:00',
+        locationType: 'オンライン',
         meetingUrl: '',
-        notes: '【早期予約要】適性検査合格に伴う一次面接。枠が埋まり次第終了のためマイページ/案内メールより早急に面接枠を確保。',
+        notes: '10/26の予定は面接ではなくインターンです。一次面接の日程は未定で、マイページ/案内メールから面接枠を予約します。',
         gmailUrl: 'https://mail.google.com/mail/u/0/#search/%E3%83%91%E3%83%BC%E3%82%BD%E3%83%AB%E3%82%AF%E3%83%AD%E3%82%B9%E3%83%86%E3%82%AF%E3%83%8E%E3%83%AD%E3%82%B8%E3%83%BC',
         completed: false
       },
@@ -7139,21 +7139,27 @@
     }
 
     // オファーの返信期限・種類を直す。カレンダーに出ている返信期限の予定（cal-offer-…）の日付も合わせる
-    function syncOfferDeadlineEvent(offer) {
+    // oldDeadline：直す前の返信期限。返信期限の予定が、元からある同じ日の「ES提出締切」にまとめられているときは、そちらを動かす
+    function syncOfferDeadlineEvent(offer, oldDeadline) {
       const id = `cal-offer-${offer.id}`;
-      const evt = calendarEvents.find(e => e.id === id);
+      let evt = calendarEvents.find(e => e.id === id);
+      if (!evt && oldDeadline) {
+        const key = normalizeCompanyName(offer.companyName);
+        evt = calendarEvents.find(e => normalizeCompanyName(e.companyName) === key && e.eventType === 'ES提出締切' && e.startDate === oldDeadline);
+      }
       if (!evt) return;
       if (!offer.deadline) {
-        calendarEvents = calendarEvents.filter(e => e.id !== id);
+        if (evt.id === id) calendarEvents = calendarEvents.filter(e => e !== evt);
         return;
       }
       evt.startDate = offer.deadline;
       evt.endDate = offer.deadline;
-      evt.title = `【締切】${offer.offerType}`;
+      if (evt.id === id) evt.title = `【締切】${offer.offerType}`;
     }
 
     function updateActiveOfferField(field, value) {
       if (activeDetailType !== 'offer' || !activeDetailItem) return;
+      const oldDeadline = activeDetailItem.deadline;
       if (field === 'deadline') {
         activeDetailItem.deadline = value;
       } else if (field === 'offerType') {
@@ -7162,7 +7168,7 @@
       } else {
         return;
       }
-      syncOfferDeadlineEvent(activeDetailItem);
+      syncOfferDeadlineEvent(activeDetailItem, oldDeadline);
       afterScheduleChange();
       showToast(`「${activeDetailItem.companyName}」のオファーを変更しました`, 'success');
     }
@@ -7610,11 +7616,12 @@
             completed: false
           });
         } else if (change.type === 'deadline') {
+          const oldDeadline = item.deadline;
           item.deadline = change.to;
-          syncOfferDeadlineEvent(item);
+          syncOfferDeadlineEvent(item, oldDeadline);
         } else if (change.type === 'offerType') {
           item.offerType = change.to;
-          syncOfferDeadlineEvent(item);
+          syncOfferDeadlineEvent(item, item.deadline);
         } else if (change.type === 'stage') {
           item.stage = change.to;
         }
@@ -8249,10 +8256,12 @@
           lastCalendarAt: c.lastCalendarAt || null,
           lastCalendarResult: c.lastCalendarResult || '',
           calendarNotice: c.calendarNotice && typeof c.calendarNotice === 'object' ? c.calendarNotice : null,
-          calendarIgnoredIds: Array.isArray(c.calendarIgnoredIds) ? c.calendarIgnoredIds : []
+          calendarIgnoredIds: Array.isArray(c.calendarIgnoredIds) ? c.calendarIgnoredIds : [],
+          dedupeNotice: c.dedupeNotice && typeof c.dedupeNotice === 'object' ? c.dedupeNotice : null,
+          dedupeIgnoredKeys: Array.isArray(c.dedupeIgnoredKeys) ? c.dedupeIgnoredKeys : []
         };
       } catch (e) {
-        return { url: '', key: '', autoOnOpen: true, lastRunAt: null, lastResult: '', importedIds: [], calendarSync: true, calendarNeedsUpdate: false, lastCalendarAt: null, lastCalendarResult: '', calendarNotice: null, calendarIgnoredIds: [] };
+        return { url: '', key: '', autoOnOpen: true, lastRunAt: null, lastResult: '', importedIds: [], calendarSync: true, calendarNeedsUpdate: false, lastCalendarAt: null, lastCalendarResult: '', calendarNotice: null, calendarIgnoredIds: [], dedupeNotice: null, dedupeIgnoredKeys: [] };
       }
     }
 
@@ -8543,7 +8552,8 @@
           }
           return;
         }
-        const same = mine.find(e => !e.gcalId && !claimed.has(e.id) && e.startDate === t.g.date && (e.eventType === t.type || (e.startTime || '') === t.g.time));
+        // 同じ予定とみなすのは、同じ日で同じ種類のとき（同じ時間でも種類が違えば、別の予定として両方残す）
+        const same = mine.find(e => !e.gcalId && !claimed.has(e.id) && e.startDate === t.g.date && e.eventType === t.type);
         if (same) {
           claimed.add(same.id);
           const before = gcalFmt(same.startDate, same.startTime);
@@ -8559,8 +8569,8 @@
       // 2回目：残った Google の予定を、同じ会社・同じ種類の「まだ結びついていない」アプリの予定に当てはめる
       rest.forEach(t => {
         const mine = eventsOf(t.company);
-        // 1回目のあとに追加された、同じ日時の予定（Google に同じ予定が2つあるとき）
-        if (mine.some(e => e.gcalId && e.startDate === t.g.date && (e.startTime || '') === t.g.time)) return;
+        // 同じ内容（日付・開始と終了の時間・種類がすべて同じ）の予定が、すでにあるときは1件にする（Google に同じ予定が2つあるときなど）
+        if (mine.some(e => e.eventType === t.type && e.startDate === t.g.date && (e.startTime || '') === t.g.time && (e.endTime || '') === (t.g.endTime || ''))) return;
         const candidates = mine.filter(e => !e.gcalId && !claimed.has(e.id) && e.eventType === t.type);
         if (candidates.length === 1) {
           const evt = candidates[0];
@@ -8702,24 +8712,24 @@
 
     // アプリを開いたときの自動処理（Gmail の取り込みと、Google カレンダーの同期）
     function runAutoImportsOnOpen() {
+      if (dedupeCalendarEvents()) refreshCurrentView(); // 同じ内容の予定が重なっていたら1件にまとめる
       const config = loadGmailImportConfig();
       if (!config.autoOnOpen) return;
       runGmailImport();
       if (config.calendarSync) runCalendarSync();
     }
 
-    // ホームに出す「Googleカレンダーから予定を直しました」のお知らせ
-    function calendarNoticeHtml() {
-      const notice = loadGmailImportConfig().calendarNotice;
+    // ホームに出すお知らせ（Google カレンダーの反映 / 重複した予定をまとめた）
+    function noticePanelHtml(notice, title, undoFn, dismissFn) {
       if (!notice || notice.dismissed || !Array.isArray(notice.lines) || !notice.lines.length) return '';
       const shown = notice.lines.slice(0, 6);
       return `
-        <section class="ds-panel mb-4" role="status" aria-label="Googleカレンダーとの同期の結果">
+        <section class="ds-panel mb-4" role="status" aria-label="${escapeHtml(title)}">
           <div class="flex items-center justify-between gap-2 px-4 py-3" style="border-bottom: 1px solid var(--ds-border);">
-            <h3 class="ds-h2">Googleカレンダーの内容を反映しました</h3>
+            <h3 class="ds-h2">${escapeHtml(title)}</h3>
             <div class="flex items-center gap-1">
-              ${notice.hasUndo ? `<button type="button" class="ds-btn" onclick="undoCalendarSync()">元に戻す</button>` : ''}
-              <button type="button" class="ds-btn ds-btn-text" onclick="dismissCalendarNotice()">閉じる</button>
+              ${notice.hasUndo ? `<button type="button" class="ds-btn" onclick="${undoFn}()">元に戻す</button>` : ''}
+              <button type="button" class="ds-btn ds-btn-text" onclick="${dismissFn}()">閉じる</button>
             </div>
           </div>
           <ul class="px-4 py-3 space-y-1">
@@ -8727,6 +8737,12 @@
             ${notice.lines.length > shown.length ? `<li class="ds-sub">ほか${notice.lines.length - shown.length}件</li>` : ''}
           </ul>
         </section>`;
+    }
+
+    function calendarNoticeHtml() {
+      const config = loadGmailImportConfig();
+      return noticePanelHtml(config.dedupeNotice, '同じ内容の予定を1件にまとめました', 'undoDedupe', 'dismissDedupeNotice')
+        + noticePanelHtml(config.calendarNotice, 'Googleカレンダーの内容を反映しました', 'undoCalendarSync', 'dismissCalendarNotice');
     }
 
     function dismissCalendarNotice() {
@@ -8759,6 +8775,86 @@
     async function saveAndRunCalendarSync() {
       saveGmailImportSettings({ silent: true });
       await runCalendarSync({ manual: true });
+    }
+
+    // ==========================================
+    // 同じ内容の予定を1件にまとめる
+    // 同じ会社・同じ日・同じ開始と終了の時間・同じ種類の予定が複数あるときは、1件だけ残す。
+    // 時間や種類が違う予定は、すべて残す。まとめたときはホームに知らせ、元に戻せる。
+    // ==========================================
+    const DEDUPE_UNDO_KEY = 'jobhunt_dedupe_undo_v1';
+    const DEDUPE_IGNORED_LIMIT = 100;
+
+    function calendarDuplicateKey(e) {
+      return [normalizeCompanyName(e.companyName), e.startDate || '', e.startTime || '', e.endTime || '', e.eventType || ''].join('|');
+    }
+
+    // 残す1件を決める目安：Google と結びついている / メモや場所が入っている予定を優先する
+    function calendarEventRichness(e) {
+      return (e.gcalId ? 5 : 0) + (String(e.id).startsWith('cal-offer-') ? 0 : 1) + (e.notes ? 2 : 0) + (e.meetingUrl ? 1 : 0) + (e.locationType ? 1 : 0) + (e.completed ? 1 : 0);
+    }
+
+    // 重複をまとめた件数を返す（まとめたものがなければ 0）
+    function dedupeCalendarEvents() {
+      const config = loadGmailImportConfig();
+      const ignored = new Set(config.dedupeIgnoredKeys);
+      const groups = {};
+      calendarEvents.forEach(e => { if (e && e.startDate) (groups[calendarDuplicateKey(e)] ||= []).push(e); });
+
+      const removed = [];
+      const lines = [];
+      const keys = [];
+      Object.entries(groups).forEach(([key, list]) => {
+        if (list.length < 2 || ignored.has(key)) return;
+        const sorted = list.slice().sort((a, b) => calendarEventRichness(b) - calendarEventRichness(a));
+        const keeper = sorted[0];
+        sorted.slice(1).forEach(dup => {
+          // 消す予定にだけ入っている情報は、残す予定に写す
+          ['locationType', 'meetingUrl', 'notes', 'gcalId'].forEach(k => { if (!keeper[k] && dup[k]) keeper[k] = dup[k]; });
+          if (dup.completed) keeper.completed = true;
+          removed.push(dup);
+        });
+        keys.push(key);
+        lines.push(`${keeper.companyName}　${keeper.eventType}　${cmdFmtDate(keeper.startDate)}${keeper.startTime ? ' ' + keeper.startTime : ''}：${list.length}件 → 1件`);
+      });
+      if (!removed.length) return 0;
+
+      const snapshot = JSON.stringify(calendarEvents);
+      calendarEvents = calendarEvents.filter(e => !removed.includes(e));
+      try {
+        localStorage.setItem(DEDUPE_UNDO_KEY, JSON.stringify({ events: snapshot, keys }));
+      } catch (err) { /* 控えを残せなくても、まとめる処理は続ける */ }
+      config.dedupeNotice = { lines, sig: lines.join('|'), at: new Date().toISOString(), dismissed: false, hasUndo: true };
+      saveGmailImportConfig(config);
+      saveState();
+      return removed.length;
+    }
+
+    function dismissDedupeNotice() {
+      const config = loadGmailImportConfig();
+      if (config.dedupeNotice) config.dedupeNotice.dismissed = true;
+      saveGmailImportConfig(config);
+      renderHome();
+    }
+
+    // まとめる前に戻す。同じ組み合わせは、以降はまとめない
+    function undoDedupe() {
+      let snapshot = null;
+      try { snapshot = JSON.parse(localStorage.getItem(DEDUPE_UNDO_KEY)); } catch (e) { snapshot = null; }
+      if (!snapshot || !snapshot.events) {
+        showToast('元に戻す情報が見つかりませんでした', 'error');
+        return;
+      }
+      calendarEvents = JSON.parse(snapshot.events);
+      const config = loadGmailImportConfig();
+      config.dedupeIgnoredKeys = (config.dedupeIgnoredKeys || []).concat(snapshot.keys || []).slice(-DEDUPE_IGNORED_LIMIT);
+      if (config.dedupeNotice) { config.dedupeNotice.dismissed = true; config.dedupeNotice.hasUndo = false; }
+      saveGmailImportConfig(config);
+      try { localStorage.removeItem(DEDUPE_UNDO_KEY); } catch (e) { /* 消せなくても問題ない */ }
+      saveState();
+      refreshCurrentView();
+      renderModalSchedule();
+      showToast('まとめる前の状態に戻しました。この予定は、これ以降もまとめません', 'info');
     }
 
     function handleCreatePipeline(e) {
@@ -8846,11 +8942,12 @@
       const offer = offers.find(o => o.id === id);
       if (!offer) return;
 
+      const oldDeadline = offer.deadline;
       offer.companyName = document.getElementById('editOfferCompanyName').value.trim();
       offer.media = document.getElementById('editOfferMedia').value;
       offer.deadline = document.getElementById('editOfferDeadline').value;
       offer.offerType = document.getElementById('editOfferType').value;
-      syncOfferDeadlineEvent(offer);
+      syncOfferDeadlineEvent(offer, oldDeadline);
       offer.rating = Number(document.getElementById('editOfferRating').value);
       offer.status = document.getElementById('editOfferStatus').value;
       offer.url = document.getElementById('editOfferUrl').value.trim();
@@ -9505,7 +9602,10 @@
         if (o.deadline && o.status !== '辞退') {
           const offId = `cal-offer-${o.id}`;
           const existingOff = calendarEvents.find(e => e.id === offId);
-          if (!existingOff) {
+          // 同じ日・同じ会社の「ES提出締切」がすでにあるときは、返信期限の予定を重ねて作らない
+          const sameKey = normalizeCompanyName(o.companyName);
+          const alreadyThere = calendarEvents.some(e => normalizeCompanyName(e.companyName) === sameKey && e.eventType === 'ES提出締切' && e.startDate === o.deadline);
+          if (!existingOff && !alreadyThere) {
             calendarEvents.push({
               id: offId,
               companyName: o.companyName,
@@ -9526,6 +9626,7 @@
         }
       });
 
+      dedupeCalendarEvents();
       saveState();
       renderCalendar();
       showToast(`パイプライン・オファーの全予定（合計 ${calendarEvents.length}件）をカレンダーに完全同期しました！`);
