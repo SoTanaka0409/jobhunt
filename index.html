@@ -5045,16 +5045,45 @@
       const week = ['日', '月', '火', '水', '木', '金', '土'][today.getDay()];
       document.getElementById('homeDateLabel').innerText = `${today.getMonth() + 1}月${today.getDate()}日（${week}）`;
 
-      // 1. 今日と明日の予定
+      // 1. これからの予定（今日から14日先まで）。同じ日に複数の予定があるときは、すべてを日付ごとにまとめて並べる
+      const UPCOMING_DAYS = 14;
       const upcoming = calendarEvents
-        .filter(e => { const d = daysFromToday(e.startDate); return d === 0 || d === 1; })
+        .filter(e => { const d = daysFromToday(e.startDate); return d !== null && d >= 0 && d <= UPCOMING_DAYS; })
         .sort((a, b) => `${a.startDate} ${a.startTime || ''}`.localeCompare(`${b.startDate} ${b.startTime || ''}`));
-      const upcomingRows = upcoming.map(e => homeRowHtml({
-        when: `${formatDateLabel(e.startDate)} ${escapeHtml(e.startTime || '')}`,
-        title: escapeHtml(e.companyName),
-        sub: escapeHtml([e.eventType, e.locationType].filter(Boolean).join(' ・ ')),
-        onclick: `openCalendarEventDetail('${safeId(e.id)}')`
-      })).join('');
+      let upcomingRows = '';
+      let upcomingLastDate = '';
+      upcoming.forEach(e => {
+        if (e.startDate !== upcomingLastDate) {
+          upcomingLastDate = e.startDate;
+          const sameDay = upcoming.filter(x => x.startDate === e.startDate).length;
+          upcomingRows += `<div class="px-4 py-1.5 ds-sub flex items-center justify-between" style="background: var(--ds-sunken); border-bottom: 1px solid var(--ds-border);">
+            <span class="font-medium" style="color: var(--ds-text);">${escapeHtml(formatDateLabel(e.startDate))}</span>
+            ${sameDay > 1 ? `<span>${sameDay}件</span>` : ''}
+          </div>`;
+        }
+        const isInterview = /面接/.test(e.eventType || '');
+        upcomingRows += homeRowHtml({
+          when: escapeHtml(e.startTime || '時間未定'),
+          title: escapeHtml(e.companyName),
+          sub: escapeHtml([e.eventType, e.locationType].filter(Boolean).join(' ・ ')),
+          badge: isInterview ? '<span class="ds-badge ds-badge-good">面接</span>' : '',
+          onclick: `openCalendarEventDetail('${safeId(e.id)}')`
+        });
+      });
+
+      // 大事な面接が一覧の下のほうに埋もれないよう、いちばん近い面接を先頭に目立たせて出す
+      const nextInterview = calendarEvents
+        .filter(e => /面接/.test(e.eventType || '') && daysFromToday(e.startDate) !== null && daysFromToday(e.startDate) >= 0)
+        .sort((a, b) => `${a.startDate} ${a.startTime || ''}`.localeCompare(`${b.startDate} ${b.startTime || ''}`))[0];
+      if (nextInterview) {
+        upcomingRows = `<div style="background: var(--ds-good-bg); border-bottom: 1px solid var(--ds-border);">${homeRowHtml({
+          when: '次の面接',
+          title: escapeHtml(nextInterview.companyName),
+          sub: escapeHtml(`${formatDateLabel(nextInterview.startDate)} ${nextInterview.startTime || ''} ・ ${nextInterview.eventType}`.replace(/\s+/g, ' ')),
+          badge: dsDeadlineHtml(nextInterview.startDate),
+          onclick: `openCalendarEventDetail('${safeId(nextInterview.id)}')`
+        })}</div>` + upcomingRows;
+      }
 
       // 2. 7日以内の締切（オファーの返信期限と、カレンダーの締切の予定）
       const deadlines = [];
@@ -5139,7 +5168,7 @@
       container.innerHTML = `
         ${calendarNoticeHtml()}
         <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
-          ${homeSectionHtml('今日と明日の予定', upcomingRows, '今日と明日の予定はありません。', `<button type="button" class="ds-btn ds-btn-text" onclick="switchTab('calendar')">カレンダー</button>`)}
+          ${homeSectionHtml(`これからの予定 <span class="ds-sub ds-num">2週間・${upcoming.length}件</span>`, upcomingRows, '今後2週間の予定はありません。',`<button type="button" class="ds-btn ds-btn-text" onclick="switchTab('calendar')">カレンダー</button>`)}
           ${homeSectionHtml(`やること <span class="ds-sub ds-num">${openTodos.length}件</span>`, todoRows, 'やることはありません。企業の詳細の「ToDo」から追加できます。')}
           ${homeSectionHtml('7日以内の締切', deadlineRows, '7日以内の締切はありません。')}
           ${homeSectionHtml(`未確認のオファー <span class="ds-sub ds-num">${unread.length}件</span>`, unreadRows, '未確認のオファーはありません。', `<button type="button" class="ds-btn ds-btn-text" onclick="switchTab('offers')">オファー一覧</button>`)}
@@ -8522,7 +8551,8 @@
 
     // Google の予定の一覧をアプリの予定と見比べて、追加・更新する。何を変えたかを返す
     function applyGoogleCalendarEvents(gEvents, ignoredIds) {
-      const result = { added: [], updated: [], ambiguous: [], touchedGoogleIds: [] };
+      // dirty：見た目に出ない小さな変更（終了時刻など）も含めて、保存が必要か
+      const result = { added: [], updated: [], ambiguous: [], touchedGoogleIds: [], dirty: false };
       const today = toLocalDateString(new Date());
       const ignored = new Set(ignoredIds || []);
       const targets = [];
@@ -8538,6 +8568,15 @@
       const eventsOf = company => calendarEvents.filter(e => normalizeCompanyName(e.companyName) === normalizeCompanyName(company.item.companyName) && !String(e.id).startsWith('cal-offer-'));
       const claimed = new Set(); // すでに Google の予定と結びついたアプリの予定
 
+      // 更新を記録する。日付と開始時刻が変わらないもの（終了時刻だけの違いなど）は、お知らせに出さずに保存だけする
+      const recordUpdate = (t, evt, before) => {
+        result.dirty = true;
+        const after = gcalFmt(t.g.date, t.g.time);
+        if (before === after) return;
+        result.updated.push({ company: t.company.item.companyName, type: evt.eventType, before, after });
+        result.touchedGoogleIds.push(t.g.id);
+      };
+
       // 1回目：すでに結びついている予定と、日付も種類・時間も合っている予定を結びつける（日時が変わっていれば更新）
       const rest = [];
       targets.forEach(t => {
@@ -8547,8 +8586,7 @@
           claimed.add(linked.id);
           const before = gcalFmt(linked.startDate, linked.startTime);
           if (gcalApplyToEvent(linked, t.g, false)) {
-            result.updated.push({ company: t.company.item.companyName, type: linked.eventType, before, after: gcalFmt(t.g.date, t.g.time) });
-            result.touchedGoogleIds.push(t.g.id);
+            recordUpdate(t, linked, before);
           }
           return;
         }
@@ -8558,8 +8596,7 @@
           claimed.add(same.id);
           const before = gcalFmt(same.startDate, same.startTime);
           if (gcalApplyToEvent(same, t.g, false)) {
-            result.updated.push({ company: t.company.item.companyName, type: same.eventType, before, after: gcalFmt(t.g.date, t.g.time) });
-            result.touchedGoogleIds.push(t.g.id);
+            recordUpdate(t, same, before);
           }
           return;
         }
@@ -8577,8 +8614,7 @@
           claimed.add(evt.id);
           const before = gcalFmt(evt.startDate, evt.startTime);
           gcalApplyToEvent(evt, t.g, true);
-          result.updated.push({ company: t.company.item.companyName, type: evt.eventType, before, after: gcalFmt(t.g.date, t.g.time) });
-          result.touchedGoogleIds.push(t.g.id);
+          recordUpdate(t, evt, before);
         } else if (candidates.length > 1) {
           result.ambiguous.push({ company: t.company.item.companyName, type: t.type, after: gcalFmt(t.g.date, t.g.time) });
         } else {
@@ -8673,8 +8709,8 @@
           try {
             localStorage.setItem(GCAL_UNDO_KEY, JSON.stringify({ at: config.lastCalendarAt, events: snapshot, googleIds: result.touchedGoogleIds }));
           } catch (e) { config.calendarNotice.hasUndo = false; }
-          saveState();
         }
+        if (changes || result.dirty) saveState(); // 終了時刻などの小さな変更も保存する
         saveGmailImportConfig(config);
         if (changes) refreshCurrentView();
         else if (config.calendarNotice && lines.length) refreshCurrentView();
@@ -9975,7 +10011,12 @@
         const isToday = isCurrentMonth && (d === todayDate);
 
         // 該当日のイベントを抽出
-        const dayEvents = calendarEvents.filter(e => e.startDate === dateStr);
+        // 面接を先頭に、あとは時間の順に並べる（3件を超えるときも、面接が「他○件」に隠れないようにする）
+        const dayEvents = calendarEvents.filter(e => e.startDate === dateStr).sort((a, b) => {
+          const ia = /面接/.test(a.eventType || '') ? 0 : 1;
+          const ib = /面接/.test(b.eventType || '') ? 0 : 1;
+          return ia - ib || (a.startTime || '').localeCompare(b.startTime || '');
+        });
 
         const cell = document.createElement('div');
         cell.className = `min-h-[75px] sm:min-h-[105px] p-1 sm:p-1.5 rounded-xl border flex flex-col justify-between cursor-pointer transition hover:border-slate-600/80 group ${
@@ -10004,7 +10045,7 @@
         dayEvents.slice(0, 3).forEach(evt => {
           let badgeBorder = 'border-l-2 border-indigo-400 bg-indigo-500/15 text-indigo-200';
           if (evt.eventType.includes('面接')) {
-            badgeBorder = 'border-l-2 border-emerald-400 bg-emerald-500/15 text-emerald-200';
+            badgeBorder = 'border-l-4 border-emerald-400 bg-emerald-500/30 text-emerald-100 ring-1 ring-emerald-400/60';
           } else if (evt.eventType.includes('締切') || evt.eventType.includes('ES')) {
             badgeBorder = 'border-l-2 border-rose-400 bg-rose-500/15 text-rose-200';
           } else if (evt.eventType.includes('説明会') || evt.eventType.includes('座談会')) {
@@ -10017,7 +10058,7 @@
             <div onclick="event.stopPropagation(); openCalendarEventDetail('${safeId(evt.id)}')"
                  class="p-1 rounded-md text-[10px] sm:text-[11px] leading-tight truncate font-medium ${badgeBorder} hover:brightness-125 transition active:scale-95 flex items-center justify-between gap-1 shadow-xs"
                  title="${escapeHtml(evt.companyName)} (${escapeHtml(evt.title || evt.eventType)}) ${escapeHtml(evt.startTime || '')}">
-              <span class="truncate font-bold">${evt.startTime ? `<span class="opacity-80">${escapeHtml(evt.startTime)}</span> ` : ''}${escapeHtml(evt.companyName)}</span>
+              <span class="truncate font-bold">${evt.startTime ? `<span class="opacity-80">${escapeHtml(evt.startTime)}</span> ` : ''}${evt.eventType.includes('面接') ? '【面接】' : ''}${escapeHtml(evt.companyName)}</span>
             </div>
           `;
         });
