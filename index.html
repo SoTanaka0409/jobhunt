@@ -60,6 +60,7 @@
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Noto+Sans+JP:wght@400;500;700&display=swap" rel="stylesheet">
   <!-- Lucide Icons -->
   <script src="https://unpkg.com/lucide@latest"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcode-generator/1.4.4/qrcode.min.js"></script>
   <style>
     body {
       font-family: 'Inter', 'Noto Sans JP', sans-serif;
@@ -1685,6 +1686,36 @@
               <button type="button" class="ds-btn" onclick="saveAndRunCalendarSync()"><i data-lucide="calendar-sync"></i><span>カレンダーと今すぐ同期</span></button>
               <button type="button" class="ds-btn ds-btn-text" onclick="saveGmailImportSettings()">保存だけする</button>
               <button type="button" class="ds-btn ds-btn-danger-text" onclick="clearGmailImportSettings()">設定を消す</button>
+            </div>
+          </section>
+
+          <section class="space-y-3">
+            <h4 class="ds-h2">別の端末に引き継ぐ</h4>
+            <p class="ds-sub">データはこの端末の中にしかありません。新しい端末では、①同期の設定を入れて、②データを復元します。Google 側のスクリプトの更新が必要です（設定ガイド参照）。</p>
+
+            <div class="space-y-1">
+              <p class="font-medium">1. Google にバックアップ・復元</p>
+              <p class="ds-sub">あなたの Google ドライブにだけ保存します。一度バックアップすると、あとは変更するたびに自動で保存します。</p>
+              <div class="flex flex-wrap gap-2">
+                <button type="button" class="ds-btn" onclick="runCloudBackup({ manual: true })"><i data-lucide="cloud-upload"></i><span>Google にバックアップ</span></button>
+                <button type="button" class="ds-btn" onclick="runCloudRestore()"><i data-lucide="cloud-download"></i><span>Google から復元</span></button>
+              </div>
+              <p class="ds-sub">状態：<span id="cloudBackupStatus" role="status">まだバックアップしていません</span></p>
+            </div>
+
+            <div class="space-y-1">
+              <p class="font-medium">2. 新しい端末に設定を入れる</p>
+              <p class="ds-sub">URL と合言葉が入ったリンクを作ります。新しい端末で開くと、設定が入り、続けてデータを復元できます。</p>
+              <button type="button" class="ds-btn" onclick="showTransferLink()"><i data-lucide="qr-code"></i><span>引き継ぎリンクを作る</span></button>
+              <div id="transferLinkBox" class="hidden space-y-2 pt-2">
+                <p class="ds-sub" style="color: var(--ds-danger, #e01e5a);">このリンクと QR には合言葉が入っています。他の人に見せたり、共有したりしないでください。使い終わったら閉じてください。</p>
+                <input type="text" id="transferLinkText" class="ds-input" readonly autocomplete="off" spellcheck="false">
+                <div class="flex flex-wrap gap-2">
+                  <button type="button" class="ds-btn" onclick="copyTransferLink()">リンクをコピー</button>
+                  <button type="button" class="ds-btn ds-btn-text" onclick="hideTransferLink()">閉じる</button>
+                </div>
+                <div id="transferQr" class="ds-sub" style="width: 192px; background: #fff; padding: 8px; border: 1px solid var(--ds-border);"></div>
+              </div>
             </div>
           </section>
 
@@ -4911,6 +4942,7 @@
       localStorage.setItem(STORAGE_KEY_ARCHIVED, JSON.stringify(archivedPipeline));
       localStorage.setItem(STORAGE_KEY_CALENDAR, JSON.stringify(calendarEvents));
       updateBadges();
+      scheduleCloudBackup();
     }
 
     function updateBadges() {
@@ -8312,10 +8344,16 @@
           calendarNotice: c.calendarNotice && typeof c.calendarNotice === 'object' ? c.calendarNotice : null,
           calendarIgnoredIds: Array.isArray(c.calendarIgnoredIds) ? c.calendarIgnoredIds : [],
           dedupeNotice: c.dedupeNotice && typeof c.dedupeNotice === 'object' ? c.dedupeNotice : null,
-          dedupeIgnoredKeys: Array.isArray(c.dedupeIgnoredKeys) ? c.dedupeIgnoredKeys : []
+          dedupeIgnoredKeys: Array.isArray(c.dedupeIgnoredKeys) ? c.dedupeIgnoredKeys : [],
+          // Google へのバックアップ（cloudAuto：一度バックアップか復元をした端末だけ、自動でバックアップする）
+          cloudAuto: !!c.cloudAuto,
+          cloudSavedAt: c.cloudSavedAt || '',
+          cloudHash: c.cloudHash || '',
+          lastCloudAt: c.lastCloudAt || null,
+          lastCloudResult: c.lastCloudResult || ''
         };
       } catch (e) {
-        return { url: '', key: '', autoOnOpen: true, lastRunAt: null, lastResult: '', importedIds: [], calendarSync: true, calendarNeedsUpdate: false, lastCalendarAt: null, lastCalendarResult: '', calendarNotice: null, calendarIgnoredIds: [], dedupeNotice: null, dedupeIgnoredKeys: [] };
+        return { url: '', key: '', autoOnOpen: true, lastRunAt: null, lastResult: '', importedIds: [], calendarSync: true, calendarNeedsUpdate: false, lastCalendarAt: null, lastCalendarResult: '', calendarNotice: null, calendarIgnoredIds: [], dedupeNotice: null, dedupeIgnoredKeys: [], cloudAuto: false, cloudSavedAt: '', cloudHash: '', lastCloudAt: null, lastCloudResult: '' };
       }
     }
 
@@ -8445,6 +8483,7 @@
       const autoInput = document.getElementById('gmailImportAuto');
       const status = document.getElementById('gmailImportStatus');
       updateCalendarSyncStatus();
+      updateCloudBackupStatus();
       if (urlInput && document.activeElement !== urlInput) urlInput.value = config.url;
       if (keyInput && document.activeElement !== keyInput) keyInput.value = config.key;
       if (autoInput) autoInput.checked = config.autoOnOpen;
@@ -8512,6 +8551,276 @@
       localStorage.removeItem(GMAIL_IMPORT_KEY);
       updateGmailImportStatus();
       showToast('Gmail の取り込み設定を消しました', 'info');
+    }
+
+    // ==========================================
+    // 端末の引き継ぎ
+    // ① Google にバックアップ（Gmail 取り込みと同じ Apps Script を使い、あなたの Google ドライブにだけ保存する）
+    // ② 引き継ぎリンク / QR（URL と合言葉を、新しい端末に入れる）
+    // 第三者のサービスは通らない。リンクの「#」より後ろは、サーバーには送られない。
+    // ==========================================
+    const CLOUD_BACKUP_DELAY_MS = 30000;
+    const CLOUD_BACKUP_MAX_LENGTH = 4 * 1024 * 1024;
+    let cloudBackupRunning = false;
+    let cloudBackupTimer = null;
+
+    function cloudBackupHash(text) {
+      let h = 5381;
+      for (let i = 0; i < text.length; i++) h = ((h << 5) + h + text.charCodeAt(i)) | 0;
+      return String(h);
+    }
+
+    // Google に預けるデータ。取り込み済みのメールの記録も入れて、新しい端末で同じオファーを二重に取り込まないようにする
+    function buildCloudBackupText() {
+      const config = loadGmailImportConfig();
+      return JSON.stringify({
+        version: 1,
+        offers, pipeline, archivedPipeline, calendarEvents,
+        importedIds: config.importedIds,
+        calendarIgnoredIds: config.calendarIgnoredIds
+      });
+    }
+
+    function formatCloudDate(iso) {
+      const d = new Date(iso);
+      if (isNaN(d)) return '';
+      return `${d.getMonth() + 1}/${d.getDate()} ${String(d.getHours()).padStart(2, '0')}:${String(d.getMinutes()).padStart(2, '0')}`;
+    }
+
+    function updateCloudBackupStatus(runningText) {
+      const el = document.getElementById('cloudBackupStatus');
+      if (!el) return;
+      const config = loadGmailImportConfig();
+      if (runningText) {
+        el.textContent = runningText;
+      } else if (!isGmailImportConfigured(config)) {
+        el.textContent = '先に「合言葉」と「取り込み用のURL」を入れてください';
+      } else if (config.lastCloudAt) {
+        el.textContent = `最後：${formatCloudDate(config.lastCloudAt)}　${config.lastCloudResult}${config.cloudAuto ? '（変更すると、自動でバックアップします）' : ''}`;
+      } else {
+        el.textContent = 'まだバックアップしていません';
+      }
+    }
+
+    function cloudErrorMessage(err) {
+      if (err && err.code === 'unauthorized') return '合言葉が一致しません';
+      if (err && err.code === 'outdated') return 'Google 側のスクリプトを更新してください（設定ガイド参照）';
+      return '通信できませんでした。Google 側のスクリプトの更新が必要なこともあります';
+    }
+
+    // 変更から少しあとに、自動でバックアップする（一度でもバックアップか復元をした端末だけ）
+    function scheduleCloudBackup() {
+      let config;
+      try { config = loadGmailImportConfig(); } catch (e) { return; }
+      if (!config.cloudAuto || !isGmailImportConfigured(config)) return;
+      clearTimeout(cloudBackupTimer);
+      cloudBackupTimer = setTimeout(() => { cloudBackupTimer = null; runCloudBackup(); }, CLOUD_BACKUP_DELAY_MS);
+    }
+
+    // アプリを閉じる前に、待っているバックアップがあればすぐ実行する
+    document.addEventListener('visibilitychange', () => {
+      if (document.visibilityState === 'hidden' && cloudBackupTimer) {
+        clearTimeout(cloudBackupTimer);
+        cloudBackupTimer = null;
+        runCloudBackup();
+      }
+    });
+
+    // options.manual が true のときは、結果を必ずメッセージで知らせる
+    async function runCloudBackup(options = {}) {
+      const config = loadGmailImportConfig();
+      if (!isGmailImportConfigured(config)) {
+        if (options.manual) showToast('先に Gmail の取り込み設定（合言葉とURL）を入れてください', 'error');
+        return null;
+      }
+      if (cloudBackupRunning) return null;
+      const text = buildCloudBackupText();
+      const hash = cloudBackupHash(text);
+      if (!options.manual && hash === config.cloudHash) return null;
+      if (text.length > CLOUD_BACKUP_MAX_LENGTH) {
+        if (options.manual) showToast('データが大きすぎて、Google にバックアップできません', 'error');
+        return null;
+      }
+
+      cloudBackupRunning = true;
+      updateCloudBackupStatus('Google にバックアップ中…');
+      const send = async (baseSavedAt, force) => {
+        // text/plain にすると、ブラウザの事前確認（CORS）を通らずに送れる
+        const res = await fetch(config.url, {
+          method: 'POST',
+          headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+          body: JSON.stringify({ key: config.key, action: 'backup-save', baseSavedAt: baseSavedAt || '', force: !!force, data: text })
+        });
+        try {
+          return await res.json();
+        } catch (e) {
+          throw { code: 'outdated' }; // 古いスクリプトは、書き込みの入り口がなく、JSON ではない画面が返ってくる
+        }
+      };
+
+      try {
+        let data = await send(config.cloudSavedAt, false);
+        if (!data.ok && data.error === 'conflict') {
+          if (!options.manual) {
+            config.lastCloudAt = new Date().toISOString();
+            config.lastCloudResult = '別の端末のバックアップがあるため、自動バックアップを止めました。設定 → データで確認してください';
+            config.cloudAuto = false;
+            saveGmailImportConfig(config);
+            return null;
+          }
+          const ok = confirm(`Google には、別の端末が ${formatCloudDate(data.savedAt)} に保存したバックアップがあります。\n\nこの端末のデータで上書きしますか？\n\n※「キャンセル」を押すと、何も変えません。先に「Google から復元」を使うと、その端末のデータを引き継げます。`);
+          if (!ok) return null;
+          data = await send(data.savedAt, true);
+        }
+        if (!data.ok) throw { code: data.error };
+        config.cloudSavedAt = data.savedAt;
+        config.cloudHash = hash;
+        config.cloudAuto = true;
+        config.lastCloudAt = data.savedAt;
+        config.lastCloudResult = 'バックアップしました';
+        saveGmailImportConfig(config);
+        if (options.manual) showToast('Google にバックアップしました', 'success');
+        return data;
+      } catch (err) {
+        config.lastCloudAt = new Date().toISOString();
+        config.lastCloudResult = `失敗：${cloudErrorMessage(err)}`;
+        saveGmailImportConfig(config);
+        if (options.manual) showToast(config.lastCloudResult, 'error');
+        return null;
+      } finally {
+        cloudBackupRunning = false;
+        updateCloudBackupStatus();
+      }
+    }
+
+    // Google のバックアップで、この端末のデータを置き換える。置き換えたら true
+    async function runCloudRestore(options = {}) {
+      const config = loadGmailImportConfig();
+      if (!isGmailImportConfigured(config)) {
+        showToast('先に Gmail の取り込み設定（合言葉とURL）を入れてください', 'error');
+        return false;
+      }
+      updateCloudBackupStatus('Google から読み込み中…');
+      try {
+        const requestUrl = new URL(config.url);
+        requestUrl.searchParams.set('key', config.key);
+        requestUrl.searchParams.set('type', 'backup-load');
+        const res = await fetch(requestUrl.toString(), { cache: 'no-store' });
+        const data = await res.json();
+        if (!data.ok) throw { code: data.error };
+        if (!('backup' in data)) throw { code: 'outdated' };
+        if (!data.backup || !data.backup.data) {
+          showToast('Google には、まだバックアップがありません。引き継ぎ元の端末で、先にバックアップしてください', 'error');
+          return false;
+        }
+        const payload = JSON.parse(data.backup.data);
+        if (!Array.isArray(payload.offers) || !Array.isArray(payload.pipeline)) throw { code: 'invalid' };
+        if (!options.skipConfirm) {
+          const ok = confirm(`Google にある ${formatCloudDate(data.backup.savedAt)} のバックアップで、この端末のデータを置き換えます。\n\nこの端末の今のデータは消えます。よろしいですか？`);
+          if (!ok) return false;
+        }
+
+        const cleanIds = list => (Array.isArray(list) ? list : []).map((x, i) => ({ ...x, id: safeId(x.id) || `restore-${Date.now()}-${i}` }));
+        offers = cleanIds(payload.offers);
+        pipeline = cleanIds(payload.pipeline);
+        archivedPipeline = cleanIds(payload.archivedPipeline);
+        if (Array.isArray(payload.calendarEvents)) calendarEvents = cleanIds(payload.calendarEvents);
+
+        const merge = (a, b) => Array.from(new Set([...(a || []), ...(Array.isArray(b) ? b : [])]));
+        config.importedIds = merge(config.importedIds, payload.importedIds);
+        config.calendarIgnoredIds = merge(config.calendarIgnoredIds, payload.calendarIgnoredIds);
+        config.cloudSavedAt = data.backup.savedAt;
+        config.cloudHash = '';
+        config.cloudAuto = true;
+        config.lastCloudAt = new Date().toISOString();
+        config.lastCloudResult = `${formatCloudDate(data.backup.savedAt)} のバックアップから復元しました`;
+        saveGmailImportConfig(config);
+        saveState();
+        showToast('Google のバックアップから復元しました。画面を読み込み直します', 'success');
+        setTimeout(() => location.reload(), 800);
+        return true;
+      } catch (err) {
+        const message = err && err.code === 'invalid' ? 'バックアップの形式が正しくありません' : (err instanceof SyntaxError ? cloudErrorMessage({ code: 'outdated' }) : cloudErrorMessage(err));
+        const c = loadGmailImportConfig();
+        c.lastCloudAt = new Date().toISOString();
+        c.lastCloudResult = `失敗：${message}`;
+        saveGmailImportConfig(c);
+        showToast(`失敗：${message}`, 'error');
+        return false;
+      } finally {
+        updateCloudBackupStatus();
+      }
+    }
+
+    // ---- 引き継ぎリンク / QR ----
+    function buildTransferLink() {
+      const config = loadGmailImportConfig();
+      if (!isGmailImportConfigured(config)) return '';
+      const token = btoa(JSON.stringify({ u: config.url, k: config.key })).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
+      return `${location.origin}${location.pathname}#setup=${token}`;
+    }
+
+    function showTransferLink() {
+      const link = buildTransferLink();
+      if (!link) {
+        showToast('先に「合言葉」と「取り込み用のURL」を入れて保存してください', 'error');
+        return;
+      }
+      document.getElementById('transferLinkText').value = link;
+      const qrBox = document.getElementById('transferQr');
+      qrBox.innerHTML = '';
+      if (typeof qrcode === 'function') {
+        const qr = qrcode(0, 'M');
+        qr.addData(link);
+        qr.make();
+        qrBox.innerHTML = qr.createSvgTag({ cellSize: 4, margin: 4, scalable: true });
+      } else {
+        qrBox.textContent = 'QRコードを作れませんでした（インターネットにつながっていないときなど）。リンクをお使いください。';
+      }
+      document.getElementById('transferLinkBox').classList.remove('hidden');
+    }
+
+    function hideTransferLink() {
+      document.getElementById('transferLinkText').value = '';
+      document.getElementById('transferQr').innerHTML = '';
+      document.getElementById('transferLinkBox').classList.add('hidden');
+    }
+
+    function copyTransferLink() {
+      const link = document.getElementById('transferLinkText').value;
+      if (link) copyTextToClipboard(link, '引き継ぎリンクをコピーしました');
+    }
+
+    // 引き継ぎリンクから開いたときに、設定を入れる。Google からの復元を始めたときは true を返す
+    function handleSetupLinkOnOpen() {
+      const m = /^#setup=([A-Za-z0-9_-]+)$/.exec(location.hash);
+      if (!m) return false;
+      history.replaceState(null, '', location.pathname + location.search); // 合言葉がアドレスバーや履歴に残らないようにする
+      let parsed;
+      try {
+        parsed = JSON.parse(atob(m[1].replace(/-/g, '+').replace(/_/g, '/')));
+      } catch (e) {
+        showToast('引き継ぎリンクを読み取れませんでした', 'error');
+        return false;
+      }
+      const next = { url: String(parsed.u || ''), key: String(parsed.k || '') };
+      if (!isGmailImportConfigured(next)) {
+        showToast('引き継ぎリンクの内容が正しくありません', 'error');
+        return false;
+      }
+      const current = loadGmailImportConfig();
+      const replacing = isGmailImportConfigured(current) && (current.url !== next.url || current.key !== next.key);
+      const ok = confirm(`引き継ぎリンクから、Gmail とカレンダーの同期の設定（URL と合言葉）を、この端末に入れます。${replacing ? '\n\n※この端末の今の設定は置き換わります。' : ''}\n\n自分の端末で開いたリンクのときだけ、「OK」を押してください。`);
+      if (!ok) return false;
+      current.url = next.url;
+      current.key = next.key;
+      saveGmailImportConfig(current);
+      updateGmailImportStatus();
+      showToast('同期の設定を入れました', 'success');
+
+      if (!confirm('続けて、Google にあるバックアップから、企業やオファーのデータを復元しますか？\n\n※この端末の今のデータは置き換わります。あとで「設定 → データ」からもできます。')) return false;
+      runCloudRestore({ skipConfirm: true }).then(done => { if (!done) runAutoImportsOnOpen(); });
+      return true;
     }
 
     // ==========================================
@@ -9058,6 +9367,7 @@
         offers: offers,
         pipeline: pipeline,
         archivedPipeline: archivedPipeline,
+        calendarEvents: calendarEvents,
         analystReports: ANALYST_REPORTS
       };
       const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
@@ -9085,6 +9395,9 @@
             pipeline = cleanIds(parsed.pipeline);
             if (Array.isArray(parsed.archivedPipeline)) {
               archivedPipeline = cleanIds(parsed.archivedPipeline);
+            }
+            if (Array.isArray(parsed.calendarEvents)) {
+              calendarEvents = cleanIds(parsed.calendarEvents);
             }
             if (parsed.analystReports) {
               Object.assign(ANALYST_REPORTS, parsed.analystReports);
@@ -11477,7 +11790,8 @@ URL: https://www.ncd.co.jp/
 
       // 起動時 Gmail からの自動取り込み（設定済みで、「開いたときに取り込む」がオンのとき）
       updateGmailImportStatus();
-      runAutoImportsOnOpen();
+      // 引き継ぎリンクから開いたときは、設定とデータの復元が先
+      if (!handleSetupLinkOnOpen()) runAutoImportsOnOpen();
     });
   </script>
 </body>

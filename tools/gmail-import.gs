@@ -4,6 +4,7 @@
  * 使い方は docs/gmail-import.md を見てください。
  * このスクリプトはあなたの Google アカウントの中で動き、あなたの Gmail と Google カレンダーを読みます。
  * 合言葉（KEY）を知っている人だけが結果を受け取れるようにしてあるので、KEY は他人に教えないでください。
+ * 端末の引き継ぎ用に、アプリのデータを Google ドライブに1つのファイルとして保存・復元する機能もあります（バックアップ）。
  */
 
 // ① アプリの「設定 → データ → Gmailから自動取り込み」で作った合言葉を、' ' の間に貼り付ける
@@ -22,15 +23,24 @@ const MAX_BODY_LENGTH = 4000;
 const MAX_CALENDAR_EVENTS = 300;
 const MAX_DESCRIPTION_LENGTH = 600;
 
+// バックアップ：Google ドライブ（マイドライブの直下）に作るファイルの名前と、保存できるデータの大きさの上限
+const BACKUP_FILE_NAME = '就活ダッシュボード バックアップ.json';
+const MAX_BACKUP_LENGTH = 4 * 1024 * 1024;
+
 /**
  * アプリから呼ばれる入り口。合言葉が合っていれば、結果を JSON で返す
  *   ふつう：条件に合うメールの一覧
  *   type=calendar：Google カレンダーの、きょうから days 日先までの予定の一覧
+ *   type=backup-load：Google ドライブに保存してあるバックアップ（無ければ backup が null）
  */
 function doGet(e) {
   const params = (e && e.parameter) || {};
-  if (!KEY || KEY.indexOf('ここに') === 0 || params.key !== KEY) {
+  if (!isAuthorized(params.key)) {
     return jsonResponse({ ok: false, error: 'unauthorized' });
+  }
+
+  if (params.type === 'backup-load') {
+    return jsonResponse({ ok: true, backup: readBackup() });
   }
 
   if (params.type === 'calendar') {
@@ -53,6 +63,70 @@ function doGet(e) {
   });
 
   return jsonResponse({ ok: true, messages: messages });
+}
+
+/**
+ * アプリからデータを受け取る入り口（バックアップの保存）。合言葉が合っているときだけ受け付ける
+ */
+function doPost(e) {
+  let body;
+  try {
+    body = JSON.parse((e && e.postData && e.postData.contents) || '{}');
+  } catch (err) {
+    return jsonResponse({ ok: false, error: 'bad-request' });
+  }
+  if (!isAuthorized(body.key)) {
+    return jsonResponse({ ok: false, error: 'unauthorized' });
+  }
+  if (body.action === 'backup-save') {
+    return jsonResponse(saveBackup(body));
+  }
+  return jsonResponse({ ok: false, error: 'unknown-action' });
+}
+
+function isAuthorized(key) {
+  return !!KEY && KEY.indexOf('ここに') !== 0 && key === KEY;
+}
+
+function findBackupFile() {
+  const files = DriveApp.getFilesByName(BACKUP_FILE_NAME);
+  return files.hasNext() ? files.next() : null;
+}
+
+// 保存してあるバックアップを { savedAt, data } で返す。無いときや読めないときは null
+function readBackup() {
+  const file = findBackupFile();
+  if (!file) return null;
+  try {
+    return JSON.parse(file.getBlob().getDataAsString('UTF-8'));
+  } catch (err) {
+    return null;
+  }
+}
+
+/**
+ * バックアップを保存する。
+ * 別の端末が先に保存していたとき（アプリが知っている日時と違うとき）は、上書きせずに conflict を返す。
+ * force が true のときだけ、そのまま上書きする。
+ */
+function saveBackup(body) {
+  const data = String(body.data || '');
+  if (!data || data.length > MAX_BACKUP_LENGTH) {
+    return { ok: false, error: 'invalid-data' };
+  }
+  const current = readBackup();
+  if (current && !body.force && String(body.baseSavedAt || '') !== current.savedAt) {
+    return { ok: false, error: 'conflict', savedAt: current.savedAt };
+  }
+  const savedAt = new Date().toISOString();
+  const content = JSON.stringify({ savedAt: savedAt, data: data });
+  const file = findBackupFile();
+  if (file) {
+    file.setContent(content);
+  } else {
+    DriveApp.createFile(BACKUP_FILE_NAME, content, MimeType.PLAIN_TEXT);
+  }
+  return { ok: true, savedAt: savedAt };
 }
 
 /**
@@ -108,4 +182,13 @@ function testCalendar() {
   const events = listCalendarEvents(14);
   Logger.log('これから14日間の予定：' + events.length + '件');
   events.slice(0, 10).forEach(event => Logger.log(event.date + ' ' + event.time + ' ' + event.title));
+}
+
+/**
+ * バックアップを使うために、一度だけ実行する関数。
+ * Google ドライブに保存する許可（承認）を出すために使う。実行すると、バックアップの有無が「実行ログ」に表示される。
+ */
+function testBackup() {
+  const file = findBackupFile();
+  Logger.log(file ? 'バックアップがあります：' + file.getName() : 'バックアップはまだありません（許可の確認はできました）');
 }
