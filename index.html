@@ -8288,10 +8288,13 @@
           calendarNotice: c.calendarNotice && typeof c.calendarNotice === 'object' ? c.calendarNotice : null,
           calendarIgnoredIds: Array.isArray(c.calendarIgnoredIds) ? c.calendarIgnoredIds : [],
           dedupeNotice: c.dedupeNotice && typeof c.dedupeNotice === 'object' ? c.dedupeNotice : null,
-          dedupeIgnoredKeys: Array.isArray(c.dedupeIgnoredKeys) ? c.dedupeIgnoredKeys : []
+          dedupeIgnoredKeys: Array.isArray(c.dedupeIgnoredKeys) ? c.dedupeIgnoredKeys : [],
+          // 会社説明会を自動で「参加済み」にしたお知らせと、元に戻した企業
+          advanceNotice: c.advanceNotice && typeof c.advanceNotice === 'object' ? c.advanceNotice : null,
+          advanceIgnoredIds: Array.isArray(c.advanceIgnoredIds) ? c.advanceIgnoredIds : []
         };
       } catch (e) {
-        return { url: '', key: '', autoOnOpen: true, lastRunAt: null, lastResult: '', importedIds: [], calendarSync: true, calendarNeedsUpdate: false, lastCalendarAt: null, lastCalendarResult: '', calendarNotice: null, calendarIgnoredIds: [], dedupeNotice: null, dedupeIgnoredKeys: [] };
+        return { url: '', key: '', autoOnOpen: true, lastRunAt: null, lastResult: '', importedIds: [], calendarSync: true, calendarNeedsUpdate: false, lastCalendarAt: null, lastCalendarResult: '', calendarNotice: null, calendarIgnoredIds: [], dedupeNotice: null, dedupeIgnoredKeys: [], advanceNotice: null, advanceIgnoredIds: [] };
       }
     }
 
@@ -8713,7 +8716,8 @@
         }
         if (changes || result.dirty) saveState(); // 終了時刻などの小さな変更も保存する
         saveGmailImportConfig(config);
-        if (changes) refreshCurrentView();
+        const advancedAfterSync = changes ? autoAdvanceInfoSessions() : 0;
+        if (changes || advancedAfterSync) refreshCurrentView();
         else if (config.calendarNotice && lines.length) refreshCurrentView();
         if (changes || options.manual) showToast(`Googleカレンダーと同期しました（${config.lastCalendarResult}）`, changes ? 'success' : 'info');
         return result;
@@ -8749,7 +8753,9 @@
 
     // アプリを開いたときの自動処理（Gmail の取り込みと、Google カレンダーの同期）
     function runAutoImportsOnOpen() {
-      if (dedupeCalendarEvents()) refreshCurrentView(); // 同じ内容の予定が重なっていたら1件にまとめる
+      const merged = dedupeCalendarEvents(); // 同じ内容の予定が重なっていたら1件にまとめる
+      const advanced = autoAdvanceInfoSessions(); // 説明会の日が過ぎた企業を「参加済み」へ
+      if (merged || advanced) refreshCurrentView();
       const config = loadGmailImportConfig();
       if (!config.autoOnOpen) return;
       runGmailImport();
@@ -8779,6 +8785,7 @@
     function calendarNoticeHtml() {
       const config = loadGmailImportConfig();
       return noticePanelHtml(config.dedupeNotice, '同じ内容の予定を1件にまとめました', 'undoDedupe', 'dismissDedupeNotice')
+        + noticePanelHtml(config.advanceNotice, '会社説明会を「参加済み」にしました', 'undoAutoAdvance', 'dismissAdvanceNotice')
         + noticePanelHtml(config.calendarNotice, 'Googleカレンダーの内容を反映しました', 'undoCalendarSync', 'dismissCalendarNotice');
     }
 
@@ -8813,6 +8820,90 @@
       saveGmailImportSettings({ silent: true });
       await runCalendarSync({ manual: true });
     }
+
+    // ==========================================
+    // 会社説明会の日付が過ぎたら、自動で「参加済み」にする
+    // 段階が「会社説明会 (参加予定)」の企業で、カレンダーの説明会系の予定（会社説明会・座談会・セミナー・仕事体験）が
+    // すべて過ぎていたら、「会社説明会 (参加済み)」へ進める。予定の日はまだ「参加予定」のままで、翌日に進む。
+    // 行かなかったものは、あとでユーザーが取り下げる。進めたときはホームに知らせ、元に戻せる。
+    // アプリを開いたとき、同期のあと、日付が変わって画面に戻ったときに調べる。
+    // ==========================================
+    const ADVANCE_UNDO_KEY = 'jobhunt_advance_undo_v1';
+    const ADVANCE_IGNORED_LIMIT = 200;
+    const INFO_SESSION_EVENT_TYPES = ['会社説明会', '座談会・セミナー', '仕事体験・ワークショップ'];
+    let lastAutoAdvanceDay = '';
+
+    // 進めた企業の数を返す（進めたものがなければ 0）
+    function autoAdvanceInfoSessions() {
+      const today = toLocalDateString(new Date());
+      lastAutoAdvanceDay = today;
+      const config = loadGmailImportConfig();
+      const ignored = new Set(config.advanceIgnoredIds);
+      const before = [];
+      const lines = [];
+
+      pipeline.forEach(item => {
+        if (item.stage !== '会社説明会 (参加予定)' || ignored.has(item.id)) return;
+        const key = normalizeCompanyName(item.companyName);
+        const dates = calendarEvents
+          .filter(e => e && e.startDate && INFO_SESSION_EVENT_TYPES.includes(e.eventType) && normalizeCompanyName(e.companyName) === key)
+          .map(e => e.startDate)
+          .sort();
+        // 予定が1つも無い、または、今日以降の予定がまだ残っているときは、何もしない
+        if (!dates.length || dates[dates.length - 1] >= today) return;
+        before.push({ id: item.id, stage: item.stage, infoSessionStatus: item.infoSessionStatus });
+        item.stage = '会社説明会 (参加済み)';
+        if (!item.infoSessionStatus || item.infoSessionStatus === '参加予定') item.infoSessionStatus = '参加済み';
+        lines.push(`${item.companyName}　参加予定 → 参加済み（最後の予定：${cmdFmtDate(dates[dates.length - 1])}）`);
+      });
+      if (!before.length) return 0;
+
+      try {
+        localStorage.setItem(ADVANCE_UNDO_KEY, JSON.stringify({ before }));
+      } catch (err) { /* 控えを残せなくても、進める処理は続ける */ }
+      config.advanceNotice = { lines, sig: lines.join('|'), at: new Date().toISOString(), dismissed: false, hasUndo: true };
+      saveGmailImportConfig(config);
+      saveState();
+      return before.length;
+    }
+
+    function dismissAdvanceNotice() {
+      const config = loadGmailImportConfig();
+      if (config.advanceNotice) config.advanceNotice.dismissed = true;
+      saveGmailImportConfig(config);
+      renderHome();
+    }
+
+    // 進める前の段階に戻す。同じ企業は、以降は自動では進めない
+    function undoAutoAdvance() {
+      let snapshot = null;
+      try { snapshot = JSON.parse(localStorage.getItem(ADVANCE_UNDO_KEY)); } catch (e) { snapshot = null; }
+      if (!snapshot || !Array.isArray(snapshot.before)) {
+        showToast('元に戻す情報が見つかりませんでした', 'error');
+        return;
+      }
+      snapshot.before.forEach(b => {
+        const item = pipeline.find(p => p.id === b.id);
+        if (!item) return;
+        item.stage = b.stage;
+        if (b.infoSessionStatus === undefined) delete item.infoSessionStatus; else item.infoSessionStatus = b.infoSessionStatus;
+      });
+      const config = loadGmailImportConfig();
+      config.advanceIgnoredIds = (config.advanceIgnoredIds || []).concat(snapshot.before.map(b => b.id)).slice(-ADVANCE_IGNORED_LIMIT);
+      if (config.advanceNotice) { config.advanceNotice.dismissed = true; config.advanceNotice.hasUndo = false; }
+      saveGmailImportConfig(config);
+      try { localStorage.removeItem(ADVANCE_UNDO_KEY); } catch (e) { /* 消せなくても問題ない */ }
+      saveState();
+      refreshCurrentView();
+      showToast('「参加予定」に戻しました。この企業は、これ以降も自動では進めません', 'info');
+    }
+
+    // 画面を開いたまま日付が変わったときも、戻ってきたときに調べる
+    document.addEventListener('visibilitychange', () => {
+      if (document.visibilityState === 'visible' && lastAutoAdvanceDay && lastAutoAdvanceDay !== toLocalDateString(new Date())) {
+        if (autoAdvanceInfoSessions()) refreshCurrentView();
+      }
+    });
 
     // ==========================================
     // 同じ内容の予定を1件にまとめる
