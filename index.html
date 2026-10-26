@@ -934,7 +934,8 @@
           <p class="ds-sub mt-1">オファー・選考中・保管庫の企業をまとめて表示します。<span id="companiesAllCount" class="ds-num">0社</span></p>
         </div>
         <div class="flex items-center gap-2">
-          <button type="button" class="ds-btn" onclick="exportCompaniesCsv()" title="いま表示している企業を、Excel などで開ける CSV ファイルに書き出す"><i data-lucide="download"></i><span>CSVで書き出す</span></button>
+          <button type="button" class="ds-btn" onclick="exportCompaniesCsv()" title="全企業を CSV に書き出す（Edge・Chrome では、決めたフォルダに企業一覧.csv と日付つきの控えを保存）"><i data-lucide="download"></i><span>CSVで書き出す</span></button>
+          <button type="button" class="ds-btn" onclick="exportCompaniesCsv(true)" title="CSV を保存するフォルダを選び直す"><i data-lucide="folder"></i><span>保存先を選ぶ</span></button>
           <div class="ds-seg" role="group" aria-label="表示の切り替え">
             <button type="button" id="companiesViewListBtn" onclick="setCompaniesViewMode('list')" aria-pressed="true">
               <i data-lucide="list"></i><span>リスト</span>
@@ -5447,8 +5448,75 @@
       return lines.map(line => line.map(csvCell).join(',')).join('\r\n');
     }
 
-    function exportCompaniesCsv() {
-      let rows = getVisibleCompanyRows();
+    // ---- 書き出し先フォルダ（企業一覧）の記憶。ブラウザの IndexedDB に「フォルダへの入口」だけを置く ----
+    const CSV_DIR_DB = 'jobhunt-csv-dir';
+    function csvDirDb() {
+      return new Promise((resolve, reject) => {
+        const req = indexedDB.open(CSV_DIR_DB, 1);
+        req.onupgradeneeded = () => req.result.createObjectStore('kv');
+        req.onsuccess = () => resolve(req.result);
+        req.onerror = () => reject(req.error);
+      });
+    }
+    async function csvDirGet() {
+      try {
+        const db = await csvDirDb();
+        return await new Promise((resolve, reject) => {
+          const r = db.transaction('kv').objectStore('kv').get('dir');
+          r.onsuccess = () => resolve(r.result || null);
+          r.onerror = () => reject(r.error);
+        });
+      } catch (e) { return null; }
+    }
+    async function csvDirSet(handle) {
+      try {
+        const db = await csvDirDb();
+        await new Promise((resolve, reject) => {
+          const tx = db.transaction('kv', 'readwrite');
+          tx.objectStore('kv').put(handle, 'dir');
+          tx.oncomplete = resolve;
+          tx.onerror = () => reject(tx.error);
+        });
+      } catch (e) { /* 記憶できなくても書き出しは続ける（次回また聞く） */ }
+    }
+    const csvFolderSupported = () => typeof window.showDirectoryPicker === 'function';
+
+    // 電話・住所・パスワードらしい文字が、メモの列に入っていないかを見る（入っていたら会社名を返す）
+    function csvSensitiveCompanies(rows) {
+      const patterns = [
+        /0\d{1,4}[-ー‐\s]\d{1,4}[-ー‐\s]\d{3,4}/,
+        /0\d{9,10}/,
+        /〒\s*\d{3}[-ー]?\d{4}/,
+        /(東京都|北海道|(?:京都|大阪)府|.{2,3}県).{1,6}[市区町村郡]/,
+        /パスワード|password|passwd|暗証/i
+      ];
+      return rows
+        .filter(r => { const m = r.item.notes || r.item.infoSessionNotes || ''; return patterns.some(p => p.test(m)); })
+        .map(r => r.item.companyName);
+    }
+
+    function downloadCsvFile(text, fileName) {
+      // 先頭に BOM（目印）を付けると、Excel でも日本語が文字化けしない
+      const blob = new Blob(['﻿' + text], { type: 'text/csv;charset=utf-8' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = fileName;
+      a.click();
+      URL.revokeObjectURL(url);
+    }
+
+    async function writeCsvToFolder(dir, text, fileName) {
+      const fh = await dir.getFileHandle(fileName, { create: true });
+      const w = await fh.createWritable();
+      await w.write('﻿' + text);
+      await w.close();
+    }
+
+    // changeFolder が true なら、保存先を選び直す
+    async function exportCompaniesCsv(changeFolder) {
+      // 画面の絞り込みや検索には関係なく、全企業を書き出す（並びは画面と同じ）
+      let rows = getAllCompanyRows();
       if (!rows.length) {
         showToast('書き出す企業がありません', 'error');
         return;
@@ -5456,15 +5524,37 @@
       rows = companiesViewMode === 'table'
         ? sortCompanyRowsForTable(rows)
         : sortCompanyRowsForList(rows, document.getElementById('companiesAllSort')?.value || 'next');
-      // 先頭に BOM（目印）を付けると、Excel でも日本語が文字化けしない
-      const blob = new Blob(['﻿' + companiesToCsv(rows)], { type: 'text/csv;charset=utf-8' });
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      a.href = url;
-      a.download = `企業一覧_${toLocalDateString(new Date())}.csv`;
-      a.click();
-      URL.revokeObjectURL(url);
-      showToast(`${rows.length}社をCSVに書き出しました`, 'success');
+      const flagged = csvSensitiveCompanies(rows);
+      if (flagged.length && !confirm('メモに、電話・住所・パスワードのような文字が入っているかもしれません。\n\n' + flagged.join('、') + '\n\nこのまま書き出しますか？')) {
+        showToast('書き出しを取りやめました', 'info');
+        return;
+      }
+      const text = companiesToCsv(rows);
+      const dated = `企業一覧_${toLocalDateString(new Date())}.csv`;
+
+      if (!csvFolderSupported()) {
+        downloadCsvFile(text, dated);
+        showToast(`${rows.length}社をCSVに書き出しました（ダウンロード）`, 'success');
+        return;
+      }
+      try {
+        let dir = changeFolder ? null : await csvDirGet();
+        // 保存済みのフォルダでも、ブラウザを開き直すと許可の確認が出ることがある
+        if (dir && (await dir.queryPermission({ mode: 'readwrite' })) !== 'granted') {
+          if ((await dir.requestPermission({ mode: 'readwrite' })) !== 'granted') dir = null;
+        }
+        if (!dir) {
+          dir = await window.showDirectoryPicker({ id: 'jobhunt-csv', mode: 'readwrite', startIn: 'documents' });
+          await csvDirSet(dir);
+        }
+        await writeCsvToFolder(dir, text, '企業一覧.csv');
+        await writeCsvToFolder(dir, text, dated);
+        showToast(`${rows.length}社を「${dir.name}」フォルダに保存しました（企業一覧.csv と ${dated}）`, 'success');
+      } catch (e) {
+        if (e && e.name === 'AbortError') { showToast('保存先の選択を取りやめました', 'info'); return; }
+        downloadCsvFile(text, dated);
+        showToast('フォルダに保存できなかったので、ダウンロードしました', 'error');
+      }
     }
 
     function toggleOffersLayout(layout) {
