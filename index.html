@@ -5513,6 +5513,57 @@
       await w.close();
     }
 
+    // 日付つきの控えは最新の1つだけ残す（企業一覧_YYYY-MM-DD.csv の形のものだけを対象にし、それ以外は触らない）
+    async function removeOldDatedCsv(dir, keepName) {
+      let removed = 0;
+      try {
+        const names = [];
+        for await (const [name, handle] of dir.entries()) {
+          if (handle.kind === 'file' && name !== keepName && /^企業一覧_\d{4}-\d{2}-\d{2}\.csv$/.test(name)) names.push(name);
+        }
+        for (const name of names) { await dir.removeEntry(name); removed++; }
+      } catch (e) { /* 消せなくても、書き出し自体は成功している */ }
+      return removed;
+    }
+
+    // ---- 開いたときの自動更新（1日1回。保存先フォルダの許可が残っているときだけ、静かに更新する） ----
+    const CSV_LAST_EXPORT_KEY = 'job_hunt_csv_last_export';
+    let csvAutoStarted = false;
+    function scheduleAutoCsvOnOpen() {
+      if (csvAutoStarted || !csvFolderSupported()) return;
+      csvAutoStarted = true;
+      // カレンダー同期などで最新になってから書き出すため、少し待つ
+      setTimeout(runAutoCsvOnOpen, 8000);
+    }
+    async function runAutoCsvOnOpen() {
+      try {
+        const lock = document.getElementById('authLockScreen');
+        if (lock && !lock.classList.contains('hidden')) { csvAutoStarted = false; return; }
+        const today = toLocalDateString(new Date());
+        if (localStorage.getItem(CSV_LAST_EXPORT_KEY) === today) return;
+        const dir = await csvDirGet();
+        if (!dir) return; // まだ保存先を決めていない
+        const rows = getAllCompanyRows();
+        if (!rows.length) return;
+        if ((await dir.queryPermission({ mode: 'readwrite' })) !== 'granted') {
+          showToast('CSVを今日の分に更新できます。企業タブの「CSVで書き出す」を1回押してください', 'info');
+          return;
+        }
+        if (csvSensitiveCompanies(rows).length) {
+          showToast('メモに個人情報らしい文字があるため、CSVの自動更新を見送りました。企業タブから書き出してください', 'info');
+          return;
+        }
+        const sorted = sortCompanyRowsForList(rows, 'next');
+        const text = companiesToCsv(sorted);
+        const dated = `企業一覧_${today}.csv`;
+        await writeCsvToFolder(dir, text, '企業一覧.csv');
+        await writeCsvToFolder(dir, text, dated);
+        await removeOldDatedCsv(dir, dated);
+        localStorage.setItem(CSV_LAST_EXPORT_KEY, today);
+        showToast(`企業一覧のCSVを自動で更新しました（${rows.length}社）`, 'success');
+      } catch (e) { /* 自動更新は静かに諦める（手動の書き出しはいつでも使える） */ }
+    }
+
     // changeFolder が true なら、保存先を選び直す
     async function exportCompaniesCsv(changeFolder) {
       // 画面の絞り込みや検索には関係なく、全企業を書き出す（並びは画面と同じ）
@@ -5549,7 +5600,9 @@
         }
         await writeCsvToFolder(dir, text, '企業一覧.csv');
         await writeCsvToFolder(dir, text, dated);
-        showToast(`${rows.length}社を「${dir.name}」フォルダに保存しました（企業一覧.csv と ${dated}）`, 'success');
+        const removed = await removeOldDatedCsv(dir, dated);
+        try { localStorage.setItem(CSV_LAST_EXPORT_KEY, toLocalDateString(new Date())); } catch (e) { /* 覚えられなくても続ける */ }
+        showToast(`${rows.length}社を「${dir.name}」フォルダに保存しました（企業一覧.csv と ${dated}${removed ? '。古い控え' + removed + '件を削除' : ''}）`, 'success');
       } catch (e) {
         if (e && e.name === 'AbortError') { showToast('保存先の選択を取りやめました', 'info'); return; }
         downloadCsvFile(text, dated);
@@ -9519,6 +9572,7 @@
       }, 300);
 
       showToast('認証に成功しました。おかえりなさい！', 'success');
+      scheduleAutoCsvOnOpen();
 
       // リログ時Googleカレンダー自動同期
       if (gcalConfig && gcalConfig.autoSyncOnRelog) {
@@ -11696,6 +11750,7 @@ URL: https://www.ncd.co.jp/
       // 起動時 Gmail からの自動取り込み（設定済みで、「開いたときに取り込む」がオンのとき）
       updateGmailImportStatus();
       runAutoImportsOnOpen();
+      scheduleAutoCsvOnOpen();
     });
   </script>
 </body>
