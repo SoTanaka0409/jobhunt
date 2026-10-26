@@ -8986,7 +8986,7 @@
     // ==========================================
     // 会社説明会の日付が過ぎたら、自動で「参加済み」にする
     // 段階が「会社説明会 (参加予定)」の企業で、カレンダーの説明会系の予定（会社説明会・座談会・セミナー・仕事体験）が
-    // すべて過ぎていたら、「会社説明会 (参加済み)」へ進める。予定の日はまだ「参加予定」のままで、翌日に進む。
+    // 1つでも過ぎていたら、「会社説明会 (参加済み)」へ進める（先の予定が残っていても進める）。予定の日はまだ「参加予定」のままで、翌日に進む。
     // 行かなかったものは、あとでユーザーが取り下げる。進めたときはホームに知らせ、元に戻せる。
     // アプリを開いたとき、同期のあと、日付が変わって画面に戻ったときに調べる。
     // ==========================================
@@ -9011,12 +9011,13 @@
           .filter(e => e && e.startDate && INFO_SESSION_EVENT_TYPES.includes(e.eventType) && normalizeCompanyName(e.companyName) === key)
           .map(e => e.startDate)
           .sort();
-        // 予定が1つも無い、または、今日以降の予定がまだ残っているときは、何もしない
-        if (!dates.length || dates[dates.length - 1] >= today) return;
+        // 予定が1つも無い、または、過ぎた予定がまだ1つも無いときは、何もしない
+        const past = dates.filter(d => d < today);
+        if (!past.length) return;
         before.push({ id: item.id, stage: item.stage, infoSessionStatus: item.infoSessionStatus });
         item.stage = '会社説明会 (参加済み)';
         if (!item.infoSessionStatus || item.infoSessionStatus === '参加予定') item.infoSessionStatus = '参加済み';
-        lines.push(`${item.companyName}　参加予定 → 参加済み（最後の予定：${cmdFmtDate(dates[dates.length - 1])}）`);
+        lines.push(`${item.companyName}　参加予定 → 参加済み（過ぎた予定：${cmdFmtDate(past[past.length - 1])}）`);
       });
       if (!before.length) return 0;
 
