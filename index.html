@@ -2821,6 +2821,10 @@
               <label class="block text-xs font-semibold text-slate-300 mb-1">必須アクション</label>
               <input type="text" id="detailAction" placeholder="例: 日程選択待ち, ES提出..." class="w-full text-xs rounded-lg bg-slate-800 border border-slate-700 px-3 py-2 text-white focus:border-indigo-500">
             </div>
+            <div>
+              <label class="block text-xs font-semibold text-slate-300 mb-1">経由媒体</label>
+              <input type="text" id="detailMedia" placeholder="例: OfferBox, マイナビ" class="w-full text-xs rounded-lg bg-slate-800 border border-slate-700 px-3 py-2 text-white focus:border-indigo-500">
+            </div>
           </div>
 
           <!-- 会社説明会の詳細管理セクション -->
@@ -7964,6 +7968,7 @@
       document.getElementById('detailStage').value = item.stage || '書類選考';
       document.getElementById('detailPriority').value = item.priority || '中';
       document.getElementById('detailAction').value = item.action || '';
+      document.getElementById('detailMedia').value = item.media || '';
       document.getElementById('detailNextSchedule').value = item.nextSchedule || '';
 
       document.getElementById('detailInfoSessionStatus').value = item.infoSessionStatus || '該当なし';
@@ -8211,6 +8216,9 @@
       activeDetailItem.stage = document.getElementById('detailStage').value;
       activeDetailItem.priority = document.getElementById('detailPriority').value;
       activeDetailItem.action = document.getElementById('detailAction').value.trim();
+      // 媒体は、空にして消えないよう、入力があるときだけ書き換える
+      const newMedia = document.getElementById('detailMedia').value.trim();
+      if (newMedia) activeDetailItem.media = newMedia;
       activeDetailItem.nextSchedule = document.getElementById('detailNextSchedule').value.trim();
 
       activeDetailItem.infoSessionStatus = document.getElementById('detailInfoSessionStatus').value;
@@ -8232,6 +8240,7 @@
         const off = offers.find(o => o.id === activeDetailItem.id);
         if (off) {
           off.gmailUrl = activeDetailItem.gmailUrl;
+          if (newMedia) off.media = newMedia;
         }
         renderOffers();
       }
