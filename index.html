@@ -2403,6 +2403,8 @@
           <button type="button" class="ds-btn ds-btn-text" onclick="fillCommand('○○の面談を11/5 14時に追加')">予定を追加</button>
           <button type="button" class="ds-btn ds-btn-text" onclick="fillCommand('○○を面談確約にして')">面談確約にする</button>
           <button type="button" class="ds-btn ds-btn-text" onclick="fillCommand('○○の返信期限を11/5に')">返信期限を変える</button>
+          <button type="button" class="ds-btn ds-btn-text" onclick="fillCommand('○○の経由媒体をOfferBoxにして')">経由媒体を変える</button>
+          <button type="button" class="ds-btn ds-btn-text" onclick="fillCommand('○○の説明会ステータスを該当なしにして')">説明会ステータスを変える</button>
         </div>
         <div id="commandResult"></div>
       </div>
@@ -7420,6 +7422,26 @@
       { re: /説明会/, value: '会社説明会 (参加予定)' }
     ];
 
+    // 経由媒体：「経由媒体をOfferBoxにして」「媒体をマイナビに」。値はそのまま使い、よく使う媒体は表記をそろえる
+    const CMD_MEDIA_RE = /(?:経由)?媒体\s*(?:を|は)?\s*([^、,。\s]+?)\s*(?:に|へ)(?=\s*(?:して|する|変更|直し|修正|、|,|。|$))/;
+    const CMD_MEDIA_NAMES = [
+      { re: /^offer\s*box$/i, value: 'OfferBox' },
+      { re: /^マイナビ$/, value: 'マイナビ' },
+      { re: /^re\s*就活$/i, value: 'Re就活' },
+      { re: /^paiza$/i, value: 'paiza' },
+      { re: /^wantedly$/i, value: 'Wantedly' },
+      { re: /^リクナビ$/, value: 'リクナビ' },
+      { re: /^直接採用$/, value: '直接採用' }
+    ];
+    // 説明会ステータス（企業の詳細の選択肢と同じ値）：「説明会ステータスを該当なしにして」「説明会をスキップにして」
+    const CMD_INFO_STATUS_RE = /説明会(?:の)?\s*(?:ステータス|状況)\s*(?:を|は)?\s*(参加予定|参加済み|参加済|アーカイブ視聴|アーカイブ|該当なし|スキップ)|説明会\s*(?:を|は)?\s*(スキップ|該当なし)\s*(?:に|と)/;
+    const CMD_INFO_STATUS_VALUES = [
+      { re: /参加予定/, value: '参加予定' },
+      { re: /参加済/, value: '参加済み' },
+      { re: /アーカイブ/, value: 'アーカイブ視聴' },
+      { re: /該当なし|スキップ/, value: '該当なし' }
+    ];
+
     // 会社名を探すときに、先に取り除く言葉（これらは会社名ではない）
     const CMD_STRIP_RE = /カジュアル面談確約|面談確約|特別選考|(?:1|一)次免除|選考免除|書類免除|特別ルート|通常選考案内|通常選考|説明会案内|インターン・説明会案内|インターン案内|カジュアル|リクルーター|(?:一|二|三|最終|1|2|3)次面接|最終面接|(?:二|三|1|2|3|一)次|説明会|座談会|セミナー|仕事体験|ワークショップ|インターン|面談|面接|Webテスト|ウェブテスト|テスト|課題|エントリーシート|返信期限|返信|締め切り|締切|期限|予定|日程|追加|登録|変更|午前|午後|ずらして|直して|変えて|入れて|作って|ください|お願い|から|まで/gi;
 
@@ -7539,9 +7561,12 @@
 
       const dates = cmdFindDates(text);
       if (dates.invalid.length) return fail(`日付「${dates.invalid[0]}」は存在しない日付です。入力をたしかめてください。`);
-      const residue =text.replace(new RegExp(CMD_DATE_SRC, 'g'), ' ').replace(new RegExp(CMD_TIME_SRC, 'g'), ' ').replace(CMD_STRIP_RE, ' ');
+      const mediaMatch = text.match(CMD_MEDIA_RE);
+      const infoMatch = text.match(CMD_INFO_STATUS_RE);
+      const textForCompany = text.replace(CMD_MEDIA_RE, ' ').replace(CMD_INFO_STATUS_RE, ' ');
+      const residue = textForCompany.replace(new RegExp(CMD_DATE_SRC, 'g'), ' ').replace(new RegExp(CMD_TIME_SRC, 'g'), ' ').replace(CMD_STRIP_RE, ' ');
 
-      plan.candidates = cmdFindCompanies(text, residue);
+      plan.candidates = cmdFindCompanies(textForCompany, residue);
       if (!plan.candidates.length) return fail('会社名が見つかりませんでした。登録されている会社の名前（「セガ」のような一部でも大丈夫です）を入れてください。');
       plan.companyIdx = Math.min(companyIdx, plan.candidates.length - 1);
       const { kind, item } = plan.company = plan.candidates[plan.companyIdx];
@@ -7549,7 +7574,8 @@
       const withoutOfferPhrases = text.replace(CMD_OFFER_PHRASES_RE, ' ');
       const offerTypeHit = CMD_OFFER_TYPES.find(t => t.re.test(text));
       const eventTypeHit = CMD_EVENT_TYPES.find(t => t.re.test(withoutOfferPhrases));
-      const isAdd = /追加|登録|入れて|作って|作成|新しく/.test(text);
+      const isFieldEdit = !!(mediaMatch || infoMatch); // 経由媒体・説明会ステータスの変更
+      const isAdd = !isFieldEdit && /追加|登録|入れて|作って|作成|新しく/.test(text);
       const hasExplicitEventWord = /(?:^|[^A-Za-z])ES(?:[^A-Za-z]|$)|エントリーシート|テスト|課題/i.test(text);
       const deadlineWord = /返信期限|返信|期限|締切|締め切り/.test(withoutOfferPhrases) && !hasExplicitEventWord;
       const events = eventsForCompany(item);
@@ -7571,6 +7597,20 @@
         return plan;
       }
 
+      // --- 経由媒体 / 説明会ステータス ---
+      if (mediaMatch) {
+        const raw = mediaMatch[1].trim();
+        const known = CMD_MEDIA_NAMES.find(m => m.re.test(raw));
+        plan.changes.push({ type: 'media', to: known ? known.value : raw });
+      }
+      if (infoMatch) {
+        if (kind === 'offer') {
+          return fail(`「${item.companyName}」はまだオファーの段階なので、説明会ステータスは変えられません。選考に進めたあとで直してください。`);
+        }
+        const word = infoMatch[1] || infoMatch[2];
+        plan.changes.push({ type: 'infoStatus', to: CMD_INFO_STATUS_VALUES.find(v => v.re.test(word)).value });
+      }
+
       // --- オファーの返信期限 ---
       const deadlineOp = kind === 'offer' && deadlineWord && dates.length >= 1;
       if (deadlineOp) {
@@ -7587,7 +7627,7 @@
         } else {
           return fail(`「${item.companyName}」は${kind === 'pipeline' ? '選考中' : '保管庫'}の企業なので、オファーの種類は変えられません。`);
         }
-      } else if (kind === 'pipeline' && !dates.length && /に(?:して|する|変更|進|移|し)|へ(?:変更|進|移)/.test(text)) {
+      } else if (kind === 'pipeline' && !dates.length && !isFieldEdit && /に(?:して|する|変更|進|移|し)|へ(?:変更|進|移)/.test(text)) {
         const stageHit = CMD_STAGES.find(s => s.re.test(text));
         if (stageHit) plan.changes.push({ type: 'stage', to: stageHit.value });
       }
@@ -7701,6 +7741,12 @@
       if (change.type === 'stage') {
         return { label: '選考の段階', before: item.stage || '未設定', after: change.to };
       }
+      if (change.type === 'media') {
+        return { label: '経由媒体', before: item.media || '未設定', after: change.to };
+      }
+      if (change.type === 'infoStatus') {
+        return { label: '説明会ステータス', before: item.infoSessionStatus || '未設定', after: change.to };
+      }
       return null;
     }
 
@@ -7775,7 +7821,7 @@
       // 元に戻せるように、変える前の値を控えておく
       const undo = {
         events: JSON.stringify(calendarEvents),
-        fields: { id: item.id, kind: plan.company.kind, deadline: item.deadline, offerType: item.offerType, stage: item.stage }
+        fields: { id: item.id, kind: plan.company.kind, deadline: item.deadline, offerType: item.offerType, stage: item.stage, media: item.media, infoSessionStatus: item.infoSessionStatus }
       };
       const summary = [];
 
@@ -7820,6 +7866,10 @@
           syncOfferDeadlineEvent(item, item.deadline);
         } else if (change.type === 'stage') {
           item.stage = change.to;
+        } else if (change.type === 'media') {
+          item.media = change.to;
+        } else if (change.type === 'infoStatus') {
+          item.infoSessionStatus = change.to;
         }
       });
 
@@ -7858,6 +7908,8 @@
       if (target) {
         if (f.kind === 'offer') { target.deadline = f.deadline; target.offerType = f.offerType; }
         if (f.kind === 'pipeline') target.stage = f.stage;
+        target.media = f.media;
+        if (f.infoSessionStatus === undefined) delete target.infoSessionStatus; else target.infoSessionStatus = f.infoSessionStatus;
       }
       commandUndo = null;
       saveState();
@@ -11230,7 +11282,7 @@ URL: https://www.ncd.co.jp/
         const diff = daysFromToday(e.startDate);
         const d = new Date(e.startDate);
         const when = diff === 0 ? '今日' : diff === 1 ? '明日' : `${d.getMonth() + 1}/${d.getDate()}`;
-        const label = `${e.companyName.replace(/株式会社|(株)|（株）/g, '').trim()}（${when}${e.startTime ? ' ' + e.startTime : ''}）`;
+        const label = `${e.companyName.replace(/株式会社|\(株\)|（株）/g, '').trim()}（${when}${e.startTime ? ' ' + e.startTime : ''}）`;
         const soon = diff <= 1;
         const cls = soon
           ? 'px-2.5 py-1 rounded-lg bg-amber-500/20 hover:bg-amber-500/30 text-amber-300 border border-amber-500/40 text-[11px] font-bold flex items-center gap-1 transition active:scale-95 shadow-sm'
