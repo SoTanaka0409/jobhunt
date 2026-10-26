@@ -5409,10 +5409,23 @@
       return /[",\n\r]/.test(s) ? `"${s.replace(/"/g, '""')}"` : s;
     }
 
+    // その企業の、今日以降のカレンダーの予定を、近い順に「10/28（水） 09:30 種類」で並べた文字
+    function upcomingEventsText(companyName) {
+      const key = normalizeCompanyName(companyName);
+      return calendarEvents
+        .filter(e => e && normalizeCompanyName(e.companyName) === key && daysFromToday(e.startDate) !== null && daysFromToday(e.startDate) >= 0)
+        .sort((a, b) => `${a.startDate} ${a.startTime || ''}`.localeCompare(`${b.startDate} ${b.startTime || ''}`))
+        .map(e => `${cmdFmtDate(e.startDate)}${e.startTime ? ' ' + e.startTime : ''} ${e.eventType || ''}`.trim())
+        .join(' / ');
+    }
+
     function companiesToCsv(rows) {
-      const header = ['企業', '状態', '媒体', '志望度', 'スコア', '次の予定の日付', '次の予定', '未完了のToDo件数', '未完了のToDo'];
+      const exportedOn = toLocalDateString(new Date());
+      const header = ['企業', '状態', '媒体', '志望度', 'スコア', '次の予定の日付', '次の予定', '未完了のToDo件数', '未完了のToDo',
+        '次の面接', 'これからの予定（カレンダー）', 'オファーの返信期限', '説明会の参加状況', 'メモ', '書き出した日'];
       const lines = [header].concat(rows.map(r => {
         const open = getTodos(r.item).filter(t => !t.done);
+        const interview = nextInterviewForCompany(r.item.companyName);
         return [
           r.item.companyName,
           r.status,
@@ -5422,7 +5435,13 @@
           r.nextDate || '',
           r.nextText || '',
           open.length,
-          open.map(t => t.due ? `${t.text}（${t.due}まで）` : t.text).join(' / ')
+          open.map(t => t.due ? `${t.text}（${t.due}まで）` : t.text).join(' / '),
+          interview ? `${cmdFmtDate(interview.date)}${interview.time ? ' ' + interview.time : ''} ${interview.type}` : '',
+          upcomingEventsText(r.item.companyName),
+          r.item.deadline || '',
+          r.item.infoSessionStatus || '',
+          r.item.notes || r.item.infoSessionNotes || '',
+          exportedOn
         ];
       }));
       return lines.map(line => line.map(csvCell).join(',')).join('\r\n');
